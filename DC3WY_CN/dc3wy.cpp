@@ -46,7 +46,7 @@ namespace Dc3wy::subtitle {
             DOUBLE playedSamples = (playCursor * 8) / (channels * bytesPerSample);
             playedTime = playedSamples / samplesPerSecond / 10;
             //PostMessageA(hStaticText, 114514, NULL, NULL);
-            printf("\r[In SubWndProc] PlayedTime: %f", playedTime);
+            printf("\r　PlayedTime: %f", playedTime);
             //std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
         printf("\n\n");
@@ -129,7 +129,7 @@ namespace Dc3wy {
 
     void jmp_hook_init(intptr_t base) {
         Dc3wy::dsBufferRelease = (Sub32000)(base + 0x32000);
-        Dc3wy::pDsBufferArray = (DWORD*)(base + 0xA95EC);
+        Dc3wy::pDsBufferArray  = (DWORD*)(base + 0xA95EC);
         Dc3wy::dword_a95a4 = base + 0xA95A4;
         subtitle::init(base);
     }
