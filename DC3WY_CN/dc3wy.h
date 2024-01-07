@@ -6,8 +6,9 @@ namespace Dc3wy {
 	extern void jmp_audio_play_hook();
 	extern void jmp_audio_stop_hook();
 	extern void jmp_hook_init(intptr_t);
+	
 	namespace subtitle {
-		extern intptr_t PtrSubWndProc;
+		extern intptr_t SubWndProcPtr;
 		extern void init(HWND);
 		extern void destroy();
 	}

@@ -101,7 +101,6 @@ namespace Hook {
             Fun::OldGetGlyphOutlineA = (Type::GetGlyphOutlineA)GetProcAddress(GDI32_DLL, "GetGlyphOutlineA");
         }
         if (HMODULE KERNEL32_DLL = GetModuleHandleW(L"kernel32.dll")) {
-            //
             Fun::OldFindFirstFileA = (Type::FindFirstFileA)GetProcAddress(KERNEL32_DLL, "FindFirstFileA");
             Fun::OldCreateFileA = (Type::CreateFileA)GetProcAddress(KERNEL32_DLL, "CreateFileA");
             Fun::OldCreateFileW = (Type::CreateFileW)GetProcAddress(KERNEL32_DLL, "CreateFileW");
@@ -111,7 +110,7 @@ namespace Hook {
             Mem::MemWrite(BaseAddr + 0x0E8DB, (void*)&Dc3wy::WdTitleName, 0x04);
             Mem::MemWrite(BaseAddr + 0x0DABF, (void*)&Dc3wy::Description, 0x04);
             Mem::MemWrite(BaseAddr + 0x9DF58, Dc3wy::ChapterTitles, sizeof(Dc3wy::ChapterTitles));
-            Mem::MemWrite(BaseAddr + 0x101A5, &Dc3wy::subtitle::PtrSubWndProc, 0x04);
+            Mem::MemWrite(BaseAddr + 0x101A5, &Dc3wy::subtitle::SubWndProcPtr, 0x04);
             Mem::JmpWrite(BaseAddr + 0x31870, (intptr_t)&Dc3wy::jmp_audio_play_hook);
             Mem::JmpWrite(BaseAddr + 0x32490, (intptr_t)&Dc3wy::jmp_audio_stop_hook);
         }
@@ -122,8 +121,8 @@ namespace Hook {
         if (Fun::OldGetGlyphOutlineA) {
             DetourAttach((void**)&Fun::OldGetGlyphOutlineA, Fun::NewGetGlyphOutlineA);
         }
-        if (Fun::OldFindFirstFileA)   {
-            DetourAttach((void**)&Fun::OldFindFirstFileA,   Fun::NewFindFirstFileA);
+        if (Fun::OldFindFirstFileA) {
+            DetourAttach((void**)&Fun::OldFindFirstFileA, Fun::NewFindFirstFileA);
         }
         if (Fun::OldCreateFileA) {
             DetourAttach((void**)&Fun::OldCreateFileA, Fun::NewCreateFileA);
