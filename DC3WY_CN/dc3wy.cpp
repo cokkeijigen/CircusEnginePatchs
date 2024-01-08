@@ -64,10 +64,10 @@ namespace Dc3wy::subtitle {
 namespace Dc3wy {
     
     using Sub32000 = DWORD(__thiscall*)(VOID*, DWORD);
-    static Sub32000 dsBufferRelease = NULL;
+    static Sub32000 DsBufferRelease = NULL;
     static char* current_audio_name = NULL;
-    static DWORD* pDsBufferArray = NULL;
-    static DWORD dword_a95a4 = NULL;
+    static DWORD pDsBufferArray = NULL;
+    static DWORD dword_a95a4    = NULL;
 
     struct hook {
         
@@ -82,7 +82,7 @@ namespace Dc3wy {
                 DWORD Buf = *(DWORD*)dword_a95a4;
                 *(DWORD*)(Buf + 0x136C) = a1;
             }
-            if (PDSB pDSB = (PDSB)pDsBufferArray[i]) {
+            if (PDSB pDSB = ((PDSB*)pDsBufferArray)[i]) {
                 if (!strncmp("music", current_audio_name, 0x05)) {
                     printf("Current: [%s]\n", current_audio_name);
                     subtitle::pDsBuffer = pDSB;
@@ -99,13 +99,13 @@ namespace Dc3wy {
                 *((BYTE*)Buf + 0x20 * i + 0x4D10) = 0x00;
             }
             ((DWORD*)this)[0x05 * i + 0x15] = 0x00;
-            if (PDSB pDSB = (PDSB)pDsBufferArray[i]) {
+            if (PDSB pDSB = ((PDSB*)pDsBufferArray)[i]) {
                 if (pDSB == subtitle::pDsBuffer) {
                     subtitle::pDsBuffer = nullptr;
                 }
                 pDSB->SetCurrentPosition(0x00);
                 pDSB->Stop();
-                return dsBufferRelease(this, i);
+                return DsBufferRelease(this, i);
             }
             return NULL;
         }
@@ -128,9 +128,9 @@ namespace Dc3wy {
 
 
     void jmp_hook_init(intptr_t base) {
-        Dc3wy::dsBufferRelease = (Sub32000)(base + 0x32000);
-        Dc3wy::pDsBufferArray  = (DWORD*)(base + 0xA95EC);
-        Dc3wy::dword_a95a4 = base + 0xA95A4;
+        Dc3wy::DsBufferRelease = (Sub32000)(base + 0x32000);
+        Dc3wy::pDsBufferArray  = base + 0xA95EC;
+        Dc3wy::dword_a95a4     = base + 0xA95A4;
         subtitle::init(base);
     }
     

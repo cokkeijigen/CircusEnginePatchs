@@ -41,7 +41,7 @@ namespace Hook::Fun {
     static std::wstring NewReplacePathW;
     static std::vector<Type::Font*> Fonts;
 
-    static Type::Font* GetFontStruct(HDC& hdc, tagTEXTMETRICA lptm = {}) {
+    static inline Type::Font* GetFontStruct(HDC& hdc, tagTEXTMETRICA lptm = {}) {
         GetTextMetricsA(hdc, &lptm);
         size_t size = (size_t)lptm.tmHeight;
         for (Type::Font* f : Fonts) if (f->size == size) return f;
