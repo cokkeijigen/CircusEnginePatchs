@@ -6,13 +6,12 @@
 
 namespace Dc3wy::subtitle {
 
-    intptr_t SubWndProcPtr = NULL;
-    using WndProc = LRESULT(CALLBACK*)(HWND, UINT, WPARAM, LPARAM);
+    static IDirectSoundBuffer* pDsBuffer;
     static WndProc MainWndProc = NULL;
     static HWND hStaticText  = NULL;
     static HWND SubtitleWnd  = NULL;
-    static double playedTime = 0.0l;
-    static IDirectSoundBuffer* pDsBuffer;
+    static DOUBLE PlayedTime = 0.0L;
+    intptr_t SubWndProcPtr = NULL;
 
     static LRESULT CALLBACK SubWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
         if (message == WM_CREATE) { 
@@ -44,9 +43,9 @@ namespace Dc3wy::subtitle {
             DWORD playCursor = 0x00, writeCursor = 0x00;
             pDsBuffer->GetCurrentPosition(&playCursor, &writeCursor);
             DOUBLE playedSamples = (playCursor * 8) / (channels * bytesPerSample);
-            playedTime = playedSamples / samplesPerSecond / 10;
+            PlayedTime = playedSamples / samplesPerSecond / 10;
             //PostMessageA(hStaticText, 114514, NULL, NULL);
-            printf("\r　PlayedTime: %f", playedTime);
+            printf("\r　PlayedTime: %f", PlayedTime);
             //std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
         printf("\n\n");
@@ -63,9 +62,8 @@ namespace Dc3wy::subtitle {
 
 namespace Dc3wy {
     
-    using Sub32000 = DWORD(__thiscall*)(VOID*, DWORD);
-    static Sub32000 DsBufferRelease = NULL;
     static char* current_audio_name = NULL;
+    static Fn32000 AudioRelease = NULL;
     static DWORD pDsBufferArray = NULL;
     static DWORD dword_a95a4    = NULL;
 
@@ -76,7 +74,7 @@ namespace Dc3wy {
         static int __stdcall audio_play(int a1, int i) {
             /*printf(
                 "[audio_play] v1: 0x%02X v2: 0x%02X file: %s\n", 
-                a1, a2, current_audio_name
+                a1, i, current_audio_name
             );*/
             if (i == 0x01) {
                 DWORD Buf = *(DWORD*)dword_a95a4;
@@ -105,7 +103,7 @@ namespace Dc3wy {
                 }
                 pDSB->SetCurrentPosition(0x00);
                 pDSB->Stop();
-                return DsBufferRelease(this, i);
+                return AudioRelease(this, i);
             }
             return NULL;
         }
@@ -128,9 +126,9 @@ namespace Dc3wy {
 
 
     void jmp_hook_init(intptr_t base) {
-        Dc3wy::DsBufferRelease = (Sub32000)(base + 0x32000);
-        Dc3wy::pDsBufferArray  = base + 0xA95EC;
-        Dc3wy::dword_a95a4     = base + 0xA95A4;
+        Dc3wy::AudioRelease   = (Fn32000)(base + 0x32000);
+        Dc3wy::pDsBufferArray = base + 0xA95EC;
+        Dc3wy::dword_a95a4    = base + 0xA95A4;
         subtitle::init(base);
     }
     

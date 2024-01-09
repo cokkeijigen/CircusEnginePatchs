@@ -3,6 +3,9 @@
 
 namespace Dc3wy {
 	
+	using WndProc = LRESULT(CALLBACK*)(HWND, UINT, WPARAM, LPARAM);
+	using Fn32000 = DWORD(__thiscall*)(VOID*, DWORD);
+
 	extern void jmp_audio_play_hook();
 	extern void jmp_audio_stop_hook();
 	extern void jmp_hook_init(intptr_t);
