@@ -129,7 +129,7 @@ namespace Dc3wy {
         Dc3wy::AudioRelease   = (Fn32000)(base + 0x32000);
         Dc3wy::pDsBufferArray = base + 0xA95EC;
         Dc3wy::dword_a95a4    = base + 0xA95A4;
-        subtitle::init(base);
+        Dc3wy::subtitle::init(base);
     }
     
 }
