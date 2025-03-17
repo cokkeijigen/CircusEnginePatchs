@@ -18,6 +18,7 @@ namespace Utils {
         };
 
         FontManager() : FontManager(NULL) {}
+
         FontManager(HWND hWnd);
 
         auto Init(HWND hWnd) -> FontManager&;
