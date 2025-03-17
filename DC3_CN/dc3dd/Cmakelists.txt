@@ -1,0 +1,22 @@
+project(DC3DD_CN)
+
+set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
+file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
+
+add_library(DC3DD_CN SHARED ${SOURCES})
+
+file(GLOB HEADER_DIR ALL_FILES_AND_DIRS 
+    "${SOURCE_DIR}"
+    "${SOURCE_DIR}/*"
+    "${SOURCE_DIR}/*/*"
+)
+list(FILTER HEADER_DIR EXCLUDE REGEX ".*\\..*")
+target_include_directories(DC3DD_CN PUBLIC
+    ${HEADER_DIR}
+)
+
+target_link_libraries(DC3DD_CN Utillibs)
+
+set_target_properties(DC3DD_CN PROPERTIES
+    LINK_FLAGS "/ENTRY:DllMainCRTStartupForYY_Thunks /DYNAMICBASE:NO"
+)
