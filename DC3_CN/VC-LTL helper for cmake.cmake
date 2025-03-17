@@ -91,7 +91,6 @@ if(NOT VC_LTL_Root)
         endif()
     else()
         message("VC-LTL installation directory not found.")
-        message("See https://github.com/Chuyu-Team/VC-LTL5/releases/latest.")
     endif()
 endif()
 
