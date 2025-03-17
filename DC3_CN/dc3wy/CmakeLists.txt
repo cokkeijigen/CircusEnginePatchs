@@ -19,3 +19,7 @@ target_link_libraries(DC3WY_CN Utillibs)
 set_target_properties(DC3WY_CN PROPERTIES
     LINK_FLAGS "/ENTRY:DllMainCRTStartupForYY_Thunks /DYNAMICBASE:NO"
 )
+
+add_custom_command(TARGET DC3WY_CN POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "D:\\Galgame\\DC3WY"
+)
