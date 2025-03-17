@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <dc3wy.hpp>
 
-extern "C" { 
+extern "C" {
     
     __declspec(dllexport) auto hook(void) -> void {}
 
