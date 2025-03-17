@@ -7,17 +7,17 @@
 
 namespace DC3WY {
 
-   static Utils::FontManager FontManager{};
+    static Utils::FontManager FontManager{ nullptr };
 
     static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
         if (uMsg == WM_CREATE) 
         {
             ::SetWindowTextW(hWnd, DC3WY::TitleName);
-            HMENU systemMenu{ ::GetSystemMenu(hWnd, FALSE) };
-            if (systemMenu)
+            HMENU system_menu{ ::GetSystemMenu(hWnd, FALSE) };
+            if (system_menu)
             {
-                ::AppendMenuW(systemMenu, 0, 0x114514, L"更改字体");
+                ::AppendMenuW(system_menu, 0, 0x114514, L"更改字体");
             }
 
             if (DC3WY::FontManager.GUI() == nullptr)
@@ -36,16 +36,16 @@ namespace DC3WY {
                 DC3WY::FontManager.GUIChooseFont();
             }
         }
-        return Patch::Hooker::Call<WndProc>(hWnd, uMsg, wParam, lParam);
+        return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
 
     static auto ReplacePathW(std::wstring_view path) -> std::wstring_view
     {
         static std::wstring new_path{};
-        size_t pos = path.find_last_of(L"\\/");
+        size_t pos{ path.find_last_of(L"\\/") };
         if (pos != std::wstring_view::npos)
         {
-            new_path = std::wstring{ L"cn_Data" }.append(path.substr(pos));
+            new_path = std::wstring{ L".\\cn_Data" }.append(path.substr(pos));
             DWORD attr { ::GetFileAttributesW(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
@@ -59,10 +59,10 @@ namespace DC3WY {
     static auto ReplacePathA(std::string_view path) -> std::string_view
     {
         static std::string new_path{};
-        size_t pos = path.find_last_of("\\/");
+        size_t pos{ path.find_last_of("\\/") };
         if (pos != std::wstring_view::npos)
         {
-            new_path = std::string{ "cn_Data" }.append(path.substr(pos));
+            new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
             DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
@@ -75,19 +75,19 @@ namespace DC3WY {
     static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
     {
         std::string_view new_path { DC3WY::ReplacePathA(lpFN) };
-        return Patch::Hooker::Call<CreateFileA>(new_path.empty()? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
+        return Patch::Hooker::Call<DC3WY::CreateFileA>(new_path.empty()? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
     }
 
     static auto WINAPI CreateFileW(LPCWSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
     {
         std::wstring_view new_path{ DC3WY::ReplacePathW(lpFN) };
-        return Patch::Hooker::Call<CreateFileW>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
+        return Patch::Hooker::Call<DC3WY::CreateFileW>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
     }
 
     static auto WINAPI FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) -> HANDLE
     {
         std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
-        return Patch::Hooker::Call<FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
+        return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
     }
 
     static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
@@ -113,13 +113,13 @@ namespace DC3WY {
             if (font != nullptr)
             {
                 font = reinterpret_cast<HFONT>(::SelectObject(hdc, font));
-                DWORD result{ Patch::Hooker::Call<GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+                DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
                 static_cast<void>(::SelectObject(hdc, font));
                 return result;
             }
         }
 
-        return Patch::Hooker::Call<GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
+        return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
     }
 
 	auto DC3WY::INIT_ALL_PATCH(void) -> void
