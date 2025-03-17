@@ -12,7 +12,7 @@ add_compile_options(
     "$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>"
 )
 
-# 安装 VC-LTL5（可选）
+# 瀹夎 VC-LTL5锛堝彲閫夛級
 # https://github.com/Chuyu-Team/VC-LTL5/releases/latest
 include("VC-LTL helper for cmake.cmake")
 
