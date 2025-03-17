@@ -6,11 +6,19 @@ namespace Utils {
 
     FontManager::FontManager(HWND hWnd)
     {
+        this->Init(hWnd);
     }
 
     auto FontManager::Init(HWND hWnd) -> FontManager&
     {
-        this->m_GUI = FontManagerGUI::CreatePtr(hWnd);
+        if (this->m_GUI == nullptr)
+        {
+            this->m_GUI = FontManagerGUI::CreatePtr(hWnd);
+            if (this->m_GUI == nullptr)
+            {
+                return *this;
+            }
+        }
         this->m_GUI->Init(22, Utils::FontManagerGUI::NORMAL, L"黑体", 18, 30)
             .Load(".\\cn_Data\\chs_font.dat")
             .OnChanged([&](const Utils::FontManagerGUI* m_this) -> void
@@ -39,7 +47,7 @@ namespace Utils {
     {
         int32_t key{ size | (0x10 << 24) };
         HFONT font { this->m_Fonts[key] };
-        if (nullptr == font)
+        if (nullptr == font && this->m_GUI != nullptr)
         {
             auto base{ static_cast<int32_t>(size - 22) };
             this->m_Fonts[key] = this->m_GUI->MakeFont(this->UseCharSet, base);
@@ -51,7 +59,7 @@ namespace Utils {
     {
         int32_t key{ size | (0x20 << 24) };
         HFONT font{ this->m_Fonts[key] };
-        if (nullptr == font)
+        if (nullptr == font && this->m_GUI != nullptr)
         {
             auto base{ static_cast<int32_t>(size - 22) };
             this->m_Fonts[key] = this->m_GUI->MakeFont(0x81, base);
@@ -63,7 +71,6 @@ namespace Utils {
     {
         return this->m_GUI.get();
     }
-
 
     auto FontManager::GUIUpdateDisplayState() -> FontManager&
     {
