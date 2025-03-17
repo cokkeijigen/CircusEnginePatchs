@@ -1,0 +1,13 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "dll",
+      "exe": "D:\\Galgame\\DC3WY\\DC3WY_CN.exe",
+      "project": "CmakeLists.txt",
+      "projectTarget": "DC3WY_CN.dll (dc3wy\\DC3WY_CN.dll)",
+      "name": "DC3WY_CN.dll (dc3wy\\DC3WY_CN.dll)"
+    }
+  ]
+}
