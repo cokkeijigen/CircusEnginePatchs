@@ -88,22 +88,36 @@ namespace Utils {
 		}
 
 		template<typename T = LONG_PTR>
-		inline auto Set(int nIndex, T nValue) const -> T {
-			auto&& result = ::SetWindowLongW(this->m_hwnd, nIndex, LONG_PTR(nValue));
+		inline auto Set(int nIndex, T nValue) const -> T
+        {
+            auto&& result
+            {
+                ::SetWindowLongW(this->m_hwnd, nIndex, LONG_PTR(nValue))
+            };
 			return *reinterpret_cast<T*>(&result);
 		}
 
-		inline auto SetIcon(HICON hIcon, bool isBig = true) -> HICON {
+		inline auto SetIcon(HICON hIcon, bool isBig = true) -> HICON
+        {
 			return this->SendMessage<HICON>(WM_SETICON, isBig, LPARAM(hIcon));
 		}
 
-		template<typename R = LONG_PTR> inline auto Get(int nIndex) const -> R {
+		template<typename R = LONG_PTR>
+        inline auto Get(int nIndex) const -> R
+        {
 			auto&& result = ::GetWindowLongW(this->m_hwnd, nIndex);
 			return *reinterpret_cast<R*>(&result);
 		}
 
-		inline auto GetRect(RECT rect = {}) const -> RECT {
-			::GetWindowRect(this->m_hwnd, &rect);
+        inline auto GetRect(RECT& rect) const -> bool
+        {
+            return static_cast<bool>(::GetWindowRect(this->m_hwnd, &rect));
+        }
+
+        inline auto GetRect() const -> RECT 
+        {
+            RECT rect{};
+            ::GetWindowRect(this->m_hwnd, &rect);
 			return rect;
 		}
 	};
@@ -153,6 +167,9 @@ namespace Utils {
 			inline auto SetTopIndex(int index) const -> int;
 			inline auto ResetTopIndex() const -> int;
 			inline auto ResetDefault() const -> int;
+            inline auto UnSelectItem() const -> void;
+            inline auto GetItemTextLength(int index) const -> int;
+            inline auto GetItemText(int index) const -> std::wstring;
 		};
 
 		class FszGroupBox : public WindowBase<FszGroupBox, static_cast<uint16_t>(0x2000)> {
@@ -369,12 +386,12 @@ namespace Utils {
 
 		FontManagerGUI(HWND parent, HFONT font, HINSTANCE hInstance = ::GetModuleHandleW(NULL));
 		auto InitDisplay(SIZE size = {}, PAINTSTRUCT ps = {}) -> FontManagerGUI&;
-		auto UpdateDisplay(bool state = false, SIZE size = {}, PAINTSTRUCT ps = {}) -> FontManagerGUI&;
+		auto UpdateDisplay(bool state = false) -> FontManagerGUI&;
 		auto UpdateBoxState() -> FontManagerGUI&;
 		auto ShowWindow(bool topMost = false) const -> BOOL;
 		auto HideWindow() const -> BOOL;
 		auto IsFullScreen() const -> bool;
-
+        auto OnChanged() -> void;
 	public:
 
 		auto MessageLoop() const -> void;
@@ -386,12 +403,12 @@ namespace Utils {
 		auto Init(Data defaultData, int minSize = 18, int maxSize = 35) -> FontManagerGUI&;
 		auto Init(int size, Style style, std::wstring_view name, int minSize = 18, int maxSize = 35) -> FontManagerGUI&;
 		auto OnChanged(Callback callback) -> FontManagerGUI&;
-		auto OnChanged(std::function<void(int size, Style style, const std::wstring_view name)> callback) -> FontManagerGUI&;
+		auto OnChanged(std::function<void(int32_t size, Style style, const std::wstring_view name)> callback) -> FontManagerGUI&;
 		auto StorageData(std::string_view storageFilePath) const -> bool;
 		auto StorageData() const -> bool;
 		auto GetData() const -> const Data&;
 		auto ChooseFont() -> FontManagerGUI&;
-		auto ChooseFont(std::function<void(int size, Style style, const std::wstring_view name)> callback) -> FontManagerGUI&;
+		auto ChooseFont(std::function<void(int32_t size, Style style, const std::wstring_view name)> callback) -> FontManagerGUI&;
 		auto Wait() -> FontManagerGUI&;
 		auto IsWindowVisible() -> bool;
 		auto UpdateDisplayState() -> FontManagerGUI&;
