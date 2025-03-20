@@ -137,21 +137,25 @@ namespace Utils {
 
         // 按下回车键事件，将当前字体设置搜索结果的第一个结果
 		if (uMsg == WM_CHAR && wParam == 0x0D)
-        { 
-			if (auto text = m_this->GetTextW(); text.empty())
+        {
+            std::wstring&& text{ m_this->GetTextW() };
+			if (text.empty())
             {
 				m_this->SetTextW(m_this->manager->currentData.name);
 				m_this->manager->UpdateDisplay(true);
 			}
-			else if (int index = m_this->manager->m_FontListBox.FindItem(text.c_str(), false); 
-				LB_ERR != index && index != m_this->manager->m_FontListBox.GetCurrentIndex()) {
-				m_this->manager->m_FontListBox.SelectItem(index);
-				auto&& name = m_this->manager->m_FontListBox.GetCurrentName();
-				::wcscpy_s(m_this->manager->currentData.name, 30, name.c_str());
-				m_this->SetTextW(m_this->manager->currentData.name);
-				m_this->manager->UpdateDisplay(true);
-			}
-			return TRUE;
+            else
+            {
+                int index{ m_this->manager->m_FontListBox.FindItem(text.c_str(), false) };
+                if (LB_ERR != index && index != m_this->manager->m_FontListBox.GetCurrentIndex())
+                {
+                    m_this->manager->m_FontListBox.SelectItem(index);
+                    auto&& name = m_this->manager->m_FontListBox.GetCurrentName();
+                    ::wcscpy_s(m_this->manager->currentData.name, 30, name.c_str());
+                    m_this->SetTextW(m_this->manager->currentData.name);
+                    m_this->manager->UpdateDisplay(true);
+                }
+            }
 		}
 		return m_this->m_proc(hwnd, uMsg, wParam, lParam);
 	}
@@ -708,33 +712,33 @@ namespace Utils {
     {
         const wchar_t* name
         {
-            ::wcslen(this->currentData.name) > 0 ? this->currentData.name :
-            ::wcslen(this->defaultData.name) > 0 ? this->defaultData.name : L""
-        };
-        const int16_t& size
-        {
-            this->currentData.size > 0 ?
-            this->currentData.size : this->defaultData.size
+            ::wcslen(this->currentData.name) > 0 ?
+            this->currentData.name : this->defaultData.name
         };
         const Style& style
         {
             this->currentData.style ?
             this->currentData.style : this->defaultData.style
         };
-        auto cWeight = int
-        {
-            style & static_cast<uint16_t>(0x00F0) ?
-            FW_BOLD : FW_NORMAL
-        };
         auto bItalic = int
         {
             style& static_cast<uint16_t>(0x0F00) ?
             TRUE : FALSE
         };
+        auto cWeight = int
+        {
+            style & static_cast<uint16_t>(0x00F0) ?
+            FW_BOLD : FW_NORMAL
+        };
+        auto tarSize = int
+        {
+            this->currentData.size > 0 ?
+            this->currentData.size : this->defaultData.size
+        } + baseSize;
         auto result = HFONT
         {
             ::CreateFontW(
-                size + baseSize, 0, 0, 0, cWeight, bItalic, FALSE, FALSE, iCharSet,
+                tarSize, 0, 0, 0, cWeight, bItalic, FALSE, FALSE, iCharSet,
                 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
                 DEFAULT_PITCH | FF_DONTCARE, name
             )
