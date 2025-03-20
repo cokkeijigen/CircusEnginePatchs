@@ -4,16 +4,16 @@
 
 namespace Utils {
 
-    FontManager::FontManager(HWND hWnd)
+    FontManager::FontManager(HWND parent)
     {
-        this->Init(hWnd);
+        this->Init(parent);
     }
 
-    auto FontManager::Init(HWND hWnd) -> FontManager&
+    auto FontManager::Init(HWND parent) -> FontManager&
     {
         if (this->m_GUI == nullptr)
         {
-            this->m_GUI = FontManagerGUI::CreatePtr(hWnd);
+            this->m_GUI = FontManagerGUI::CreatePtr(parent);
             if (this->m_GUI == nullptr)
             {
                 return *this;
