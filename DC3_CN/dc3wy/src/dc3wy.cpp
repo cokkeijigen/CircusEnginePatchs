@@ -7,7 +7,7 @@
 
 namespace DC3WY {
 
-    static Utils::FontManager FontManager{ nullptr };
+    static Utils::FontManager FontManager{};
 
     static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
