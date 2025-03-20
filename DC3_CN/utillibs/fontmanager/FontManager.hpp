@@ -17,7 +17,7 @@ namespace Utils {
             ::GetACP() == 936 ? ANSI_CHARSET : 0x86
         };
 
-        FontManager() : FontManager(NULL) {}
+        FontManager(){}
 
         FontManager(HWND hWnd);
 
