@@ -12,10 +12,13 @@ namespace Utils {
 
     public:
 
+        const inline static int DefaultSize{ 22 };
+
         const inline static int UseCharSet
         {
             ::GetACP() == 936 ? ANSI_CHARSET : 0x86
         };
+        
 
         FontManager(){}
 
