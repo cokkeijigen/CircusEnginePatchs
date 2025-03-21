@@ -1,5 +1,6 @@
 project(Utillibs)
 
+#https://github.com/Chuyu-Team/YY-Thunks
 ######################[YY-THUNKS]######################
 set(YY_THUNKS_DIR       "${CMAKE_CURRENT_LIST_DIR}/yy-thunks")
 set(YY_THUNKS_Win2K_OBJ "${YY_THUNKS_DIR}/YY_Thunks_for_Win2K.obj" PARENT_SCOPE)
@@ -20,6 +21,7 @@ macro(project_yy_thunks_for_win2k_release_only)
 endmacro()
 #######################################################
 
+#https://github.com/microsoft/Detours
 set(DETOURS_DIR "${CMAKE_CURRENT_LIST_DIR}/detours")
 set(DETOURS_LIB "${DETOURS_DIR}/detours.lib" PARENT_SCOPE)
 
