@@ -19,10 +19,12 @@ namespace Utils {
             ::GetACP() == 936 ? ANSI_CHARSET : 0x86
         };
         
+        inline FontManager(){}
 
-        FontManager(){}
-
-        FontManager(HWND hWnd);
+        inline FontManager(HWND hWnd)
+        {
+            this->Init(hWnd);
+        };
 
         auto Init(HWND hWnd) -> FontManager&;
 
