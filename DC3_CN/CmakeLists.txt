@@ -19,6 +19,3 @@ include("VC-LTL helper for cmake.cmake")
 add_subdirectory("utillibs")
 add_subdirectory("dc3wy")
 add_subdirectory("dc3dd")
-add_subdirectory(".test")
-
-
