@@ -4,6 +4,11 @@
 
 namespace Utils {
 
+    inline FontManager::FontManager(HWND hWnd)
+    {
+        this->Init(hWnd);
+    }
+
     auto FontManager::Init(HWND parent) -> FontManager&
     {
         if (this->m_GUI == nullptr)
