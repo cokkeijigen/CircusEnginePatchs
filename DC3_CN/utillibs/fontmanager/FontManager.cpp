@@ -19,27 +19,29 @@ namespace Utils {
                 return *this;
             }
         }
-        this->m_GUI->Init(22, Utils::FontManagerGUI::NORMAL, L"黑体", 18, 30)
-            .Load(".\\cn_Data\\chs_font.dat")
-            .OnChanged([&](const Utils::FontManagerGUI* m_this) -> void
-            {
-                for (auto& [key, font] : this->m_Fonts)
+        this->m_GUI->Init(FontManager::DefaultSize, FontManagerGUI::NORMAL, L"黑体", 18, 30)
+            .Load(".\\cn_Data\\chs_font.dat").OnChanged
+            (
+                [&](const FontManagerGUI* m_this) -> void
                 {
-                    auto flag{ static_cast<int32_t>(key & 0xFF000000) };
-                    auto size{ static_cast<int32_t>(key & 0x00FFFFFF) };
-                    auto base{ static_cast<int32_t>(size - 22) };
-
-                    auto charset{ flag == (0x10 << 24) ? this->UseCharSet : 0x81 };
-                    HFONT nFont { m_this->MakeFont(charset, base) };
-                    HFONT oFont { font };
-
-                    font = nFont;
-                    if (oFont != nullptr)
+                    for (auto& [key, font] : this->m_Fonts)
                     {
-                        ::DeleteObject(oFont);
+                        auto flag{ static_cast<int32_t>(key & 0xFF000000) };
+                        auto size{ static_cast<int32_t>(key & 0x00FFFFFF) };
+                        auto base{ static_cast<int32_t>(size - FontManager::DefaultSize) };
+
+                        auto charset{ flag == (0x10 << 24) ? this->UseCharSet : 0x81 };
+                        HFONT nFont { m_this->MakeFont(charset, base) };
+                        HFONT oFont { font };
+
+                        font = nFont;
+                        if (oFont != nullptr)
+                        {
+                            ::DeleteObject(oFont);
+                        }
                     }
                 }
-            });
+            );
         return *this;
     }
 
@@ -49,7 +51,7 @@ namespace Utils {
         HFONT font { this->m_Fonts[key] };
         if (nullptr == font && this->m_GUI != nullptr)
         {
-            auto base{ static_cast<int32_t>(size - 22) };
+            auto base{ static_cast<int32_t>(size - FontManager::DefaultSize) };
             this->m_Fonts[key] = this->m_GUI->MakeFont(this->UseCharSet, base);
         }
         return this->m_Fonts[key];
@@ -61,7 +63,7 @@ namespace Utils {
         HFONT font{ this->m_Fonts[key] };
         if (nullptr == font && this->m_GUI != nullptr)
         {
-            auto base{ static_cast<int32_t>(size - 22) };
+            auto base{ static_cast<int32_t>(size - FontManager::DefaultSize) };
             this->m_Fonts[key] = this->m_GUI->MakeFont(0x81, base);
         }
         return this->m_Fonts[key];
