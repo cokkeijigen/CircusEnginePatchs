@@ -35,6 +35,7 @@ namespace DC3WY {
             {
                 DC3WY::FontManager.GUIChooseFont();
             }
+            return TRUE;
         }
         return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
@@ -52,7 +53,6 @@ namespace DC3WY {
                 return new_path;
             }
         }
-
         return {};
     }
     
