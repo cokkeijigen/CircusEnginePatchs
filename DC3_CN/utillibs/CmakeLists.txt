@@ -4,7 +4,7 @@ project(Utillibs)
 ######################[YY-THUNKS]######################
 set(YY_THUNKS_DIR       "${CMAKE_CURRENT_LIST_DIR}/yy-thunks")
 set(YY_THUNKS_Win2K_OBJ "${YY_THUNKS_DIR}/YY_Thunks_for_Win2K.obj" PARENT_SCOPE)
-set(YY_THUNKS_ENTRY     "/ENTRY:DllMainCRTStartupForYY_Thunks" PARENT_SCOPE)
+set(YY_THUNKS_ENTRY     "/ENTRY:DllMainCRTStartupForYY_Thunks"     PARENT_SCOPE)
 
 macro(project_yy_thunks_for_win2k)
     if (MSVC)
