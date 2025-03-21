@@ -712,7 +712,7 @@ namespace Utils {
     {
         const wchar_t* name
         {
-            ::wcslen(this->currentData.name) > 0 ?
+            std::wcslen(this->currentData.name) > 0 ?
             this->currentData.name : this->defaultData.name
         };
         const Style& style
@@ -722,7 +722,7 @@ namespace Utils {
         };
         auto bItalic = int
         {
-            style& static_cast<uint16_t>(0x0F00) ?
+            style & static_cast<uint16_t>(0x0F00) ?
             TRUE : FALSE
         };
         auto cWeight = int
