@@ -46,11 +46,20 @@ namespace DC3WY {
         size_t pos{ path.find_last_of(L"\\/") };
         if (pos != std::wstring_view::npos)
         {
+          
             new_path = std::wstring{ L".\\cn_Data" }.append(path.substr(pos));
             DWORD attr { ::GetFileAttributesW(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
+                if (path.ends_with(L".mes"))
+                {
+                    console::fmt::write<console::txt::dark_yellow>(L"[LOAD] %s\n", path.substr(pos + 1).data());
+                }
                 return new_path;
+            }
+            if (path.ends_with(L".mes"))
+            {
+                console::fmt::write(L"[LOAD] %s\n", path.substr(pos + 1).data());
             }
         }
         return {};
@@ -66,7 +75,15 @@ namespace DC3WY {
             DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
+                if (path.ends_with(".mes"))
+                {
+                    console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>("[LOAD] %s\n", path.substr(pos + 1).data());
+                }
                 return new_path;
+            }
+            if (path.ends_with(".mes"))
+            {
+                console::fmt::write("[LOAD] %s\n", path.substr(pos + 1).data());
             }
         }
         return {};
@@ -100,7 +117,7 @@ namespace DC3WY {
                 HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
                 if (font != nullptr)
                 {
-                    font = reinterpret_cast<HFONT>(::SelectObject(hdc, font));
+                    font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
                     DWORD result{ ::GetGlyphOutlineW(hdc, L'♪', fuf, lpgm, cjbf, pvbf, lpmat) };
                     static_cast<void>(::SelectObject(hdc, font));
                     return result;
@@ -112,7 +129,7 @@ namespace DC3WY {
             HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
             if (font != nullptr)
             {
-                font = reinterpret_cast<HFONT>(::SelectObject(hdc, font));
+                font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
                 DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
                 static_cast<void>(::SelectObject(hdc, font));
                 return result;
@@ -124,7 +141,7 @@ namespace DC3WY {
 
 	auto DC3WY::INIT_ALL_PATCH(void) -> void
 	{
-		console::make();
+		console::make("DEBUG LOG FOR DC3WY");
         Patch::Hooker::Begin();
         Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
         Patch::Hooker::Add<DC3WY::CreateFileW>(::CreateFileW);

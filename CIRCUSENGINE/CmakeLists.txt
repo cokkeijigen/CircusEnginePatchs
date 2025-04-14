@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20.0)
-project(DC3_CN)
+project(CircusEngine)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -12,6 +12,8 @@ if (MSVC)
     endif()
 endif(MSVC)
 
+add_definitions(-DUNICODE)
+
 # 安装 VC-LTL5（可选）
 # https://github.com/Chuyu-Team/VC-LTL5/releases/latest
 include("VC-LTL helper for cmake.cmake")
@@ -19,3 +21,5 @@ include("VC-LTL helper for cmake.cmake")
 add_subdirectory("utillibs")
 add_subdirectory("dc3wy")
 add_subdirectory("dc3dd")
+add_subdirectory("fortissimo_exs")
+add_subdirectory(".test")
