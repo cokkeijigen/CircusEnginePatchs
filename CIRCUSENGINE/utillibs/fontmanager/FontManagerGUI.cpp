@@ -737,13 +737,25 @@ namespace Utils {
         } + baseSize;
         auto result = HFONT
         {
-            ::CreateFontW(
-                tarSize, 0, 0, 0, cWeight, bItalic, FALSE, FALSE, iCharSet,
-                OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                DEFAULT_PITCH | FF_DONTCARE, name
+            ::CreateFontW
+            (
+                { tarSize  },
+                { 0x000000 },
+                { 0x000000 },
+                { 0x000000 },
+                { cWeight  },
+                { static_cast<uint32_t>(bItalic) },
+                { FALSE    },
+                { FALSE    },
+                { iCharSet },
+                { OUT_DEFAULT_PRECIS  },
+                { CLIP_DEFAULT_PRECIS },
+                { CLEARTYPE_QUALITY   },
+                { DEFAULT_PITCH | FF_DONTCARE },
+                { name      }
             )
         };
-		return result;
+        return { result };
 	}
 
 	auto Utils::FontManagerGUI::MakeDefualtFont(DWORD iCharSet, int baseSize) const -> HFONT
@@ -762,16 +774,27 @@ namespace Utils {
             this->defaultData.style& static_cast<uint16_t>(0x0F00) ?
             TRUE : FALSE
         };
-
 		auto result = HFONT
         {
-            ::CreateFontW(
-                tarSize, 0, 0, 0, cWeight, bItalic, FALSE, FALSE, iCharSet,
-                OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                DEFAULT_PITCH | FF_DONTCARE, this->defaultData.name
+            ::CreateFontW
+            (
+                { tarSize  },
+                { 0x000000 },
+                { 0x000000 },
+                { 0x000000 },
+                { cWeight  },
+                { static_cast<uint32_t>(bItalic) },
+                { FALSE    },
+                { FALSE    },
+                { iCharSet },
+                { OUT_DEFAULT_PRECIS  },
+                { CLIP_DEFAULT_PRECIS },
+                { CLEARTYPE_QUALITY   },
+                { DEFAULT_PITCH | FF_DONTCARE },
+                { this->defaultData.name      }
             )
         };
-        return result;
+        return { result };
 	}
 
 	FontManagerGUI::FontManagerGUI(HWND parent, HFONT font, HINSTANCE hInstance) : WindowBase(
@@ -800,7 +823,7 @@ namespace Utils {
 
 	auto FontManagerGUI::UpdateDisplay(bool state) -> FontManagerGUI&
     {
-        SIZE size = {};
+        SIZE size{};
         PAINTSTRUCT ps{};
 		static const RECT rect{ 0, 0, 550, 70 };
 		static wchar_t text[]{ L"这是一段测试字体样式的文字。" };

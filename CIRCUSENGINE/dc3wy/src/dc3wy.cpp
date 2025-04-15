@@ -14,10 +14,10 @@ namespace DC3WY {
         if (uMsg == WM_CREATE) 
         {
             ::SetWindowTextW(hWnd, DC3WY::TitleName);
-            HMENU system_menu{ ::GetSystemMenu(hWnd, FALSE) };
-            if (system_menu)
+            HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
+            if (SystemMenu != nullptr)
             {
-                ::AppendMenuW(system_menu, 0, 0x114514, L"更改字体");
+                ::AppendMenuW(SystemMenu, 0, 0x114514, L"更改字体");
             }
 
             if (DC3WY::FontManager.GUI() == nullptr)
@@ -109,10 +109,9 @@ namespace DC3WY {
 
     static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
     {
-
         if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
         {
-            if (0xA1EC == uChar)
+            if (0xA1EC == uChar) // § -> ♪
             {
                 HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
                 if (font != nullptr)

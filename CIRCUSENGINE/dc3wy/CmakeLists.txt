@@ -5,7 +5,7 @@ project_yy_thunks_for_win2k_release_only()
 set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
 
-add_library(DC3WY_CN SHARED ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 file(GLOB HEADER_DIR ALL_FILES_AND_DIRS 
     "${SOURCE_DIR}"
@@ -13,15 +13,21 @@ file(GLOB HEADER_DIR ALL_FILES_AND_DIRS
     "${SOURCE_DIR}/*/*"
 )
 list(FILTER HEADER_DIR EXCLUDE REGEX ".*\\..*")
-target_include_directories(DC3WY_CN PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
     ${HEADER_DIR}
 )
-target_link_libraries(DC3WY_CN Utillibs)
+target_link_libraries(${PROJECT_NAME} Utillibs)
 
-set_target_properties(DC3WY_CN PROPERTIES
-    LINK_FLAGS "${YY_THUNKS_ENTRY} /DYNAMICBASE:NO"
-)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        LINK_FLAGS "${YY_THUNKS_ENTRY} /DYNAMICBASE:NO"
+    )
+else()
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        LINK_FLAGS "/DYNAMICBASE:NO"
+    )
+endif()
 
-add_custom_command(TARGET DC3WY_CN POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "D:\\Galgame\\DC3WY"
 )

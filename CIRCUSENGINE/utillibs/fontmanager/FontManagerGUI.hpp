@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef UNICODE
-#define UNICODE
+//#ifndef UNICODE
+//#define UNICODE
+//#endif
 #include <windows.h>
 #include <functional>
 #include <commctrl.h>
-#endif
 #ifdef SendMessage
 #undef SendMessage
 #endif

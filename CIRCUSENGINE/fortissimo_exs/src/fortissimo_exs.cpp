@@ -124,7 +124,7 @@ namespace FORTISSIMO_EXS
 
     auto FORTISSIMO_EXS::INIT_ALL_PATCH(void) -> void
     {
-        // console::make();
+        //console::make();
         Patch::Hooker::Begin();
         Patch::Hooker::Add<FORTISSIMO_EXS::CreateFileA>(::CreateFileA);
         Patch::Hooker::Add<FORTISSIMO_EXS::CreateFileW>(::CreateFileW);

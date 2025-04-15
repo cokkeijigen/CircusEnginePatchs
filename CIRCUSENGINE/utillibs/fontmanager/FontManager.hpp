@@ -7,7 +7,7 @@ namespace Utils {
     class FontManager
     {
        
-        std::unique_ptr<FontManagerGUI> m_GUI;
+        std::unique_ptr<FontManagerGUI> m_GUI{};
         std::unordered_map<int32_t, HFONT> m_Fonts{};
 
     public:

@@ -4,7 +4,7 @@
 
 namespace Patch {
 
-	struct Hooker 
+	struct Hooker
 	{
 		template<auto Fun>
 		inline static decltype(Fun) Call;
@@ -17,7 +17,7 @@ namespace Patch {
 		template<auto Fun>
 		inline static auto Add(decltype(Fun) target) -> void
 		{
-			::DetourAttach(&(PVOID&)(Call<Fun> = target), Fun);
+            ::DetourAttach({ &(Hooker::Call<Fun> = {target}) }, Fun);
 		}
 
 		template<auto Fun>
