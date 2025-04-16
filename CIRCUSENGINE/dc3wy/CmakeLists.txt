@@ -28,6 +28,6 @@ else()
     )
 endif()
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "D:\\Galgame\\DC3WY"
-)
+# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "D:\\Galgame\\DC3WY"
+# )

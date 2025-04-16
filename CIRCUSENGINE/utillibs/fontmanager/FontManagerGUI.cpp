@@ -899,7 +899,8 @@ namespace Utils {
     {
 		return FontManagerGUI::CreatePtr
         (   parent,
-            ::CreateFontW(
+            ::CreateFontW
+            (
                 20, 0, 0, 0, FW_NORMAL, FALSE, FALSE,
 			    FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
                 CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
