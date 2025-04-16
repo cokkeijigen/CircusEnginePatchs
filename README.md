@@ -1,2 +1,2 @@
-# DC3WY_CN_PATCH
-填坑中…………
+# dc3rx_cn
+DC3RX_CN_PATCH
