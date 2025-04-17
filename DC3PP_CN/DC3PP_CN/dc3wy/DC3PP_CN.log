@@ -1,0 +1,48 @@
+﻿  dc3pp.cpp
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“dc3pp.cpp”)
+  
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\dc3pp.cpp(195,44): warning C4267: “=”: 从“size_t”转换到“USHORT”，可能丢失数据
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\dc3pp.cpp(196,31): warning C4267: “=”: 从“size_t”转换到“USHORT”，可能丢失数据
+  dc3wy.cpp
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“dc3wy.cpp”)
+  
+  LoliHook.cpp
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“LoliHook/LoliHook.cpp”)
+  
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(53,27): warning C4293: “>>”: Shift 计数为负或过大，其行为未定义
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(75,11): warning C4477: “printf”: 格式字符串“%I64X”需要类型“unsigned __int64”的参数，但可变参数 1 拥有了类型“LPVOID”
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(75,11): warning C4313: "printf": 格式字符串中的 "%X" 与类型为 "LPVOID" 的参数 1 冲突
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(159,15): warning C4309: “参数”: 截断常量值
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(163,15): warning C4309: “参数”: 截断常量值
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(131,12): warning C4101: “dest”: 未引用的局部变量
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(195,15): warning C4309: “参数”: 截断常量值
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(200,22): warning C4838: 从“int”转换到“char”需要收缩转换
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(200,22): warning C4309: “初始化”: 截断常量值
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(203,15): warning C4309: “参数”: 截断常量值
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\LoliHook.cpp(171,12): warning C4101: “dest”: 未引用的局部变量
+  BeaEngine.c
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\Includes\Routines_Disasm.c(22,22): warning C4273: “Disasm”: dll 链接不一致
+  (编译源文件“LoliHook/BeaEngine.c”)
+      C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\beaengine\BeaEngine.h(488,30):
+      参见“Disasm”的前一个定义
+  
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\Includes\BeaEngineVersion.c(18,32): warning C4273: “BeaEngineVersion”: dll 链接不一致
+  (编译源文件“LoliHook/BeaEngine.c”)
+      C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\beaengine\BeaEngine.h(489,40):
+      参见“BeaEngineVersion”的前一个定义
+  
+C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\Includes\BeaEngineVersion.c(21,32): warning C4273: “BeaEngineRevision”: dll 链接不一致
+  (编译源文件“LoliHook/BeaEngine.c”)
+      C:\Users\iTsukezigen\Desktop\DC3PP_CN\DC3PP_CN\LoliHook\beaengine\BeaEngine.h(490,40):
+      参见“BeaEngineRevision”的前一个定义
+  
+    正在创建库 C:\Users\iTsukezigen\Desktop\DC3PP_CN\dc3wy\COKEZIGE.lib 和对象 C:\Users\iTsukezigen\Desktop\DC3PP_CN\dc3wy\COKEZIGE.exp
+  正在生成代码
+  Previous IPDB not found, fall back to full compilation.
+  All 1451 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  DC3PP_CN.vcxproj -> C:\Users\iTsukezigen\Desktop\DC3PP_CN\dc3wy\COKEZIGE.dll

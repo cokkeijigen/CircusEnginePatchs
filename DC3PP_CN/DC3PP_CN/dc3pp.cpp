@@ -1,12 +1,14 @@
-﻿/**********************************
-	Ever tried. Ever failed.
-	No matter. Try again.
-	Fail again. Fail better.
- **********************************/
+﻿
+#define DC3PP
+
+#ifdef DC3PP
+
+
 
 #include "framework.h"
+#include "LoliHook/LoliHook.h"
 
-typedef HFONT(WINAPI* fnCreateFontA)(
+typedef HFONT(WINAPI* ptr_CreateFontA)(
 	int nHeight, // logical height of font height
 	int nWidth, // logical average character width
 	int nEscapement, // angle of escapement
@@ -22,15 +24,8 @@ typedef HFONT(WINAPI* fnCreateFontA)(
 	DWORD fdwPitchAndFamily, // pitch and family
 	LPCSTR lpszFace // pointer to typeface name string
 	);
-fnCreateFontA CreateFontAOLD;
-HFONT WINAPI CreateFontAEx(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCSTR lpszFace)
-{
-	fdwCharSet = 0x86;
-	return CreateFontAOLD(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, "黑体");
-}
 
-PVOID g_pOldCreateWindowExA = CreateWindowExA;
-typedef HWND(WINAPI* pfuncCreateWindowExA)(
+typedef HWND(WINAPI* ptr_CreateWindowExA)(
 	DWORD dwExStyle,
 	LPCTSTR lpClassName,
 	LPCTSTR lpWindowName,
@@ -43,11 +38,64 @@ typedef HWND(WINAPI* pfuncCreateWindowExA)(
 	HMENU hMenu,
 	HINSTANCE hInstance,
 	LPVOID lpParam);
-HWND WINAPI NewCreateWindowExA(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
-{
-	const char* szWndName = "【-COKEZIGE汉化组-】Da Capo Ⅲ Platinum Partner - Ver.1.00";
 
-	return ((pfuncCreateWindowExA)g_pOldCreateWindowExA)(dwExStyle, lpClassName, (LPCTSTR)szWndName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+typedef int (WINAPI* ptr_MessageboxA)(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
+
+typedef HANDLE(WINAPI* ptr_CreateFileA)(
+	LPCSTR lpFileName,
+	DWORD dwDesiredAccess,
+	DWORD dwShareMode,
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes,
+	HANDLE hTemplateFile
+	);
+
+
+typedef HANDLE(WINAPI* ptr_FindFirstFileA)(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData);
+
+typedef BOOL(WINAPI* ptr_AppendMenuA) (HMENU hMenu, UINT uFlags, UINT_PTR uIDNewltem, LPCTSTR lpNewltem);
+
+typedef LRESULT(WINAPI* ptr_SendMessageA)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM IParam);
+
+typedef DWORD(WINAPI* ptr_GetGlyphOutlineA)(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, const MAT2 *lpmat2);
+
+typedef DWORD(WINAPI* ptr_ZwCreateFile)(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, DWORD ObjectAttributes, DWORD IoStatusBlock,
+	PLARGE_INTEGER AllocationSize, ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions,
+	PVOID EaBuffer, ULONG EaLength);
+
+typedef DWORD(WINAPI* ptr_NtOpenFile)(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, DWORD ObjectAttributes, DWORD IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions);
+
+ptr_CreateFontA old_CreateFontA = NULL;
+ptr_CreateWindowExA old_CreateWindowExA = NULL;
+ptr_MessageboxA old_MessageboxA = NULL;
+//ptr_CreateFileA old_CreateFileA = NULL;
+ptr_ZwCreateFile old_ZwCreateFile = NULL;
+//ptr_FindFirstFileA old_FindFirstFileA = NULL;
+ptr_NtOpenFile old_NtOpenFile = NULL;
+ptr_AppendMenuA old_AppendMenuA = NULL;
+ptr_SendMessageA old_SendMessageA = NULL;
+ptr_GetGlyphOutlineA old_GetGlyphOutlineA = NULL;
+HFONT jisFont;
+HFONT chsFont;
+
+HFONT WINAPI new_CreateFontA(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCSTR lpszFace)
+{
+	if (nHeight == 44) {
+		jisFont = old_CreateFontA(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, "黑体");
+	}
+	fdwCharSet = 0x86;
+	HFONT tmp = old_CreateFontA(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, "黑体");
+	if (nHeight == 44) chsFont = tmp;
+	return tmp;
+}
+
+
+HWND WINAPI new_CreateWindowExA(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+	const char* szWndName = "【-COKEZIGE汉化组-】Da Capo Ⅲ Platinum Partner - Beta v1.01";
+
+	return old_CreateWindowExA(dwExStyle, lpClassName, (LPCTSTR)szWndName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 }
 
 LPWSTR ctowJIS(char* str)
@@ -59,62 +107,24 @@ LPWSTR ctowJIS(char* str)
 	return out;
 }
 
-char* wtocGBK(LPCTSTR str)
+char* wtocGBK(LPCWCH str)
 {
 	DWORD dwMinSize;
-	dwMinSize = WideCharToMultiByte(936, NULL, str, -1, NULL, 0, NULL, FALSE); //计算长度
+	dwMinSize = WideCharToMultiByte(936, NULL, (LPCWCH)str, -1, NULL, 0, NULL, FALSE); //计算长度
 	char* out = new char[dwMinSize];
-	WideCharToMultiByte(936, NULL, str, -1, out, dwMinSize, NULL, FALSE);//转换
+	WideCharToMultiByte(936, NULL, (LPCWCH)str, -1, out, dwMinSize, NULL, FALSE);//转换
 	return out;
 }
 
 
-
-//log
-wchar_t szTitle[] = L"提示";
-typedef int (WINAPI* fnMessageboxA)(
-	_In_opt_ HWND    hWnd,
-	_In_opt_ LPCSTR lpText,
-	_In_opt_ LPCSTR lpCaption,
-	_In_     UINT    uType
-	);
-fnMessageboxA MessageBoxAOLD;
-int WINAPI MessageBoxAEx(_In_opt_ HWND    hWnd,
-	_In_opt_ LPCSTR lpText,
-	_In_opt_ LPCSTR lpCaption,
-	_In_     UINT    uType)
-{
+int WINAPI new_MessageBoxA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType){
 	char* Pstr = wtocGBK(ctowJIS((char*)lpText));
-	if (strcmp(Pstr, "終了しますか？") == 0)
-	{
+	if (strcmp(Pstr, "終了しますか？") == 0){
 		strcpy(Pstr, "结束游戏吗？");
 	}
-	return MessageBoxAOLD(hWnd, Pstr, wtocGBK(szTitle), uType);
+	return old_MessageboxA(hWnd, Pstr, "提示", uType);
 }
 
-PVOID g_pOldCreateFileA = CreateFileA;
-typedef HANDLE(WINAPI* PfuncCreateFileA)(
-	LPCSTR lpFileName,
-	DWORD dwDesiredAccess,
-	DWORD dwShareMode,
-	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-	DWORD dwCreationDisposition,
-	DWORD dwFlagsAndAttributes,
-	HANDLE hTemplateFile
-	);
-
-
-PVOID g_pOldFindFirstFileA = FindFirstFileA;
-typedef HANDLE(WINAPI* PfuncFindFirstFileA)(
-	LPCSTR lpFileName,
-	LPWIN32_FIND_DATAA lpFindFileData
-	);
-
-PVOID g_pOldAppendMenuA = AppendMenuA;
-typedef BOOL(WINAPI* PfuncAppendMenuA) (HMENU hMenu, UINT uFlags, UINT_PTR uIDNewltem, LPCTSTR lpNewltem);
-
-PVOID  g_pOldSendMessageA = SendMessageA;
-typedef LRESULT(WINAPI* PfuncSendMessageA)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM IParam);
 
 //======================================
 void ReplacePath(string *path) {
@@ -125,77 +135,207 @@ void ReplacePath(string *path) {
 	}
 }
 
-HANDLE WINAPI NewCreateFileA(
-	LPCSTR lpFileName,
-	DWORD dwDesiredAccess,
-	DWORD dwShareMode,
-	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-	DWORD dwCreationDisposition,
-	DWORD dwFlagsAndAttributes,
-	HANDLE hTemplateFile)
-{
-	string newName(lpFileName);
-	ReplacePath(&newName);
+//HANDLE WINAPI new_CreateFileA(
+//	LPCSTR lpFileName,
+//	DWORD dwDesiredAccess,
+//	DWORD dwShareMode,
+//	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+//	DWORD dwCreationDisposition,
+//	DWORD dwFlagsAndAttributes,
+//	HANDLE hTemplateFile)
+//{
+//	string newName(lpFileName);
+//	ReplacePath(&newName);
+//
+//	return old_CreateFileA(
+//		newName.c_str(),
+//		dwDesiredAccess,
+//		dwShareMode,
+//		lpSecurityAttributes,
+//		dwCreationDisposition,
+//		dwFlagsAndAttributes,
+//		hTemplateFile);
+//}
 
-	return ((PfuncCreateFileA)(g_pOldCreateFileA))(
-		newName.c_str(),
-		dwDesiredAccess,
-		dwShareMode,
-		lpSecurityAttributes,
-		dwCreationDisposition,
-		dwFlagsAndAttributes,
-		hTemplateFile);
+typedef struct _UNICODE_STRING {
+	USHORT Length;
+	USHORT MaximumLength;
+	PWSTR  Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+typedef struct _OBJECT_ATTRIBUTES {
+	ULONG           Length;
+	HANDLE          RootDirectory;
+	PUNICODE_STRING ObjectName;
+	ULONG           Attributes;
+	PVOID           SecurityDescriptor;
+	PVOID           SecurityQualityOfService;
+} OBJECT_ATTRIBUTES;
+
+
+wstring workDir;
+
+//替换文件路径，返回新的路径
+PUNICODE_STRING ReplaceUnicodePath(PUNICODE_STRING path) {
+	wstring tmp;
+	if (!path->Buffer || path->Buffer[1] != L'?' ) return nullptr;
+	if (towlower(path->Buffer[4]) != towlower(*(workDir.c_str() + 4))) return nullptr;
+
+	tmp.assign(path->Buffer, path->Length / 2);
+	auto index = tmp.find_last_of(L"\\");
+	if (index <= 0) return nullptr;
+	tmp = tmp.substr(index, tmp.length() - index);
+	if (tmp.length() <= 1) return nullptr;
+
+
+	tmp = workDir + L"\\cn_Data" + tmp;
+	//wprintf(L"%s\n",tmp.c_str());
+
+	PUNICODE_STRING npath = new UNICODE_STRING;
+	npath->MaximumLength = (tmp.length() + 1) * 2;
+	npath->Length = tmp.length() * 2;
+	npath->Buffer = new WCHAR[tmp.length() + 1];
+	memcpy(npath->Buffer, tmp.c_str(), npath->MaximumLength);
+
+	//wprintf(L"%s\n", npath->Buffer);
+
+	//delete npath;
+	//npath = nullptr;
+	return npath;
 }
 
-HANDLE WINAPI NewFindFirstFileA(
-	LPCSTR lpFileName,
-	LPWIN32_FIND_DATAA lpFindFileData) {
 
-	string newName(lpFileName);
-	ReplacePath(&newName);
+DWORD WINAPI  new_ZwCreateFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, DWORD ObjectAttributes, DWORD IoStatusBlock,
+	PLARGE_INTEGER AllocationSize, ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions,
+	PVOID EaBuffer, ULONG EaLength) {
 
-	return ((PfuncFindFirstFileA)(g_pOldFindFirstFileA))(
-		newName.c_str(),
-		lpFindFileData);
+	int ignore = GENERIC_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | FILE_APPEND_DATA;
+
+	PUNICODE_STRING newstr,oldstr;
+	auto ptr = (OBJECT_ATTRIBUTES*)ObjectAttributes;
+	if (ptr && ptr->ObjectName && !(DesiredAccess & ignore)) {
+		newstr = ReplaceUnicodePath(ptr->ObjectName);
+		if (newstr) {
+			printf("%x\n", DesiredAccess);
+
+			oldstr = ptr->ObjectName;
+			ptr->ObjectName = newstr;
+			
+			DWORD ret = old_ZwCreateFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize,
+				FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
+			wprintf(L"Zw %s,%s,%x\n", oldstr->Buffer,newstr->Buffer, ret);
+			ptr->ObjectName = oldstr;
+			delete newstr;
+			//成功找到了替换文件
+			if (ret == 0) return ret;
+		}
+	}
+
+	return old_ZwCreateFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize,
+		FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
 }
 
-BOOL WINAPI NewAppendMenuA(HMENU hMenu,UINT uFlags,UINT_PTR uIDNewltem,LPCTSTR lpNewltem) {
+DWORD WINAPI new_NtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, DWORD ObjectAttributes, DWORD IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions) {
+	PUNICODE_STRING newstr, oldstr;
+	int ignore = GENERIC_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | FILE_APPEND_DATA;
+
+	auto ptr = (OBJECT_ATTRIBUTES*)ObjectAttributes;
+	if (ptr && ptr->ObjectName && !(DesiredAccess & ignore)) {  //过滤掉写文件
+		newstr = ReplaceUnicodePath(ptr->ObjectName);
+		if (newstr) {
+			oldstr = ptr->ObjectName;
+
+			ptr->ObjectName = newstr;
+
+			DWORD ret = old_NtOpenFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, ShareAccess, OpenOptions);
+			wprintf(L"Nt %s,%s,%x\n", oldstr->Buffer, newstr->Buffer, ret);
+
+			ptr->ObjectName = oldstr;
+			delete newstr;
+			//成功找到了替换文件
+			if (ret == 0) return ret;
+		}
+	}
+	return old_NtOpenFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, ShareAccess, OpenOptions);
+}
+
+//HANDLE WINAPI new_FindFirstFileA(
+//	LPCSTR lpFileName,
+//	LPWIN32_FIND_DATAA lpFindFileData) {
+//
+//	string newName(lpFileName);
+//	ReplacePath(&newName);
+//
+//	return old_FindFirstFileA(newName.c_str(), lpFindFileData);
+//}
+
+BOOL WINAPI new_AppendMenuA(HMENU hMenu,UINT uFlags,UINT_PTR uIDNewltem,LPCTSTR lpNewltem) {
 	//printf("%s", lpNewltem);
 	if (strcmp((const char*)lpNewltem, "僶乕僕儑儞忣曬") == 0) {
-		return ((PfuncAppendMenuA)(g_pOldAppendMenuA)) (hMenu, uFlags, uIDNewltem, (LPCTSTR)"版本信息");
+		return old_AppendMenuA (hMenu, uFlags, uIDNewltem, (LPCTSTR)"版本信息");
 	}
-	else return ((PfuncAppendMenuA)(g_pOldAppendMenuA)) (hMenu,uFlags,uIDNewltem,lpNewltem);
+	else return old_AppendMenuA(hMenu,uFlags,uIDNewltem,lpNewltem);
 }
 
-LRESULT WINAPI NewSendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM IParam) {
+LRESULT WINAPI new_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM IParam) {
 	const char *oldptr = (const char*)IParam;
 	if (oldptr && strlen(oldptr) == 77 ) {
 		if (oldptr[0] == 0x44 && oldptr[1] == 0x2e && oldptr[2] == 0x43) {
-			oldptr = "～初音岛Ⅲ·白金伙伴～ Ver.1.00\n资源版本 Ver.1.00";
+			oldptr = "～初音岛Ⅲ·白金伙伴～ Ver.1.01\n资源版本 Ver.1.01";
 			IParam = (LPARAM)oldptr;
 		}
 	}
-	
-	return ((PfuncSendMessageA)(g_pOldSendMessageA))(hWnd, Msg, wParam, IParam);
+	return old_SendMessageA(hWnd, Msg, wParam, IParam);
 }
 
-void Init()
+DWORD WINAPI new_GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, const MAT2 *lpmat2) {
+	if (uChar == 0xA1EC) {
+		uChar = 0x81F4;
+		SelectObject(hdc, jisFont);
+		DWORD t = old_GetGlyphOutlineA(hdc, uChar, fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
+		SelectObject(hdc, chsFont);
+		return t;
+	}
+	return old_GetGlyphOutlineA(hdc, uChar, fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
+}
+
+
+
+bool Init()
 {
+	//首先获取工作目录
+	WCHAR *tmp = new WCHAR[1024];
+	memset(tmp, 0, sizeof(WCHAR) * 1024);
+	memcpy(tmp, L"\\??\\", sizeof(WCHAR) * 4);
+	GetModuleFileNameW(NULL, tmp + 4, 1024 - 4);
 
-	CreateFontAOLD = (fnCreateFontA)GetProcAddress(GetModuleHandle(L"gdi32.dll"), "CreateFontA");
-	MessageBoxAOLD = (fnMessageboxA)GetProcAddress(GetModuleHandle(L"User32.dll"), "MessageBoxA");
+	WCHAR *wbuf = tmp + lstrlenW(tmp);
+	while (wbuf > tmp && wbuf[0] != L'\\') wbuf--;
+	wbuf[0] = L'\0';
+	workDir.assign(tmp);
+	delete[] tmp;
 
-	DetourTransactionBegin();
-	DetourAttach((void**)& CreateFontAOLD, CreateFontAEx);
-	DetourAttach(&g_pOldCreateWindowExA, NewCreateWindowExA);
-	DetourAttach(&g_pOldCreateFileA, NewCreateFileA);
-	DetourAttach(&g_pOldFindFirstFileA, NewFindFirstFileA);
-	DetourAttach(&g_pOldAppendMenuA, NewAppendMenuA);
-	DetourAttach(&g_pOldSendMessageA, NewSendMessageA);
-	DetourAttach((void**)& MessageBoxAOLD, MessageBoxAEx);
+	wprintf(L"%s\n", workDir.c_str());
 
-	if (DetourTransactionCommit() != NOERROR) { MessageBox(NULL, L"INIT FUNCTION ERROR", L"System", MB_OK | MB_ICONERROR); }
-	else { MessageBox(NULL, L"本补丁由【-COKEZIGE汉化组-】制作\n禁止一切录播直播和商业行为", L"警告", MB_OK | MB_ICONINFORMATION); }
+	//old_CreateFileA = (ptr_CreateFileA)LoliHook::ApiHook("kernel32.dll", "CreateFileA", &new_CreateFileA);
+	old_ZwCreateFile = (ptr_ZwCreateFile)LoliHook::ApiHook("ntdll.dll", "ZwCreateFile", &new_ZwCreateFile);
+	old_NtOpenFile = (ptr_NtOpenFile)LoliHook::ApiHook("ntdll.dll", "NtOpenFile", &new_NtOpenFile);
+	//old_FindFirstFileA = (ptr_FindFirstFileA)LoliHook::ApiHook("kernel32.dll", "FindFirstFileA", &new_FindFirstFileA);
+	old_CreateFontA = (ptr_CreateFontA)LoliHook::ApiHook("gdi32.dll", "CreateFontA", &new_CreateFontA);
+	old_CreateWindowExA = (ptr_CreateWindowExA)LoliHook::ApiHook("user32.dll", "CreateWindowExA", &new_CreateWindowExA);
+	old_AppendMenuA = (ptr_AppendMenuA)LoliHook::ApiHook("user32.dll", "AppendMenuA", &new_AppendMenuA);
+	old_SendMessageA = (ptr_SendMessageA)LoliHook::ApiHook("user32.dll", "SendMessageA", &new_SendMessageA);
+	old_MessageboxA = (ptr_MessageboxA)LoliHook::ApiHook("user32.dll", "MessageBoxA", &new_MessageBoxA);
+	old_GetGlyphOutlineA = (ptr_GetGlyphOutlineA)LoliHook::ApiHook("gdi32.dll", "GetGlyphOutlineA",&new_GetGlyphOutlineA);
+
+	if (old_ZwCreateFile == NULL || old_NtOpenFile == NULL || old_CreateFontA == NULL || old_MessageboxA == NULL ||
+		old_CreateWindowExA == NULL || old_AppendMenuA == NULL || old_SendMessageA == NULL || old_GetGlyphOutlineA == NULL) {
+		MessageBoxA(NULL, "api hook 失败！", "error", MB_OK);
+		return false;
+	}
+
+	MessageBoxW(NULL, L"本补丁由【-COKEZIGE汉化组-】制作\n禁止一切录播直播和商业行为", L"警告", MB_OK | MB_ICONINFORMATION);
+	return true;
 }
 
 
@@ -524,7 +664,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		//make_console();
+		make_console();
 		CopyBlockCHS();
 		Init();
 	case DLL_THREAD_ATTACH:
@@ -538,3 +678,5 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 extern "C" __declspec(dllexport) void dummy(void) {
 	return;
 }
+
+#endif // DC3PP

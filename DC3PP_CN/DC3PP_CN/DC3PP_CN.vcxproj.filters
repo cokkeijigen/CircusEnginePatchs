@@ -26,7 +26,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="LoliHook\LoliHook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LoliHook\BeaEngine.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dc3pp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dc3wy.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
