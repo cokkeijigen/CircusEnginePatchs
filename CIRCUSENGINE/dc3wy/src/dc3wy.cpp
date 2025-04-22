@@ -37,11 +37,11 @@ namespace DC3WY {
                          static_cast<UINT>(MF_CHECKED) :
                          static_cast<UINT>(MF_UNCHECKED)
                     },
-                    { 0x1919 },
+                    { 1919810 },
                     { L"Backlog显示全部图标" }
                 );
             }
-            if (DC3WY::FontManager.GUI() == nullptr)
+            if (!DC3WY::FontManager.IsInit())
             {
                 DC3WY::FontManager.Init(hWnd);
             }
@@ -60,7 +60,7 @@ namespace DC3WY {
                 }
                 return TRUE;
             }
-            if (wParam == 0x1919)
+            if (wParam == 1919810)
             {
                 HMENU SystemMenu{ GetSystemMenu(hWnd, FALSE) };
                 if (SystemMenu == nullptr)
@@ -72,17 +72,17 @@ namespace DC3WY {
                    .cbSize = sizeof(MENUITEMINFO),
                    .fMask = MIIM_STATE
                 };
-                ::GetMenuItemInfoW(SystemMenu, 0x1919, FALSE, &mii);
+                ::GetMenuItemInfoW(SystemMenu, 1919810, FALSE, &mii);
                 ::ModifyMenuW
                 (
                     { SystemMenu },
-                    { 0x1919 },
+                    { 1919810 },
                     {
                         mii.fState & MF_CHECKED ?
                         static_cast<UINT>(MF_UNCHECKED) :
                         static_cast<UINT>(MF_CHECKED)
                     },
-                    { 0x1919 },
+                    { 1919810 },
                     { L"Backlog显示全部图标" }
                 );
 
