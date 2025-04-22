@@ -174,7 +174,7 @@ namespace DC3WY {
     _succeed:
         __asm
         {
-            mov edi, dword ptr ss:[esp]      // row
+            mov edi, dword ptr ss:[esp]    // row
             mov eax, dword ptr ss:[esp+4]  // line
             add esp, 0x08
             mov dword ptr ss:[esp+0x10], eax
