@@ -235,20 +235,20 @@ namespace DC3WY {
         __asm
         {
             sub esp, 0x08                     // 使用栈内存来存放存放line和row的结果
-            mov dword ptr ss:[esp], 0x00      // 初始化为0
-            mov dword ptr ss:[esp+0x04], 0x00 // 初始化为0
-            lea eax, dword ptr ss:[esp]         
-            push eax // push 用于存放row的栈内存地址
+            mov dword ptr ss:[esp], 0x00      // int row  = 0x00;
+            mov dword ptr ss:[esp+0x04], 0x00 // int line = 0x00;
+            lea eax, dword ptr ss:[esp]
+            push eax                          // push &row
             lea eax, dword ptr ss:[esp+0x08]
-            push eax // push 用于存放line的栈内存地址
-            lea eax, dword ptr ss:[esp+0x4C]
-            push eax // push 角色名字
-            call DC3WY::SetNameIconEx
-            test eax, eax
-            jnz _succeed
-            add esp, 0x08
-            mov dl, byte ptr ds:[0x004795BA]
-            mov eax, 0x00404C04
+            push eax                          // push &line
+            lea eax, dword ptr ss:[esp+0x4C] 
+            push eax                          // push name
+            call DC3WY::SetNameIconEx         // DC3WY::SetNameIconEx(name, &line, &row)
+            test eax, eax                     
+            jnz _succeed                      // if(result) goto _succeed
+            add esp, 0x08                     // 恢复堆栈（释放变量内存）
+            mov dl, byte ptr ds:[0x004795BA]  // 搬运原地址的指令
+            mov eax, 0x00404C04               // 跳转回去原来的地址
             jmp eax
         }
     _succeed:
