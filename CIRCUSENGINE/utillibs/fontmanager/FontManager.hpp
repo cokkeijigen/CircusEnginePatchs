@@ -6,7 +6,6 @@ namespace Utils {
 
     class FontManager
     {
-       
         std::unique_ptr<FontManagerGUI> m_GUI{};
         std::unordered_map<int32_t, HFONT> m_Fonts{};
 
@@ -21,9 +20,11 @@ namespace Utils {
         
         inline FontManager() {}
 
-        inline FontManager(HWND hWnd);
+        inline FontManager(HWND hWnd, bool check = false);
 
         auto Init(HWND hWnd) -> FontManager&;
+
+        auto IsInit() const -> bool;
 
         auto GetGBKFont(int32_t size) -> HFONT;
 
