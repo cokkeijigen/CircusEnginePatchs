@@ -138,6 +138,51 @@ namespace DC3WY {
         return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
     }
 
+    static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> int
+    {
+        std::string_view _name{ name };
+        if (_name.size() != 0)
+        {
+            line = 3;
+            row  = 4;
+            return { static_cast<int>(true) };
+        }
+        return { static_cast<int>(false) };
+    }
+
+    static __declspec(naked) auto JmpSetNameIconEx(void) -> void
+    {
+        __asm
+        {
+            sub esp, 0x08                       // 使用栈内存来存放存放line和row的结果
+            mov dword ptr ss:[esp], 0x00        // 初始化为0
+            mov dword ptr ss:[esp + 0x04], 0x00 // 初始化为0
+            lea eax, dword ptr ss:[esp]         
+            push eax // push 用于存放row的栈内存地址
+            lea eax, ss : [esp + 0x08]        
+            push eax // push 用于存放line的栈内存地址
+            lea eax, ss : [esp + 0x4C]        
+            push eax // push 角色名字
+            call SetNameIconEx
+            test eax, eax
+            jnz _succeed
+            add esp, 0x08
+            mov dl, byte ptr ds:[0x004795BA]
+            mov eax, 0x00404C04
+            jmp eax
+        }
+    _succeed:
+        __asm
+        {
+            mov edi, dword ptr ss:[esp]      // row
+            mov eax, dword ptr ss:[esp + 4]  // line
+            add esp, 0x08
+            mov dword ptr ss:[esp+0x10], eax
+            mov eax, 0x00404D2E
+            jmp eax
+        }
+    }
+
 	auto DC3WY::INIT_ALL_PATCH(void) -> void
 	{
 		console::make("DEBUG LOG FOR DC3WY");
@@ -148,6 +193,8 @@ namespace DC3WY {
         Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
         Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
         Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
+        Patch::Mem::JmpWrite(0x404BFE, JmpSetNameIconEx);
+        console::fmt::write("JmpSetNameIconEx{ %x }\n", JmpSetNameIconEx);
         Patch::Hooker::Commit();
 	}
 
