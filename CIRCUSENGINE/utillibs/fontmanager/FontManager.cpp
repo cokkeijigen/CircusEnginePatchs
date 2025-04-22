@@ -4,9 +4,9 @@
 
 namespace Utils {
 
-    inline FontManager::FontManager(HWND hWnd)
+    inline FontManager::FontManager(HWND hWnd, bool check)
     {
-        this->Init(hWnd);
+        if (hWnd != nullptr) { this->Init(hWnd); }
     }
 
     auto FontManager::Init(HWND parent) -> FontManager&
@@ -45,6 +45,11 @@ namespace Utils {
                 }
             );
         return *this;
+    }
+
+    auto FontManager::IsInit() const -> bool
+    {
+        return { this->m_GUI != nullptr };
     }
 
     auto FontManager::GetGBKFont(int32_t size) -> HFONT
