@@ -163,7 +163,7 @@ namespace DC3WY {
             push eax // push 用于存放line的栈内存地址
             lea eax, dword ptr ss:[esp+0x4C]
             push eax // push 角色名字
-            call SetNameIconEx
+            call DC3WY::SetNameIconEx
             test eax, eax
             jnz _succeed
             add esp, 0x08
