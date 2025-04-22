@@ -154,8 +154,8 @@ namespace DC3WY {
     {
         __asm
         {
-            sub esp, 0x08                       // 使用栈内存来存放存放line和row的结果
-            mov dword ptr ss:[esp], 0x00        // 初始化为0
+            sub esp, 0x08                     // 使用栈内存来存放存放line和row的结果
+            mov dword ptr ss:[esp], 0x00      // 初始化为0
             mov dword ptr ss:[esp+0x04], 0x00 // 初始化为0
             lea eax, dword ptr ss:[esp]         
             push eax // push 用于存放row的栈内存地址
