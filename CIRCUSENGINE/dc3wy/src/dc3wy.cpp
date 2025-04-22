@@ -192,7 +192,7 @@ namespace DC3WY {
         Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
         Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
         Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
-        Patch::Mem::JmpWrite(0x404BFE, JmpSetNameIconEx);
+        Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx);
         Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
         Patch::Hooker::Commit();
 	}
