@@ -7,6 +7,17 @@
 
 namespace DC3WY {
 
+    constexpr inline auto EnableBacklogAllIconFile
+    {
+        ".\\cn_Data\\EnableBacklogAllIcon"
+    };
+
+    static bool EnableBacklogAllIcon
+    {
+        ::GetFileAttributesA(EnableBacklogAllIconFile)
+        != INVALID_FILE_ATTRIBUTES
+    };
+
     static Utils::FontManager FontManager{};
 
     static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
@@ -17,9 +28,19 @@ namespace DC3WY {
             HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
             if (SystemMenu != nullptr)
             {
-                ::AppendMenuW(SystemMenu, 0, 0x114514, L"更改字体");
+                ::AppendMenuW(SystemMenu, MF_UNCHECKED, 0x114514, L"更改字体");
+                ::AppendMenuW
+                (
+                    { SystemMenu },
+                    {
+                         DC3WY::EnableBacklogAllIcon ?
+                         static_cast<UINT>(MF_CHECKED) :
+                         static_cast<UINT>(MF_UNCHECKED)
+                    },
+                    { 0x1919 },
+                    { L"Backlog显示全部图标" }
+                );
             }
-
             if (DC3WY::FontManager.GUI() == nullptr)
             {
                 DC3WY::FontManager.Init(hWnd);
@@ -29,13 +50,70 @@ namespace DC3WY {
         {
             DC3WY::FontManager.GUIUpdateDisplayState();
         }
-        else if (uMsg == WM_SYSCOMMAND && wParam == 0x114514)
+        else if (uMsg == WM_SYSCOMMAND)
         {
-            if (DC3WY::FontManager.GUI() != nullptr)
+            if (wParam == 0x114514)
             {
-                DC3WY::FontManager.GUIChooseFont();
+                if (DC3WY::FontManager.GUI() != nullptr)
+                {
+                    DC3WY::FontManager.GUIChooseFont();
+                }
+                return TRUE;
             }
-            return TRUE;
+            if (wParam == 0x1919)
+            {
+                HMENU SystemMenu{ GetSystemMenu(hWnd, FALSE) };
+                if (SystemMenu == nullptr)
+                {
+                    return FALSE;
+                }
+                auto mii = MENUITEMINFO
+                {
+                   .cbSize = sizeof(MENUITEMINFO),
+                   .fMask = MIIM_STATE
+                };
+                ::GetMenuItemInfoW(SystemMenu, 0x1919, FALSE, &mii);
+                ::ModifyMenuW
+                (
+                    { SystemMenu },
+                    { 0x1919 },
+                    {
+                        mii.fState & MF_CHECKED ?
+                        static_cast<UINT>(MF_UNCHECKED) :
+                        static_cast<UINT>(MF_CHECKED)
+                    },
+                    { 0x1919 },
+                    { L"Backlog显示全部图标" }
+                );
+
+                if (mii.fState & MF_CHECKED)
+                {
+                    ::DeleteFileA(DC3WY::EnableBacklogAllIconFile);
+                    DC3WY::EnableBacklogAllIcon = { false };
+                }
+                else
+                {
+                    auto hFile = HANDLE
+                    {
+                        ::CreateFileA
+                        (
+                            { DC3WY::EnableBacklogAllIconFile },
+                            { GENERIC_WRITE },
+                            { NULL },
+                            { NULL },
+                            { CREATE_ALWAYS },
+                            { FILE_ATTRIBUTE_NORMAL },
+                            { NULL }
+                        )
+                    };
+                    if (hFile != INVALID_HANDLE_VALUE)
+                    {
+                        ::CloseHandle(hFile);
+                    }
+                    DC3WY::EnableBacklogAllIcon = { true };
+                }
+                return TRUE;
+            }
         }
         return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
@@ -46,7 +124,6 @@ namespace DC3WY {
         size_t pos{ path.find_last_of(L"\\/") };
         if (pos != std::wstring_view::npos)
         {
-          
             new_path = std::wstring{ L".\\cn_Data" }.append(path.substr(pos));
             DWORD attr { ::GetFileAttributesW(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
@@ -140,12 +217,15 @@ namespace DC3WY {
 
     static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> int
     {
-        std::string_view _name{ name };
-        if (_name.size() != 0)
+        if (DC3WY::EnableBacklogAllIcon)
         {
-            line = 3;
-            row  = 4;
-            return { static_cast<int>(true) };
+            std::string_view _name{ name };
+            if (_name.size() != 0)
+            {
+                line = 3;
+                row  = 4;
+                return { static_cast<int>(true) };
+            }
         }
         return { static_cast<int>(false) };
     }
