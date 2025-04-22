@@ -159,9 +159,9 @@ namespace DC3WY {
             mov dword ptr ss:[esp + 0x04], 0x00 // 初始化为0
             lea eax, dword ptr ss:[esp]         
             push eax // push 用于存放row的栈内存地址
-            lea eax, ss : [esp + 0x08]        
+            lea eax, dword ptr ss:[esp + 0x08]
             push eax // push 用于存放line的栈内存地址
-            lea eax, ss : [esp + 0x4C]        
+            lea eax, dword ptr ss:[esp + 0x4C]
             push eax // push 角色名字
             call SetNameIconEx
             test eax, eax
@@ -192,9 +192,8 @@ namespace DC3WY {
         Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
         Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
         Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
-        Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
         Patch::Mem::JmpWrite(0x404BFE, JmpSetNameIconEx);
-        console::fmt::write("JmpSetNameIconEx{ %x }\n", JmpSetNameIconEx);
+        Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
         Patch::Hooker::Commit();
 	}
 
