@@ -1,7 +1,4 @@
 ﻿#pragma once
-#ifndef UNICODE
-#define UNICODE
-#endif
 #include <windows.h>
 #include <d2d1.h>
 #include <optional>

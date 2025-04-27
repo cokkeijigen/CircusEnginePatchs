@@ -1,0 +1,114 @@
+.name 271
+.width 1280
+.height 720
+.fade 0.5
+.cn::pos bottom, left, 10, 10
+.jp::pos top, left, 10, 10
+
+:image-sub
+.time 0:00:02.19,0:00:04.47
+.cn 271_CHN_00_CN.png pos(top, left, 10, 10) fade(0.1, 0.1)
+.jp 271_CHN_00_CN.png
+:end
+
+:image-sub
+.time 0:00:04.53,0:00:07.48
+.cn 271_CHN_01_CN.png
+.jp 271_CHN_01_JP.png
+:end
+
+:image-sub
+.time 0:00:07.49,0:00:11.94
+.cn 271_CHN_02_CN.png
+.jp 271_CHN_02_JP.png
+:end
+
+:image-sub
+.time 0:00:23.92,0:00:29.88
+.cn 271_CHN_03_CN.png
+.jp 271_CHN_03_JP.png
+:end
+
+:image-sub
+.time 0:00:30.08,0:00:34.42
+.cn 271_CHN_04_CN.png
+.jp 271_CHN_04_JP.png
+:end
+
+:image-sub
+.time 0:00:34.44,0:00:41.63
+.cn 271_CHN_05_CN.png
+.jp 271_CHN_05_JP.png
+:end
+
+:image-sub
+.time 0:00:41.92,0:00:44.29
+.cn 271_CHN_06_CN.png
+.jp 271_CHN_06_JP.png
+:end
+
+:image-sub
+.time 0:00:44.60,0:00:47.60
+.cn 271_CHN_07_CN.png
+.jp 271_CHN_07_JP.png
+:end
+
+:image-sub
+.time 0:00:47.73,0:00:50.17
+.cn 271_CHN_08_CN.png
+.jp 271_CHN_08_JP.png
+:end
+
+:image-sub
+.time 0:00:50.38,0:00:57.28
+.cn 271_CHN_09_CN.png
+.jp 271_CHN_09_JP.png
+:end
+
+:image-sub
+.time 0:00:57.44,0:01:00.96
+.cn 271_CHN_10_CN.png
+.jp 271_CHN_10_JP.png
+:end
+
+:image-sub
+.time 0:01:01.01,0:01:04.66
+.cn 271_CHN_11_CN.png
+.jp 271_CHN_11_JP.png
+:end
+
+:image-sub
+.time 0:01:04.91,0:01:09.00
+.cn 271_CHN_12_CN.png
+.jp 271_CHN_12_JP.png
+:end
+
+:image-sub
+.time 0:01:09.00,0:01:11.70
+.cn 271_CHN_13_CN.png
+.jp 271_CHN_13_JP.png
+:end
+
+:image-sub
+.time 0:01:11.85,0:01:15.28
+.cn 271_CHN_14_CN.png
+.jp 271_CHN_14_JP.png
+:end
+
+:image-sub
+.time 0:01:15.54,0:01:20.60
+.cn 271_CHN_15_CN.png
+.jp 271_CHN_15_JP.png
+:end
+
+:image-sub
+.time 0:01:20.93,0:01:24.64
+.cn 271_CHN_16_CN.png
+.jp 271_CHN_16_JP.png
+:end
+
+:image-sub
+.time 0:01:24.93,0:01:30.45
+.cn 271_CHN_17_CN.png
+.jp 271_CHN_17_JP.png
+:end

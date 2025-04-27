@@ -57,12 +57,12 @@ extern "C"
                     (
                         std::rand() % 1280, std::rand() % 720, std::rand() % 100,
                         { (std::rand() % 10) * 1.0f },
-                    {
-                        (std::rand() % 100) / 100.0f,
-                        (std::rand() % 100) / 100.0f,
-                        (std::rand() % 100) / 100.0f,
-                        255.0f
-                    }
+                        {
+                            (std::rand() % 100) / 100.0f,
+                            (std::rand() % 100) / 100.0f,
+                            (std::rand() % 100) / 100.0f,
+                            255.0f
+                        }
                     );
                 }
                 d2d->EndDraw();

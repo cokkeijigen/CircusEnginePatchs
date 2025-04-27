@@ -57,7 +57,7 @@ namespace GUI {
 
     auto D2DWindow::UpdateLayer() const -> void
     {
-        
+
     }
 
 }
