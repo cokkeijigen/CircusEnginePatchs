@@ -12,7 +12,9 @@ if (MSVC)
     endif()
 endif(MSVC)
 
-add_definitions(-DUNICODE)
+add_definitions("-DUNICODE")
+add_definitions("-DPROJECT_WORKSPACE=\"${CMAKE_CURRENT_LIST_DIR}\"")
+add_definitions("-D_PROJECT_WORKSPACE=L\"${CMAKE_CURRENT_LIST_DIR}\"")
 
 # 安装 VC-LTL5（可选）
 # https://github.com/Chuyu-Team/VC-LTL5/releases/latest

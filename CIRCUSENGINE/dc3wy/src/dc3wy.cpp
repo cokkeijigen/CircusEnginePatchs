@@ -46,10 +46,6 @@ namespace DC3WY {
                 DC3WY::FontManager.Init(hWnd);
             }
         }
-        else if (uMsg == WM_SIZE && DC3WY::FontManager.GUI() != nullptr)
-        {
-            DC3WY::FontManager.GUIUpdateDisplayState();
-        }
         else if (uMsg == WM_SYSCOMMAND)
         {
             if (wParam == 0x114514)
@@ -62,7 +58,7 @@ namespace DC3WY {
             }
             if (wParam == 0x1919810)
             {
-                HMENU SystemMenu{ GetSystemMenu(hWnd, FALSE) };
+                HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
                 if (SystemMenu == nullptr)
                 {
                     return FALSE;
@@ -113,6 +109,13 @@ namespace DC3WY {
                     DC3WY::EnableBacklogAllIcon = { true };
                 }
                 return TRUE;
+            }
+        }
+        else if (uMsg == WM_SIZE)
+        {
+            if (DC3WY::FontManager.GUI() != nullptr)
+            {
+                DC3WY::FontManager.GUIUpdateDisplayState();
             }
         }
         return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);

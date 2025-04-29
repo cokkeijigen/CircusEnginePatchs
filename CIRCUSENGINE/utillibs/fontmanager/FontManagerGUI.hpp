@@ -1,7 +1,7 @@
 ﻿#pragma once
-//#ifndef UNICODE
-//#define UNICODE
-//#endif
+#ifndef UNICODE
+#define UNICODE
+#endif
 #include <windows.h>
 #include <functional>
 #include <commctrl.h>

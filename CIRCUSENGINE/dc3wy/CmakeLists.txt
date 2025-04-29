@@ -4,7 +4,6 @@ project_yy_thunks_for_win2k_release_only()
 
 set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 file(GLOB HEADER_DIR ALL_FILES_AND_DIRS 
@@ -28,6 +27,6 @@ else()
     )
 endif()
 
-# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "D:\\Galgame\\DC3WY"
-# )
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:DC3WY_CN>" "I:\\Galgame\\DC3WY"
+)

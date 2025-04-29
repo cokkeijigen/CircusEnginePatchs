@@ -34,11 +34,11 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         {
             gdi = new GDI::Window(hwnd);
 
-            constexpr auto filePath
+            /*constexpr auto filePath
             {
                 _PROJECT_WORKSPACE
                 L"/dc3wy/sub/271/271_CHN_01_JP.png"
-            };
+            };*/
 
             {
 
@@ -74,57 +74,6 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                 //    graphics.DrawImage(image, rect, 0, 0, width, height, Gdiplus::UnitPixel, &imgAttr);
                 //}
             }
-
-            {
-                //Sub::ImageSub sub(L"C:/Users/iTsukezigen/Desktop/CIRCUSENGINE/dc3wy/sub/271/271_CHN_00_CN.png");
-
-              /*  static Gdiplus::Bitmap* bitmap{ nullptr };
-                if (bitmap == nullptr)
-                {
-                    bitmap = new Gdiplus::Bitmap();
-                    if (!bitmap || bitmap->GetLastStatus() != Gdiplus::Ok) {
-                        delete bitmap;
-                        bitmap = nullptr;
-                    }
-                }*/
-
-                //if (sub.m_Bitmap != nullptr)
-                //{
-                //    auto width{ sub.m_Width };
-                //    auto height{ sub.m_Height };
-
-                //    /*HBITMAP hBitmap{};
-                //    bitmap->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &hBitmap);
-                //    delete bitmap;*/
-                //    HBITMAP hBitmap = sub.m_Bitmap;
-                //    HDC memDC = CreateCompatibleDC(NULL);
-                //    HBITMAP oldBitmap = (HBITMAP)SelectObject(memDC, hBitmap);
-
-                //    // 设置混合函数
-                //    BLENDFUNCTION bf = { 0 };
-                //    bf.BlendOp = AC_SRC_OVER;
-                //    bf.BlendFlags = 0;
-                //    bf.SourceConstantAlpha = 200;  // 透明度
-                //    bf.AlphaFormat = AC_SRC_ALPHA;         // 使用源图像的alpha通道
-                //    auto imageWidth = width;
-                //    auto imageHeight = height;
-                //    // 使用AlphaBlend绘制
-                //    ::AlphaBlend(
-                //        gdi->m_MemDC,        // 目标DC
-                //        0, 0,       // 目标位置
-                //        imageWidth,
-                //        imageHeight,
-                //        memDC,      // 源DC
-                //        0, 0,       // 源位置
-                //        imageWidth,
-                //        imageHeight,
-                //        bf          // 混合参数
-                //    );
-                //    SelectObject(memDC, oldBitmap);
-                //    DeleteDC(memDC);
-                //    
-                //}
-            }
             {
                 std::thread
                 (
@@ -142,17 +91,26 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                                 return progress * 255.0f;
                             }
                         };
-                        
-                        Sub::ImageSub sub(filePath);
-                        int alpha = 1;
+
+                        constexpr auto filePath
+                        {
+                            _PROJECT_WORKSPACE
+                            L"/dc3wy/sub/271.xsub"
+                        };
+
+
                         utils::chilitimer chilitimer{};
+                        XSub::GDI::ImageSub sub{ filePath };
+
                         while (true)
                         {
                             auto time{ chilitimer.peek() };
-                            alpha = get_fade_alpha(2.0, 0, time);
-                            console::fmt::write("time{ %f } alpha{ %d }\n", time, int(alpha));
-                            sub.Draw(gdi->m_MemDC, {}, alpha);
-                            gdi->UpdateLayer();
+                            auto is_draw{ sub.Draw(time, gdi->m_MemDC, gdi->m_Size) };
+                            console::fmt::write("is_draw{ %s }\n",is_draw ? "true": "false");
+                            if (is_draw)
+                            {
+                                gdi->UpdateLayer();
+                            }
                             ::Sleep(1);
                         }
                     }

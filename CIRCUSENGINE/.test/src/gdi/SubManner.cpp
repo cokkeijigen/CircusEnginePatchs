@@ -59,7 +59,7 @@ namespace Sub {
 
 namespace XSub::GDI {
 
-    ImageSub::ImageSub(std::wstring_view path, HDC memDC) noexcept : m_MemDC{ memDC }
+    ImageSub::ImageSub(std::wstring_view path) noexcept : m_MemDC{ ::CreateCompatibleDC(NULL) }
     {
         if(path.empty() || this->m_MemDC == nullptr)
         {
@@ -130,6 +130,12 @@ namespace XSub::GDI {
             return;
         }
 
+        this->m_AspectRatio = float
+        {
+            static_cast<float>(this->m_Header->width) /
+            static_cast<float>(this->m_Header->height)
+        };
+
         this->m_RawEntries = std::span<uint8_t>
         {
             new uint8_t[this->m_Header->size]{},
@@ -162,7 +168,7 @@ namespace XSub::GDI {
         }
         {
             auto entries_data{ this->m_RawEntries.data() };
-            for (size_t i = 0; i < this->m_RawEntries.size();)
+            for (size_t i{ 0 }; i < this->m_RawEntries.size();)
             {
                 auto entry{ reinterpret_cast<XSub::ImageEntry*>(entries_data + i)};
                 this->m_SubEntries.push_back(entry);
@@ -231,9 +237,159 @@ namespace XSub::GDI {
         stream->Release();
     }
 
-    auto ImageSub::Draw(float time, HDC dest) noexcept -> bool
+    auto ImageSub::Height() const noexcept -> float
     {
+        return {  static_cast<float>(this->m_Header->height) };
+    }
 
-        return { false };
+    auto ImageSub::Width() const noexcept -> float
+    {
+        return { static_cast<float>(this->m_Header->width) };
+    }
+
+    auto ImageSub::Draw(float time, HDC dest, SIZE size) noexcept -> bool
+    {
+        if(this->m_SubEntries.empty())
+        {
+            return { false };
+        }
+
+        float scale_x{ 1.0f }, scale_y{ 1.0f };
+        {
+            auto width { static_cast<float>(size.cx) };
+            auto height{ static_cast<float>(size.cy) };
+            auto dest_aspect_ratio {  width / height };
+            if (dest_aspect_ratio != this->m_AspectRatio)
+            {
+                if (width <= height)
+                {
+                    height = { width / this->m_AspectRatio };
+                }
+                else
+                {
+                    width = { height * this->m_AspectRatio };
+                }
+            }
+            scale_x = { width  / this->Width()  };
+            scale_y = { height / this->Height() };
+        }
+
+        Gdiplus::Graphics(dest).Clear(Gdiplus::Color(0, 0, 0, 0));
+
+        BLENDFUNCTION blend
+        {
+            .BlendOp{ AC_SRC_OVER },
+            .BlendFlags{ 0 },
+            .AlphaFormat{ AC_SRC_ALPHA }
+        };
+
+        size_t count{ 0 };
+        for (const auto& sub : this->m_SubEntries)
+        {
+            if (time < sub->start || time > sub->end)
+            {
+                continue;
+            }
+            this->m_LastEntry = sub;
+            for (uint16_t i{ 0 }; i < 1; i++)
+            {
+                const auto& ety{ sub->entries[1] };
+                const auto& x{ ety.x }, &y{ ety.y };
+                auto fadein { sub->start + ety.fadein };
+                auto fadeout{ sub->end - ety.fadeout  };
+
+                if (time <= fadein)
+                {
+                    blend.SourceConstantAlpha = 
+                    {
+                        static_cast<uint8_t>
+                        (
+                            ((time - sub->start) / ety.fadein)
+                            * 255.f
+                        )
+                    };
+                }
+                else if (time >= fadeout)
+                {
+                    blend.SourceConstantAlpha =
+                    { 
+                        static_cast<uint8_t>
+                        (
+                            ((sub->end - time) / ety.fadeout)
+                            * 255.f
+                        )
+                    };
+                }
+                else
+                {
+                    blend.SourceConstantAlpha =
+                    {
+                        static_cast<uint8_t>(255)
+                    };
+                }
+
+                int32_t width{ int32_t(ety.width) }, height{ int32_t(ety.height) };
+                {
+                    auto ety_aspect_ratio
+                    {
+                        static_cast<float>(ety.width) /
+                        static_cast<float>(ety.height)
+                    };
+                    if (ety_aspect_ratio == this->m_AspectRatio)
+                    {
+                        width =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float(ety.width) * scale_x + 0.5f
+                            )
+                        };
+                        height =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float(ety.width) * scale_y + 0.5f
+                            )
+                        };
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                console::fmt::write("time{ %f }， width{ %d }, height{ %d }\n", time, width, height);
+                auto alpha_blend = BOOL
+                {
+                    ::AlphaBlend
+                    (
+                        { dest },
+                        { 0 },
+                        { 0 },
+                        { width  },
+                        { height },
+                        { this->m_MemDC  },
+                        { ety.x },
+                        { ety.y },
+                        { ety.width  },
+                        { ety.height },
+                        { blend }
+                    )
+                };
+                if (static_cast<bool>(alpha_blend))
+                {
+                    count++;
+                }
+            }
+        }
+
+        if (count == 0 && this->m_LastEntry != nullptr)
+        {
+            this->m_LastEntry = nullptr;
+            return { true };
+        }
+
+        return { count > 0 };
     }
 }
+

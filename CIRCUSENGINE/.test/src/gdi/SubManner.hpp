@@ -95,8 +95,16 @@ namespace XSub {
             HBITMAP m_Bitmap{};
             HDC     m_MemDC{};
 
-            ImageSub(std::wstring_view path, HDC memDC = ::CreateCompatibleDC(NULL));
-            auto Draw(float time, HDC dest) noexcept -> bool;
+            float m_AspectRatio{};
+            ImageEntry* m_LastEntry{};
+
+            ImageSub(std::wstring_view path) noexcept;
+
+            auto Height() const noexcept -> float;
+
+            auto Width() const noexcept -> float;
+
+            auto Draw(float time, HDC dest, SIZE size) noexcept -> bool;
         };
     }
 }
