@@ -414,6 +414,7 @@ def make_sub_file(info: dict[str, any], input_path: str) -> any:
     pass
 
 if __name__ == '__main__':
-    makesub = read_makesub("./271/.makesub")
-    make_sub_file(makesub, './271/')
+    import sys, os
+    makesub = read_makesub(os.path.join(sys.argv[1], '.makesub'))
+    make_sub_file(makesub, sys.argv[1])
     pass

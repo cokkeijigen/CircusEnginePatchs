@@ -1,7 +1,6 @@
 #include <iostream>
 #include <GDIWindow.hpp>
 #include <thread>
-
 namespace GDI {
 
     auto GDI::GdiplusStartup(void) -> void
@@ -294,8 +293,10 @@ namespace GDI {
             .bmiHeader
             {
                 .biSize{ sizeof(BITMAPINFO::bmiHeader) },
-                .biWidth { this->m_Size.cx },
-                .biHeight{ this->m_Size.cy },
+                .biWidth { 2560 },
+                .biHeight{ 1440 },
+                /*.biWidth { this->m_Size.cx },
+                .biHeight{ this->m_Size.cy },*/
                 .biPlanes{ 1 },
                 .biBitCount{ 32 },
                 .biCompression{ BI_RGB },

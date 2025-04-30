@@ -95,18 +95,22 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                         constexpr auto filePath
                         {
                             _PROJECT_WORKSPACE
-                            L"/dc3wy/sub/271.xsub"
+                            L"/dc3wy/sub/273.xsub"
                         };
 
 
                         utils::chilitimer chilitimer{};
                         XSub::GDI::ImageSub sub{ filePath };
-
                         while (true)
                         {
-                            auto time{ chilitimer.peek() };
-                            auto is_draw{ sub.Draw(time, gdi->m_MemDC, gdi->m_Size) };
-                            console::fmt::write("is_draw{ %s }\n",is_draw ? "true": "false");
+                            auto time{ chilitimer.peek() + 14.f };
+                            auto is_draw{ sub.Draw(time, gdi->m_MemDC, gdi->m_Size)};
+                            console::fmt::write
+                            (
+                                "time{ %f } is_draw{ %s }\n",
+                                time,
+                                is_draw ? "true": "false"
+                            );
                             if (is_draw)
                             {
                                 gdi->UpdateLayer();
@@ -115,11 +119,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                         }
                     }
                 ).detach();
-                
             }
-            //Gdiplus::Graphics graphics(gdi->m_MemDC);
-            //DrawRoundedRectangle(graphics, { 0, 0, gdi->m_Size.cx, gdi->m_Size.cy }, 1);
-           
         }
         break;
     }
@@ -137,7 +137,6 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     }
     case WM_SIZING:
     {
-        auto rect{ reinterpret_cast<RECT*>(lParam) };
         if (gdi != nullptr)
         {
             gdi->SyncToParentWindow();
@@ -150,6 +149,8 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         {
             if (gdi != nullptr)
             {
+                gdi->SyncToParentWindow();
+                //gdi->UpdateLayerBitmap(true);
                /* gdi->UpdateLayerBitmap();
                 Gdiplus::Graphics graphics(gdi->m_MemDC);
                 graphics.Clear(Gdiplus::Color(0, 0, 0, 0));
@@ -170,6 +171,8 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         }
         else if (wParam == SIZE_MAXIMIZED)
         {
+            gdi->SyncToParentWindow();
+            //gdi->UpdateLayerBitmap(true);
            /* gdi->SyncToParentWindow(true);
             Gdiplus::Graphics graphics(gdi->m_MemDC);
             graphics.Clear(Gdiplus::Color(0, 0, 0, 0));
@@ -223,7 +226,7 @@ auto main(int, char**) -> int
     };
     ::RegisterClassExW(&windowclass);
 
-    RECT rect{ 0, 0, 1280, 720 };
+    RECT rect{ 0, 0, 1024, 576 };
     ::AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, false, WS_EX_OVERLAPPEDWINDOW);
     int width{ rect.right - rect.left };
     int height{ rect.bottom - rect.top };

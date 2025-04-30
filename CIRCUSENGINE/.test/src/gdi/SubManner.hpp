@@ -96,7 +96,7 @@ namespace XSub {
             HDC     m_MemDC{};
 
             float m_AspectRatio{};
-            ImageEntry* m_LastEntry{};
+            ImageEntry* m_LastSubEntry{};
 
             ImageSub(std::wstring_view path) noexcept;
 

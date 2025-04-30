@@ -218,7 +218,7 @@ namespace DC3WY {
         return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
     }
 
-    static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> int
+    static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
     {
         if (DC3WY::EnableBacklogAllIcon)
         {
@@ -227,10 +227,10 @@ namespace DC3WY {
             {
                 line = 3;
                 row  = 4;
-                return { static_cast<int>(true) };
+                return { static_cast<BOOL>(true) };
             }
         }
-        return { static_cast<int>(false) };
+        return { static_cast<BOOL>(false) };
     }
 
     static __declspec(naked) auto JmpSetNameIconEx(void) -> void

@@ -1,13 +1,13 @@
 .name 271
-.width 1280
-.height 720
-.fade 0.5
-.cn::pos bottom, left, 10, 10
-.jp::pos top, left, 10, 10
+.width 1024
+.height 576
+.fade 0.3
+.cn::pos bottom, left, 0, 10
+.jp::pos top, left, 0, 10
 
 :image-sub
 .time 0:00:02.19,0:00:04.47
-.cn 271_CHN_00_CN.png pos(top, left, 10, 10) fade(0.1, 0.1)
+.cn 271_CHN_00_CN.png
 .jp 271_CHN_00_CN.png
 :end
 

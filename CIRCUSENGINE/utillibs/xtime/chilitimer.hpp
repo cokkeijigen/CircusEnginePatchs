@@ -13,7 +13,7 @@ namespace utils::xtime {
         {
             this->last = steady_clock::now();
         }
-
+        
         template<class R = float>
         requires std::is_floating_point<R>::value
         inline auto mark() noexcept -> R

@@ -275,7 +275,6 @@ namespace XSub::GDI {
         }
 
         Gdiplus::Graphics(dest).Clear(Gdiplus::Color(0, 0, 0, 0));
-
         BLENDFUNCTION blend
         {
             .BlendOp{ AC_SRC_OVER },
@@ -290,11 +289,10 @@ namespace XSub::GDI {
             {
                 continue;
             }
-            this->m_LastEntry = sub;
-            for (uint16_t i{ 0 }; i < 1; i++)
+            this->m_LastSubEntry = sub;
+            for (int i{ 0 }; i < static_cast<int>(sub->count); i++)
             {
-                const auto& ety{ sub->entries[1] };
-                const auto& x{ ety.x }, &y{ ety.y };
+                const auto& ety{ sub->entries[i] };
                 auto fadein { sub->start + ety.fadein };
                 auto fadeout{ sub->end - ety.fadeout  };
 
@@ -328,44 +326,121 @@ namespace XSub::GDI {
                     };
                 }
 
-                int32_t width{ int32_t(ety.width) }, height{ int32_t(ety.height) };
+                int32_t width{ ety.width }, height{ ety.height }, x{}, y{};
                 {
                     auto ety_aspect_ratio
                     {
                         static_cast<float>(ety.width) /
                         static_cast<float>(ety.height)
                     };
-                    if (ety_aspect_ratio == this->m_AspectRatio)
-                    {
-                        width =
-                        {
-                            static_cast<int32_t>
-                            (
-                                float(ety.width) * scale_x + 0.5f
-                            )
-                        };
-                        height =
-                        {
-                            static_cast<int32_t>
-                            (
-                                float(ety.width) * scale_y + 0.5f
-                            )
-                        };
 
+                    width =
+                    {
+                        static_cast<int32_t>
+                        (
+                            float(ety.width) * scale_x + 0.5f
+                        )
+                    };
+
+                    height =
+                    {
+                        static_cast<int32_t>
+                        (
+                            float(width) / ety_aspect_ratio + 0.5f
+                        )
+                    };
+
+                    if (ety.point.align & Align::Right)
+                    {
+                        x =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float
+                                (
+                                    size.cx
+                                    - (float(ety.width) * scale_x)
+                                    - (float(ety.point.horizontal) * scale_x)
+                                ) + 0.5f
+                            )
+                        };
+                    }
+                    else if (ety.point.align & Align::Center)
+                    {
+                        x =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float
+                                (
+                                    ((size.cx - float(ety.width * scale_x)) / 2.f)
+                                    + float(ety.point.horizontal) * scale_x
+                                ) + 0.5f
+                            )
+                        };
                     }
                     else
                     {
+                        x =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float(ety.point.horizontal)
+                                * scale_x + 0.5f
+                            )
+                        };
+                    }
+
+                    if (ety.point.align & Align::Bottom)
+                    {
+                        y =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float
+                                (
+                                    size.cy
+                                    - (float(ety.height) * scale_y)
+                                    - (float(ety.point.vertical) * scale_y)
+                                ) + 0.5f
+                            )
+                        };
 
                     }
+                    else if (ety.point.align & Align::Middle)
+                    {
+                        y =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float
+                                (
+                                    ((size.cy - (float(ety.height) * scale_y)) / 2.f)
+                                    + float(ety.point.vertical) * scale_y
+                                )
+                            )
+                        };
+                    }
+                    else
+                    {
+                        y =
+                        {
+                            static_cast<int32_t>
+                            (
+                                float(ety.point.vertical)
+                                * scale_y + 0.5f
+                            )
+                        };
+                    }
                 }
-                console::fmt::write("time{ %f }， width{ %d }, height{ %d }\n", time, width, height);
+                console::fmt::write("index{ %d } width{ %d }, height{ %d }\n", i, width, height);
                 auto alpha_blend = BOOL
                 {
                     ::AlphaBlend
                     (
                         { dest },
-                        { 0 },
-                        { 0 },
+                        { x },
+                        { y },
                         { width  },
                         { height },
                         { this->m_MemDC  },
@@ -383,9 +458,9 @@ namespace XSub::GDI {
             }
         }
 
-        if (count == 0 && this->m_LastEntry != nullptr)
+        if (count == 0 && this->m_LastSubEntry != nullptr)
         {
-            this->m_LastEntry = nullptr;
+            this->m_LastSubEntry = nullptr;
             return { true };
         }
 
