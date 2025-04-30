@@ -4,6 +4,7 @@
 #include <SubManner.hpp>
 #include <thread>
 #include <xtime.hpp>
+#include <subplayer_gdi.hpp>
 
 GDI::Window* gdi{ nullptr };
 
@@ -19,6 +20,8 @@ static void DrawRoundedRectangle(Gdiplus::Graphics& graphics, Gdiplus::Rect rect
     graphics.FillPath(&brush, &path);
 }
 
+XSub::GDI::PlayerWindow* XSubPlayerWindowGDI{ nullptr };
+
 static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
 
@@ -30,9 +33,47 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     }
     case WM_CREATE:
     {
+        if (XSubPlayerWindowGDI == nullptr)
+        {
+            XSubPlayerWindowGDI = new XSub::GDI::PlayerWindow(hwnd);
+            std::thread
+            (
+                [](void) -> void
+                {
+                    constexpr auto filePath
+                    {
+                        _PROJECT_WORKSPACE
+                        L"/dc3wy/sub/273.xsub"
+                    };
+
+                    utils::chilitimer chilitimer{};
+                    XSub::GDI::ImageSub sub{ filePath };
+                    while (true)
+                    {
+                        XSubPlayerWindowGDI->SafeDraw
+                        (
+                            [&chilitimer, &sub](HDC hdc, const SIZE& size) -> bool
+                            {
+                                auto time{ chilitimer.peek() + 14.f };
+                                auto is_draw{ sub.Draw(time, hdc, size) };
+                                console::fmt::write
+                                (
+                                    "time{ %f } is_draw{ %s }\n",
+                                    time,
+                                    is_draw ? "true" : "false"
+                                );
+                                return { is_draw };
+                            }
+                        );
+                        ::Sleep(1);
+                    }
+                }
+            ).detach();
+        }
+
         if (gdi == nullptr)
         {
-            gdi = new GDI::Window(hwnd);
+            //gdi = new GDI::Window(hwnd);
 
             /*constexpr auto filePath
             {
@@ -75,7 +116,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                 //}
             }
             {
-                std::thread
+                /*std::thread
                 (
                     [](void) -> void
                     {
@@ -118,7 +159,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                             ::Sleep(1);
                         }
                     }
-                ).detach();
+                ).detach();*/
             }
         }
         break;
@@ -127,19 +168,27 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     {
         auto x{ static_cast<int>(LOWORD(lParam)) };
         auto y{ static_cast<int>(HIWORD(lParam)) };
-        if (gdi != nullptr)
+        //if (gdi != nullptr)
+        //{
+        //    //gdi->SyncToParentWindow();
+        //    gdi->SetPosition(x, y);
+        //    //gdi->UpdateLayer();
+        //}
+        if (XSubPlayerWindowGDI != nullptr)
         {
-            //gdi->SyncToParentWindow();
-            gdi->SetPosition(x, y);
-            //gdi->UpdateLayer();
+            XSubPlayerWindowGDI->SetPosition(x, y);
         }
         break;
     }
     case WM_SIZING:
     {
-        if (gdi != nullptr)
+        /*if (gdi != nullptr)
         {
             gdi->SyncToParentWindow();
+        }*/
+        if (XSubPlayerWindowGDI != nullptr)
+        {
+            XSubPlayerWindowGDI->SyncToParentWindow(true);
         }
         break;
     }
@@ -147,9 +196,13 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     {
         if (wParam == SIZE_RESTORED)
         {
+            if (XSubPlayerWindowGDI != nullptr)
+            {
+                XSubPlayerWindowGDI->SyncToParentWindow(true);
+            }
             if (gdi != nullptr)
             {
-                gdi->SyncToParentWindow();
+                //gdi->SyncToParentWindow();
                 //gdi->UpdateLayerBitmap(true);
                /* gdi->UpdateLayerBitmap();
                 Gdiplus::Graphics graphics(gdi->m_MemDC);
@@ -171,7 +224,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         }
         else if (wParam == SIZE_MAXIMIZED)
         {
-            gdi->SyncToParentWindow();
+            //gdi->SyncToParentWindow();
             //gdi->UpdateLayerBitmap(true);
            /* gdi->SyncToParentWindow(true);
             Gdiplus::Graphics graphics(gdi->m_MemDC);
@@ -189,6 +242,10 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                 bitmap.bmWidth, bitmap.bmHeight,
                 gdi->m_Size.cx, gdi->m_Size.cy
             );*/
+            if (XSubPlayerWindowGDI != nullptr)
+            {
+                XSubPlayerWindowGDI->SyncToParentWindow(true);
+            }
         }
         else
         {

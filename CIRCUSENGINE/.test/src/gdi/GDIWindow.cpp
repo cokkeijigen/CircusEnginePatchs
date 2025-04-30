@@ -304,7 +304,7 @@ namespace GDI {
             }
         };
 
-        void* point{ nullptr };
+        void* bytes{ nullptr };
         auto bmp = HBITMAP
         {
             ::CreateDIBSection
@@ -312,7 +312,7 @@ namespace GDI {
                 { NULL  },
                 { &info },
                 { DIB_RGB_COLORS },
-                { &point },
+                { &bytes },
                 { NULL },
                 { 0 }
             )

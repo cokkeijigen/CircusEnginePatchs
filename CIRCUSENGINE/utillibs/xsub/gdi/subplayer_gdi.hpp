@@ -1,0 +1,102 @@
+#pragma once
+#include <windows.h>
+#include <gdiplus.h>
+#include <optional>
+#include <mutex>
+#include <atomic>
+#include <functional>
+
+namespace XSub::GDI
+{
+    class PlayerWindow
+    {
+
+        class GdiplusStartup
+        {
+            Gdiplus::GdiplusStartupInput gdiplusStartupInput{};
+            ULONG_PTR gdiplusToken{};
+        public:
+
+            GdiplusStartup()
+            {
+                Gdiplus::GdiplusStartup
+                (
+                    &this->gdiplusToken,
+                    &this->gdiplusStartupInput,
+                    NULL
+                );
+            }
+
+            ~GdiplusStartup()
+            {
+                Gdiplus::GdiplusShutdown
+                (
+                    this->gdiplusToken
+                );
+            }
+        };
+
+        static auto SafeCheckInstanceCount(bool add, std::function<void(size_t)> callback = nullptr) -> void;
+        static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+        static auto AutoGdiplusStartup(void) -> void;
+
+    protected:
+
+        HWND m_Parent{};
+        HWND m_That{};
+        HDC m_MemDC{};
+        HBITMAP m_Bitmap{};
+
+        SIZE  mutable m_Size{};
+        POINT mutable m_Point{};
+        BLENDFUNCTION mutable m_Blend
+        {
+            .BlendFlags = AC_SRC_OVER,
+            .SourceConstantAlpha = 255,
+            .AlphaFormat = AC_SRC_ALPHA,
+        };
+        std::mutex mutable m_Mutex{};
+
+        auto OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept -> std::optional<LRESULT>;
+
+        auto MakeNewBitmap(LONG width, LONG height) noexcept -> bool;
+
+    public:
+
+        static inline const wchar_t ClassName[] { L"XSub_GDI_PlayerWindow_Clazz" };
+
+        ~PlayerWindow() noexcept;
+
+        PlayerWindow(const PlayerWindow&) noexcept = delete;
+
+        PlayerWindow(PlayerWindow&& other) noexcept;
+
+        PlayerWindow(HWND parent, HINSTANCE hInstance = ::GetModuleHandleW(NULL)) noexcept;
+
+        auto operator=(PlayerWindow&& other) noexcept -> PlayerWindow&;
+
+        auto operator=(const PlayerWindow&) noexcept -> PlayerWindow & = delete;
+
+        auto SetParent(HWND parent) noexcept -> void;
+
+        auto SetRect(const RECT& rect, bool update = false) noexcept -> bool;
+
+        auto SetRect(RECT&& rect, bool update = false) noexcept -> bool;
+
+        auto SetSize(LONG width, LONG height, bool update = false) noexcept -> bool;
+
+        auto SetPosition(LONG x, LONG y, bool update = false) noexcept -> bool;
+
+        auto SyncToParentWindow(bool update_layer_bitmap = false, bool force = false) noexcept -> bool;
+
+        auto UpdateLayerBitmap(bool force = false) noexcept -> bool;
+
+        auto UpdateLayer(bool lock = true) const noexcept -> bool;
+
+        auto Show() const noexcept -> bool;
+
+        auto Hide() const noexcept -> bool;
+
+        auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> void;
+    };
+}
