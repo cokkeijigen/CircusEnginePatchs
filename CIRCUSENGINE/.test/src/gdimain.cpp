@@ -56,12 +56,12 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                             {
                                 auto time{ chilitimer.peek() + 14.f };
                                 auto is_draw{ sub.Draw(time, hdc, size) };
-                                console::fmt::write
+                                /*console::fmt::write
                                 (
                                     "time{ %f } is_draw{ %s }\n",
                                     time,
                                     is_draw ? "true" : "false"
-                                );
+                                );*/
                                 return { is_draw };
                             }
                         );
@@ -198,6 +198,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         {
             if (XSubPlayerWindowGDI != nullptr)
             {
+                XSubPlayerWindowGDI->Show();
                 XSubPlayerWindowGDI->SyncToParentWindow(true);
             }
             if (gdi != nullptr)
@@ -244,8 +245,15 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             );*/
             if (XSubPlayerWindowGDI != nullptr)
             {
+                console::fmt::write("最大化？\n");
+                XSubPlayerWindowGDI->Show();
                 XSubPlayerWindowGDI->SyncToParentWindow(true);
             }
+        }
+        else if (wParam == SIZE_MINIMIZED)
+        {
+            console::fmt::write("最小化？\n");
+            XSubPlayerWindowGDI->Hide();
         }
         else
         {

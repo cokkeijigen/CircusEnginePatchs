@@ -433,7 +433,7 @@ namespace XSub::GDI {
                         };
                     }
                 }
-                console::fmt::write("index{ %d } width{ %d }, height{ %d }\n", i, width, height);
+                //console::fmt::write("index{ %d } width{ %d }, height{ %d }\n", i, width, height);
                 auto alpha_blend = BOOL
                 {
                     ::AlphaBlend

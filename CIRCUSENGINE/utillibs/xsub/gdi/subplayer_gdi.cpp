@@ -1,15 +1,16 @@
 #include <iostream>
 #include <subplayer_gdi.hpp>
+#include <console.hpp>
 
 namespace XSub::GDI
 {
 
-    auto PlayerWindow::AutoGdiplusStartup(void) -> void
+    auto GdiplusStartup::AutoGdiplusStartup(void) -> void
     {
-        static std::unique_ptr<PlayerWindow::GdiplusStartup> GdiplusStartup{ nullptr };
-        if (GdiplusStartup == nullptr)
+        static std::unique_ptr<GdiplusStartup> p_GdiplusStartup{ nullptr };
+        if (p_GdiplusStartup == nullptr)
         {
-            GdiplusStartup = std::make_unique<PlayerWindow::GdiplusStartup>();
+            p_GdiplusStartup = std::make_unique<GdiplusStartup>();
         }
     }
 
@@ -57,16 +58,25 @@ namespace XSub::GDI
             auto screenWidth { ::GetSystemMetrics(SM_CXSCREEN) };
             auto screenHeight{ ::GetSystemMetrics(SM_CYSCREEN) };
             this->MakeNewBitmap(screenWidth, screenHeight);
+            this->Show(NULL);
         }
-        return { std::nullopt };;
+        else if (uMsg == WM_TIMER)
+        {
+            if (wParam == PlayerWindow::TIMER_SHOW_WINDOW)
+            {
+                this->Show(NULL);
+                ::KillTimer(this->m_That, PlayerWindow::TIMER_SHOW_WINDOW);
+            }
+        }
+        return { std::nullopt };
     }
 
     PlayerWindow::~PlayerWindow() noexcept
     {
         PlayerWindow::SafeCheckInstanceCount
         (
-            { false },
-            [](size_t count) -> void {
+            { false }, [](size_t count) -> void
+            {
                 if (count != 0) { return; }
                 ::UnregisterClassW
                 (
@@ -75,11 +85,29 @@ namespace XSub::GDI
                 );
             }
         );
+
+        if (this->m_That != nullptr)
+        {
+            ::DestroyWindow(this->m_That);
+            this->m_That = nullptr;
+        }
+
+        if (this->m_Bitmap != nullptr)
+        {
+            ::DeleteObject(this->m_Bitmap);
+            this->m_Bitmap = nullptr;
+        }
+
+        if (this->m_MemDC != nullptr)
+        {
+            ::ReleaseDC(NULL, this->m_MemDC);
+            this->m_MemDC = nullptr;
+        }
     }
 
     PlayerWindow::PlayerWindow(HWND parent, HINSTANCE hInstance) noexcept : m_Parent(parent)
     {
-        PlayerWindow::AutoGdiplusStartup();
+        GdiplusStartup::AutoGdiplusStartup();
         PlayerWindow::SafeCheckInstanceCount
         (
             { true },
@@ -117,10 +145,12 @@ namespace XSub::GDI
             )
         };
 
+        this->m_Mutex.lock();
         if (this->m_That == nullptr)
         {
             this->m_That = { hWnd };
         }
+        this->m_Mutex.unlock();
 
         if (parent != nullptr)
         {
@@ -178,12 +208,13 @@ namespace XSub::GDI
             .x = { rect.left },
             .y = { rect.top  }
         };
-        this->m_Mutex.unlock();
-        return bool
+        bool result
         {
             update ?
-            this->UpdateLayer() : true
+            this->UpdateLayer(false) : true
         };
+        this->m_Mutex.unlock();
+        return { result };
     }
 
     auto PlayerWindow::SetRect(RECT&& rect, bool update) noexcept -> bool
@@ -195,44 +226,66 @@ namespace XSub::GDI
     {
         this->m_Mutex.lock();
         this->m_Size = SIZE{ width, height };
-        this->m_Mutex.unlock();
-        return bool
+        bool result
         {
             update ?
-            this->UpdateLayer() : true
+            this->UpdateLayer(false) : true
         };
+        this->m_Mutex.unlock();
+        return { result };
     }
 
     auto PlayerWindow::SetPosition(LONG x, LONG y, bool update) noexcept -> bool
     {
         this->m_Mutex.lock();
         this->m_Point = POINT{ x, y };
-        this->m_Mutex.unlock();
-        return bool
+        bool result
         {
             update ?
-            this->UpdateLayer() : true
+            this->UpdateLayer(false) : true
         };
+        this->m_Mutex.unlock();
+        return { result };
     }
 
-    auto PlayerWindow::Show() const noexcept -> bool
+    auto PlayerWindow::Show(UINT delay) noexcept -> bool
     {
+        std::lock_guard<std::mutex> lock();
         if (this->m_That != nullptr)
         {
-            auto result{ ::ShowWindow(this->m_That, SW_SHOW) };
-            return { static_cast<bool>(result) };
+            if (delay > 0)
+            {
+                ::SetTimer
+                (
+                    { this->m_That },
+                    { PlayerWindow::TIMER_SHOW_WINDOW },
+                    { delay },
+                    { NULL }
+                );
+                return { true };
+            }
+            this->UpdateLayer(false, 0xFFi8);
+            return { this->m_Blend.SourceConstantAlpha != 0 };
         }
         return { false };
     }
 
-    auto PlayerWindow::Hide() const noexcept -> bool
+    auto PlayerWindow::Hide() noexcept -> bool
     {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
         if (this->m_That != nullptr)
         {
-            auto result{ ::ShowWindow(this->m_That, SW_HIDE) };
-            return { static_cast<bool>(result) };
+            ::KillTimer(this->m_That, PlayerWindow::TIMER_SHOW_WINDOW);
+            this->UpdateLayer(false, 0x00i8);
+            return { this->m_Blend.SourceConstantAlpha == 0 };
         }
         return { false };
+    }
+
+    auto PlayerWindow::IsVisible() const noexcept -> bool
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        return { this->m_Blend.SourceConstantAlpha != 0 };
     }
 
     auto PlayerWindow::SyncToParentWindow(bool update_layer_bitmap, bool force) noexcept -> bool
@@ -348,7 +401,6 @@ namespace XSub::GDI
                 return { false };
             }
         }
-        this->m_Mutex.unlock();
 
         BITMAPINFO info
         {
@@ -377,9 +429,13 @@ namespace XSub::GDI
                 { 0 }
             )
         };
-        if (bmp == nullptr) { return { false }; }
 
-        this->m_Mutex.lock();
+        if (bmp == nullptr)
+        {
+            this->m_Mutex.unlock();
+            return { false };
+        }
+
         ::SelectObject(this->m_MemDC, bmp);
         if (this->m_Bitmap != nullptr)
         {
@@ -388,6 +444,12 @@ namespace XSub::GDI
         this->m_Bitmap = { bmp };
         this->m_Mutex.unlock();
         return { true };
+    }
+
+    auto PlayerWindow::UpdateLayer(bool lock, uint8_t alpha) noexcept -> bool
+    {
+        this->m_Blend.SourceConstantAlpha = { alpha };
+        return { this->UpdateLayer(lock) };
     }
 
     auto PlayerWindow::UpdateLayer(bool lock) const noexcept -> bool
@@ -406,7 +468,7 @@ namespace XSub::GDI
             return { false };
         }
 
-        auto pos{ POINT{} };
+        auto pos = POINT{};
         auto is_update = BOOL
         {
             ::UpdateLayeredWindow
@@ -426,12 +488,50 @@ namespace XSub::GDI
         return { static_cast<bool>(is_update) };
     }
 
-    auto PlayerWindow::SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> void
+    auto PlayerWindow::SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool
     {
-        this->m_Mutex.lock();
-        bool is_draw { do_draw(this->m_MemDC, this->m_Size) };
-        if (is_draw) { this->UpdateLayer(false); }
-        this->m_Mutex.unlock();
+        if (this->m_MemDC != nullptr && do_draw != nullptr)
+        {
+            std::lock_guard<std::mutex> lock(this->m_Mutex);
+            if (this->m_Blend.SourceConstantAlpha != 0)
+            {
+                bool is_draw{ do_draw(this->m_MemDC, this->m_Size) };
+                if (is_draw) return { this->UpdateLayer(false) };
+            }
+        }
+        return { false };
+    }
+
+    auto PlayerWindow::MessageLoop(bool loop) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        if (this->m_IsMessageLoop)
+        {
+            this->m_IsMessageLoop = { loop };
+        }
+        else if(loop)
+        {
+            this->m_IsMessageLoop = { true };
+            std::thread
+            (
+                [this](void) -> void
+                {
+                    MSG message{};
+                    while (true)
+                    {
+                        {
+                            std::lock_guard<std::mutex> lock(this->m_Mutex);
+                            if (!this->m_IsMessageLoop) break;
+                        }
+                        if (::PeekMessageW(&message, NULL, NULL, NULL, PM_REMOVE))
+                        {
+                            ::TranslateMessage(&message);
+                            ::DispatchMessageW(&message);
+                        }
+                    }
+                }
+            ).detach();
+        }
     }
 
 };

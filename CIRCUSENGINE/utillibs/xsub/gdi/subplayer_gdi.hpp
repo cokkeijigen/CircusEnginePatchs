@@ -8,38 +8,38 @@
 
 namespace XSub::GDI
 {
+    class GdiplusStartup
+    {
+        Gdiplus::GdiplusStartupInput gdiplusStartupInput{};
+        ULONG_PTR gdiplusToken{};
+    public:
+
+        GdiplusStartup()
+        {
+            Gdiplus::GdiplusStartup
+            (
+                &this->gdiplusToken,
+                &this->gdiplusStartupInput,
+                NULL
+            );
+        }
+
+        ~GdiplusStartup()
+        {
+            Gdiplus::GdiplusShutdown
+            (
+                this->gdiplusToken
+            );
+        }
+
+        static auto AutoGdiplusStartup(void) -> void;
+    };
+
     class PlayerWindow
     {
-
-        class GdiplusStartup
-        {
-            Gdiplus::GdiplusStartupInput gdiplusStartupInput{};
-            ULONG_PTR gdiplusToken{};
-        public:
-
-            GdiplusStartup()
-            {
-                Gdiplus::GdiplusStartup
-                (
-                    &this->gdiplusToken,
-                    &this->gdiplusStartupInput,
-                    NULL
-                );
-            }
-
-            ~GdiplusStartup()
-            {
-                Gdiplus::GdiplusShutdown
-                (
-                    this->gdiplusToken
-                );
-            }
-        };
-
         static auto SafeCheckInstanceCount(bool add, std::function<void(size_t)> callback = nullptr) -> void;
         static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT;
-        static auto AutoGdiplusStartup(void) -> void;
-
+        static inline auto TIMER_SHOW_WINDOW{ static_cast<WPARAM>(0x01) };
     protected:
 
         HWND m_Parent{};
@@ -52,14 +52,17 @@ namespace XSub::GDI
         BLENDFUNCTION mutable m_Blend
         {
             .BlendFlags = AC_SRC_OVER,
-            .SourceConstantAlpha = 255,
+            .SourceConstantAlpha = 0x00,
             .AlphaFormat = AC_SRC_ALPHA,
         };
         std::mutex mutable m_Mutex{};
+        bool mutable m_IsMessageLoop{};
 
         auto OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept -> std::optional<LRESULT>;
 
         auto MakeNewBitmap(LONG width, LONG height) noexcept -> bool;
+
+        auto UpdateLayer(bool lock, uint8_t alpha) noexcept -> bool;
 
     public:
 
@@ -93,10 +96,14 @@ namespace XSub::GDI
 
         auto UpdateLayer(bool lock = true) const noexcept -> bool;
 
-        auto Show() const noexcept -> bool;
+        auto Show(UINT delay = 200) noexcept -> bool;
 
-        auto Hide() const noexcept -> bool;
+        auto Hide() noexcept -> bool;
 
-        auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> void;
+        auto IsVisible() const noexcept -> bool;
+
+        auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
+
+        auto MessageLoop(bool loop) noexcept -> void;
     };
 }
