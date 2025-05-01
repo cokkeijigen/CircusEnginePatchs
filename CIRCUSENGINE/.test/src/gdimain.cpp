@@ -55,7 +55,15 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                          L"/dc3wy/sub/271.xsub"
                     };
                     XSubPlayerWindowGDI->Load(SubFile);
-                    XSubPlayerWindowGDI->Play(23.8f, true);
+                    //XSubPlayerWindowGDI->Play(23.8f, true);
+                    XSubPlayerWindowGDI->Play
+                    (
+                        { true },
+                        [&chilitimer](void) -> float
+                        {
+                            return { chilitimer.peek() + 23.8f };
+                        }
+                    );
                     ::Sleep(10000);
                     XSubPlayerWindowGDI->Stop(true);
                     XSubPlayerWindowGDI->UnLoad();

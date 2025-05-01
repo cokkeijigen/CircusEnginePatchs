@@ -716,6 +716,56 @@ namespace XSub::GDI
             run_play();
         }
     }
+
+    auto ImageSubPlayer::Play(bool as_thread, std::function<float(void)> get_time) noexcept -> void
+    {
+        if (get_time == nullptr) { return; }
+
+        this->m_Mutex.lock();
+        if (this->m_IsPlaying)
+        {
+            this->m_Mutex.unlock();
+            this->Stop();
+        }
+        else
+        {
+            this->m_Mutex.unlock();
+        }
+        auto run_play
+        {
+            [this, get_time](void) -> void
+            {
+                this->m_Mutex.lock();
+                this->m_IsPlaying = { true };
+                this->m_Mutex.unlock();
+                while (true)
+                {
+                    {
+                        std::lock_guard<std::mutex> lock(this->m_Mutex);
+                        if (this->m_CurrentImageSub == nullptr)
+                        {
+                            this->m_IsPlaying = { false };
+                        }
+                        if (!this->m_IsPlaying)
+                        {
+                            break;
+                        }
+                    }
+                    auto time{ get_time() };
+                    this->Update(time);
+                    ::Sleep(1);
+                }
+            }
+        };
+        if (as_thread)
+        {
+            std::thread{ run_play }.detach();
+        }
+        else
+        {
+            run_play();
+        }
+    }
     
     auto ImageSubPlayer::Stop(bool await_for_last) noexcept -> void
     {

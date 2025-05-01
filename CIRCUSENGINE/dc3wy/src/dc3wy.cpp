@@ -266,6 +266,8 @@ namespace DC3WY {
         }
     }
 
+
+
 	auto DC3WY::INIT_ALL_PATCH(void) -> void
 	{
 		console::make("DEBUG LOG FOR DC3WY");

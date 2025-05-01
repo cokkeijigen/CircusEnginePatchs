@@ -128,6 +128,8 @@ namespace XSub::GDI
 
         auto Play(float start = 0.f, bool as_thread = true) noexcept -> void;
 
+        auto Play(bool as_thread, std::function<float(void)> get_time) noexcept -> void;
+
         auto Stop(bool await_for_last = false) noexcept -> void;
     };
 }
