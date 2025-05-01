@@ -4,16 +4,6 @@
 
 namespace XSub::GDI
 {
-
-    auto GdiplusStartup::AutoGdiplusStartup(void) -> void
-    {
-        static std::unique_ptr<GdiplusStartup> p_GdiplusStartup{ nullptr };
-        if (p_GdiplusStartup == nullptr)
-        {
-            p_GdiplusStartup = std::make_unique<GdiplusStartup>();
-        }
-    }
-
     auto PlayerWindow::SafeCheckInstanceCount(bool add, std::function<void(size_t)> callback) -> void
     {
         static auto CHECK_MUTEX{ std::mutex{} };
@@ -86,6 +76,7 @@ namespace XSub::GDI
             }
         );
 
+        this->MessageLoop(false);
         if (this->m_That != nullptr)
         {
             ::DestroyWindow(this->m_That);
@@ -502,9 +493,27 @@ namespace XSub::GDI
         return { false };
     }
 
-    auto PlayerWindow::MessageLoop(bool loop) noexcept -> void
+    auto PlayerWindow::Clear(Gdiplus::Color color, bool update_layer) noexcept -> void
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
+        if (this->m_MemDC == nullptr) { return; }
+        Gdiplus::Graphics(this->m_MemDC).Clear(color);
+        if (update_layer)
+        {
+            this->UpdateLayer(false);
+        }
+    }
+
+    auto PlayerWindow::Clear(uint32_t color, bool update_layer) noexcept -> void
+    {
+        const auto cl{ reinterpret_cast<uint8_t*>(&color) };
+        Gdiplus::Color _color{ cl[3], cl[2], cl[1], cl[0] };
+        this->Clear(_color, update_layer);
+    }
+
+    auto PlayerWindow::MessageLoop(bool loop, bool as_thread) noexcept -> void
+    {
+        this->m_Mutex.lock();
         if (this->m_IsMessageLoop)
         {
             this->m_IsMessageLoop = { loop };
@@ -512,8 +521,9 @@ namespace XSub::GDI
         else if(loop)
         {
             this->m_IsMessageLoop = { true };
-            std::thread
-            (
+            this->m_Mutex.unlock();
+            auto run_loop
+            {
                 [this](void) -> void
                 {
                     MSG message{};
@@ -521,17 +531,32 @@ namespace XSub::GDI
                     {
                         {
                             std::lock_guard<std::mutex> lock(this->m_Mutex);
-                            if (!this->m_IsMessageLoop) break;
+                            if (!this->m_IsMessageLoop) { break; }
                         }
                         if (::PeekMessageW(&message, NULL, NULL, NULL, PM_REMOVE))
                         {
                             ::TranslateMessage(&message);
                             ::DispatchMessageW(&message);
+                            if (message.message == WM_QUIT)
+                            {
+                                break;
+                            }
                         }
+                        ::Sleep(1);
                     }
                 }
-            ).detach();
+            };
+            if (as_thread)
+            {
+                std::thread{ run_loop }.detach();
+            }
+            else
+            {
+                run_loop();
+            }
+            return;
         }
+        this->m_Mutex.unlock();
     }
 
 };

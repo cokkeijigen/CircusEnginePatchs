@@ -25,7 +25,7 @@ namespace Sub
     };
 }
 
-namespace XSub {
+namespace XSub2 {
 
     enum Align: uint8_t
     {
@@ -83,7 +83,7 @@ namespace XSub {
         uint32_t size{};
     };
 
-    namespace GDI
+    namespace GDI2
     {
         class ImageSub
         {

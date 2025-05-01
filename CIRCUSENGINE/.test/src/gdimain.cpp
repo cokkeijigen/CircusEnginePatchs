@@ -1,10 +1,11 @@
 #include <iostream>
 #include <console.hpp>
 #include <GDIWindow.hpp>
-#include <SubManner.hpp>
 #include <thread>
 #include <xtime.hpp>
 #include <subplayer_gdi.hpp>
+#include <xsub/gdi/imgsub_gdi.hpp>
+#include <SubManner.hpp>
 
 GDI::Window* gdi{ nullptr };
 
@@ -20,8 +21,8 @@ static void DrawRoundedRectangle(Gdiplus::Graphics& graphics, Gdiplus::Rect rect
     graphics.FillPath(&brush, &path);
 }
 
-XSub::GDI::PlayerWindow* XSubPlayerWindowGDI{ nullptr };
-
+//XSub::GDI::PlayerWindow* XSubPlayerWindowGDI{ nullptr };
+XSub::GDI::ImageSubPlayer* XSubPlayerWindowGDI{ nullptr };
 static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
 
@@ -35,36 +36,32 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     {
         if (XSubPlayerWindowGDI == nullptr)
         {
-            XSubPlayerWindowGDI = new XSub::GDI::PlayerWindow(hwnd);
+            
+            XSubPlayerWindowGDI = new XSub::GDI::ImageSubPlayer(hwnd);
             std::thread
             (
                 [](void) -> void
                 {
-                    constexpr auto filePath
-                    {
-                        _PROJECT_WORKSPACE
-                        L"/dc3wy/sub/273.xsub"
-                    };
-
                     utils::chilitimer chilitimer{};
-                    XSub::GDI::ImageSub sub{ filePath };
+                    /*XSub2::GDI2::ImageSub sub
+                    {
+                         _PROJECT_WORKSPACE
+                        L"/dc3wy/sub/271.xsub"
+                    };*/
+                    XSubPlayerWindowGDI->Load
+                    (
+                        {
+                             _PROJECT_WORKSPACE
+                             L"/dc3wy/sub/271.xsub"
+                        }
+                    );
+                    //XSubPlayerWindowGDI->Play(23.8f, true);
+                    //::Sleep(10000);
+                    //XSubPlayerWindowGDI->Stop();
                     while (true)
                     {
-                        XSubPlayerWindowGDI->SafeDraw
-                        (
-                            [&chilitimer, &sub](HDC hdc, const SIZE& size) -> bool
-                            {
-                                auto time{ chilitimer.peek() + 14.f };
-                                auto is_draw{ sub.Draw(time, hdc, size) };
-                                /*console::fmt::write
-                                (
-                                    "time{ %f } is_draw{ %s }\n",
-                                    time,
-                                    is_draw ? "true" : "false"
-                                );*/
-                                return { is_draw };
-                            }
-                        );
+                        auto time{ chilitimer.peek() + 23.8f };
+                        XSubPlayerWindowGDI->Update(time);
                         ::Sleep(1);
                     }
                 }

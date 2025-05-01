@@ -1,0 +1,126 @@
+#pragma once
+#include <span>
+#include <vector>
+#include <xusb_basic_gdi.hpp>
+#include <subplayer_gdi.hpp>
+
+namespace XSub::GDI
+{
+
+    class ImageSubPlayer;
+
+    class ImageSub
+    {
+        friend ImageSubPlayer;
+    protected:
+
+        std::vector<XSub::ImageSubEntry*> m_SubEntries{};
+        HBITMAP m_Bitmap{};
+        HDC     m_MemDC{};
+        bool  m_IsShared{};
+        float m_AspectRatio{};
+        float m_Width{};
+        float m_Height{};
+
+        inline ImageSub(bool is_shared = true) noexcept : m_IsShared{ is_shared } {}
+
+    public:
+
+        virtual ~ImageSub() noexcept;
+
+        ImageSub(HBITMAP&& bitmap, HDC&& memdc, float width, float height);
+
+        ImageSub(HBITMAP& bitmap, HDC& memdc, float width, float height);
+
+        ImageSub(HBITMAP bitmap, HDC memdc, float width, float height, bool is_shared);
+
+        ImageSub(const ImageSub& other) noexcept = delete;
+
+        ImageSub(ImageSub&& other) noexcept;
+
+        auto operator=(ImageSub&& other) noexcept -> ImageSub&;
+
+        auto operator=(const ImageSub&) noexcept -> ImageSub& = delete;
+
+        auto Add(XSub::ImageSubEntry* sub) noexcept -> void;
+
+        auto GetSubEntries() noexcept -> std::vector<XSub::ImageSubEntry*>&;
+
+        auto Height() const noexcept -> float;
+
+        auto Width() const noexcept -> float;
+
+        auto GetBitmap() const noexcept -> const HBITMAP&;
+
+        auto GetMemDC() const noexcept -> const HDC&;
+
+        auto GetAspectRatio() const noexcept -> const float&;
+
+        auto IsEmpty() const noexcept -> bool;
+
+        auto IsValid() const noexcept -> bool;
+
+    };
+
+    class ImageSubFile: public ImageSub
+    {
+        std::span<uint8_t> m_RawEntries{};
+        XsubHeader* m_Header{};
+
+    public:
+
+        ~ImageSubFile() noexcept override;
+
+        ImageSubFile(std::wstring_view path) noexcept;
+
+        ImageSubFile(ImageSubFile&& other) noexcept;
+
+        ImageSubFile(const ImageSubFile& other) noexcept = delete;
+
+        auto operator=(ImageSubFile&& other) noexcept -> ImageSubFile&;
+
+        auto operator=(const ImageSubFile&) noexcept -> ImageSubFile& = delete;
+
+        auto GetRawEntries() const noexcept -> const std::span<uint8_t>&;
+
+        auto GetHeader() const noexcept -> const XsubHeader*;
+
+    };
+
+    class ImageSubPlayer: public PlayerWindow
+    {
+
+        XSub::GDI::ImageSub* m_CurrentImageSub{};
+        XSub::ImageSubEntry* m_LastImageSubEntry{};
+        bool m_CurrentImageSubIsShared{};
+        bool m_IsPlaying{};
+
+        BLENDFUNCTION mutable m_Blend
+        {
+            .BlendOp{ AC_SRC_OVER },
+            .BlendFlags{ 0 },
+            .SourceConstantAlpha{ 0 },
+            .AlphaFormat{ AC_SRC_ALPHA }
+        };
+
+        auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
+
+    public:
+
+        ImageSubPlayer(HWND parent, HINSTANCE hInstance = ::GetModuleHandleW(NULL)) noexcept;
+
+        auto GetCurrentImageSub(bool shared = false) noexcept -> ImageSub*;
+
+        auto Load(std::wstring_view path) noexcept -> bool;
+
+        auto SetCurrentImageSub(XSub::GDI::ImageSub* sub) noexcept -> void;
+
+        auto GetLastImageSubEntry() const noexcept -> const XSub::ImageSubEntry*;
+
+        auto Update(float time) noexcept -> void;
+
+        auto Play(float start = 0.f, bool as_thread = true) noexcept -> void;
+
+        auto Stop() noexcept -> void;
+    };
+}

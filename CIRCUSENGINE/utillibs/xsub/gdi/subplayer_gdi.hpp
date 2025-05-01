@@ -1,40 +1,12 @@
 #pragma once
-#include <windows.h>
-#include <gdiplus.h>
 #include <optional>
 #include <mutex>
 #include <atomic>
 #include <functional>
+#include <xusb_basic_gdi.hpp>
 
 namespace XSub::GDI
 {
-    class GdiplusStartup
-    {
-        Gdiplus::GdiplusStartupInput gdiplusStartupInput{};
-        ULONG_PTR gdiplusToken{};
-    public:
-
-        GdiplusStartup()
-        {
-            Gdiplus::GdiplusStartup
-            (
-                &this->gdiplusToken,
-                &this->gdiplusStartupInput,
-                NULL
-            );
-        }
-
-        ~GdiplusStartup()
-        {
-            Gdiplus::GdiplusShutdown
-            (
-                this->gdiplusToken
-            );
-        }
-
-        static auto AutoGdiplusStartup(void) -> void;
-    };
-
     class PlayerWindow
     {
         static auto SafeCheckInstanceCount(bool add, std::function<void(size_t)> callback = nullptr) -> void;
@@ -55,6 +27,7 @@ namespace XSub::GDI
             .SourceConstantAlpha = 0x00,
             .AlphaFormat = AC_SRC_ALPHA,
         };
+
         std::mutex mutable m_Mutex{};
         bool mutable m_IsMessageLoop{};
 
@@ -68,7 +41,7 @@ namespace XSub::GDI
 
         static inline const wchar_t ClassName[] { L"XSub_GDI_PlayerWindow_Clazz" };
 
-        ~PlayerWindow() noexcept;
+        virtual ~PlayerWindow() noexcept;
 
         PlayerWindow(const PlayerWindow&) noexcept = delete;
 
@@ -104,6 +77,10 @@ namespace XSub::GDI
 
         auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
 
-        auto MessageLoop(bool loop) noexcept -> void;
+        auto Clear(Gdiplus::Color color, bool update_layer = true) noexcept -> void;
+
+        auto Clear(uint32_t color = NULL, bool update_layer = true) noexcept -> void;
+
+        auto MessageLoop(bool loop, bool as_thread = true) noexcept -> void;
     };
 }

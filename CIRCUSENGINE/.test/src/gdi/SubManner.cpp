@@ -1,3 +1,4 @@
+#include "imgsub_gdi.hpp"
 #include <iostream>
 #include <SubManner.hpp>
 #include <console.hpp>
@@ -57,7 +58,7 @@ namespace Sub {
     }
 }
 
-namespace XSub::GDI {
+namespace XSub2::GDI2 {
 
     ImageSub::ImageSub(std::wstring_view path) noexcept : m_MemDC{ ::CreateCompatibleDC(NULL) }
     {
@@ -84,18 +85,18 @@ namespace XSub::GDI {
         STATSTG stat{};
         {
             HRESULT stat_hr{ stream->Stat(&stat, STATFLAG_NONAME) };
-            if (FAILED(stat_hr) || stat.cbSize.QuadPart < sizeof(XSub::Header))
+            if (FAILED(stat_hr) || stat.cbSize.QuadPart < sizeof(XSub2::Header))
             {
                 stream->Release();
                 return;
             }
         }
 
-        this->m_Header = { new XSub::Header };
+        this->m_Header = { new XSub2::Header };
         {
             ULONG bytes_read{};
-            stream->Read(this->m_Header, sizeof(XSub::Header), &bytes_read);
-            if (bytes_read != sizeof(XSub::Header))
+            stream->Read(this->m_Header, sizeof(XSub2::Header), &bytes_read);
+            if (bytes_read != sizeof(XSub2::Header))
             {
                 stream->Release();
                 return;
@@ -170,12 +171,12 @@ namespace XSub::GDI {
             auto entries_data{ this->m_RawEntries.data() };
             for (size_t i{ 0 }; i < this->m_RawEntries.size();)
             {
-                auto entry{ reinterpret_cast<XSub::ImageEntry*>(entries_data + i)};
+                auto entry{ reinterpret_cast<XSub2::ImageEntry*>(entries_data + i)};
                 this->m_SubEntries.push_back(entry);
                 auto size
                 {
-                    entry->count * sizeof(XSub::ImageEntry::Entry) +
-                    sizeof(XSub::ImageEntry)
+                    entry->count * sizeof(XSub2::ImageEntry::Entry) +
+                    sizeof(XSub2::ImageEntry)
                 };
                 i = { i + size };
             }
@@ -184,7 +185,7 @@ namespace XSub::GDI {
             move.QuadPart =
             {
                 static_cast<decltype(LARGE_INTEGER::QuadPart)>
-                (this->m_Header->size + sizeof(XSub::Header))
+                (this->m_Header->size + sizeof(XSub2::Header))
             };
             auto seek_hr{ stream->Seek(move, STREAM_SEEK_SET, &position) };
             if (FAILED(seek_hr))
