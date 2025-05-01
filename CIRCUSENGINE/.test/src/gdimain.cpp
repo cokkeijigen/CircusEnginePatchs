@@ -244,14 +244,14 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             );*/
             if (XSubPlayerWindowGDI != nullptr)
             {
-                console::fmt::write("最大化？\n");
+                //console::fmt::write("最大化？\n");
                 XSubPlayerWindowGDI->Show();
                 XSubPlayerWindowGDI->SyncToParentWindow(true);
             }
         }
         else if (wParam == SIZE_MINIMIZED)
         {
-            console::fmt::write("最小化？\n");
+            //console::fmt::write("最小化？\n");
             XSubPlayerWindowGDI->Hide();
         }
         else

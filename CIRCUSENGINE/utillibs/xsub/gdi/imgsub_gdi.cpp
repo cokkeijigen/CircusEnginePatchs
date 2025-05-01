@@ -1,8 +1,8 @@
 #include <iostream>
+#include <chrono>
 #include <thread>
 #include <shlwapi.h>
 #include <imgsub_gdi.hpp>
-#include <chilitimer.hpp>
 #pragma comment(lib, "shlwapi.lib")
 
 namespace XSub::GDI
@@ -466,7 +466,7 @@ namespace XSub::GDI
             scale_y = { height / sub->m_Height };
         }
 
-        Gdiplus::Graphics(this->m_MemDC).Clear(Gdiplus::Color(0, 0, 0, 0));
+        Gdiplus::Graphics(this->m_MemDC).Clear(Gdiplus::Color(NULL));
 
         size_t count{ 0 };
         for (const auto& imgsub : sub->m_SubEntries)
@@ -677,7 +677,10 @@ namespace XSub::GDI
                 this->m_IsPlaying = { true };
                 this->m_Mutex.unlock();
 
-                utils::xtime::chilitimer chilitimer{};
+                std::chrono::steady_clock::time_point begin_time_point
+                {
+                    std::chrono::steady_clock::now()
+                };
                 while(true)
                 {
                     {
@@ -691,7 +694,12 @@ namespace XSub::GDI
                             break;
                         }
                     }
-                    auto time{ chilitimer.peek() + start };
+                    std::chrono::duration<float> time_point
+                    {
+                        std::chrono::steady_clock::now()
+                        - begin_time_point
+                    };
+                    auto time{ time_point.count() + start };
                     this->Update(time);
                     ::Sleep(1);
                 }
