@@ -313,7 +313,6 @@ namespace XSub::GDI
         }
         return { *this };
     }
-
     ImageSubFile::~ImageSubFile() noexcept 
     {
         this->m_SubEntries.clear();
@@ -356,12 +355,19 @@ namespace XSub::GDI
         return { PlayerWindow::SafeDraw(do_draw) };
     }
 
+    ImageSubPlayer::~ImageSubPlayer() noexcept
+    {
+        this->Stop();
+        this->UnLoad();
+        PlayerWindow::~PlayerWindow();
+    }
+
     ImageSubPlayer::ImageSubPlayer(HWND parent, HINSTANCE hInstance) noexcept
         : PlayerWindow{ parent, hInstance }
     {
     }
 
-    auto ImageSubPlayer::GetCurrentImageSub(bool shared) noexcept -> ImageSub*
+    auto ImageSubPlayer::GetCurrentImageSub(bool shared) noexcept -> const ImageSub*
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
         if (!this->m_CurrentImageSubIsShared)
@@ -374,23 +380,30 @@ namespace XSub::GDI
     auto ImageSubPlayer::Load(std::wstring_view path) noexcept -> bool
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
-        if (!this->m_CurrentImageSubIsShared)
-        {
-            if (this->m_CurrentImageSub != nullptr)
-            {
-                delete this->m_CurrentImageSub;
-                this->m_CurrentImageSub = nullptr;
-            }
-        }
+        this->UnLoad(false);
         this->m_LastImageSubEntry = { nullptr };
         this->m_CurrentImageSubIsShared = { false };
         this->m_CurrentImageSub = { new ImageSubFile{ path } };
         return { this->m_CurrentImageSub->IsValid() };
     }
 
-    auto ImageSubPlayer::SetCurrentImageSub(XSub::GDI::ImageSub* sub) noexcept -> void
+    auto ImageSubPlayer::Load(const XSub::GDI::ImageSub* sub) noexcept -> void
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->UnLoad(false);
+        this->m_LastImageSubEntry = { nullptr };
+        this->m_CurrentImageSubIsShared = { true };
+        this->m_CurrentImageSub = { sub };
+    }
+
+    auto ImageSubPlayer::Load(const XSub::GDI::ImageSub& sub) noexcept -> void
+    {
+        this->Load(&sub);
+    }
+
+    auto ImageSubPlayer::UnLoad(bool lock) noexcept  -> void
+    {
+        if (lock) this->m_Mutex.lock();
         if (!this->m_CurrentImageSubIsShared)
         {
             if (this->m_CurrentImageSub != nullptr)
@@ -399,9 +412,12 @@ namespace XSub::GDI
                 this->m_CurrentImageSub = nullptr;
             }
         }
-        this->m_LastImageSubEntry = { nullptr };
-        this->m_CurrentImageSubIsShared = { true };
-        this->m_CurrentImageSub = { sub };
+        if (lock) this->m_Mutex.unlock();
+    }
+
+    auto ImageSubPlayer::UnLoad() noexcept -> void
+    {
+        this->UnLoad(true);
     }
 
     auto ImageSubPlayer::GetLastImageSubEntry() const noexcept -> const XSub::ImageSubEntry*
@@ -666,12 +682,20 @@ namespace XSub::GDI
                 {
                     {
                         std::lock_guard<std::mutex> lock(this->m_Mutex);
-                        if (!this->m_IsPlaying) { break; }
+                        if (this->m_CurrentImageSub == nullptr)
+                        {
+                            this->m_IsPlaying = { false };
+                        }
+                        if (!this->m_IsPlaying)
+                        {
+                            break;
+                        }
                     }
                     auto time{ chilitimer.peek() + start };
                     this->Update(time);
                     ::Sleep(1);
                 }
+                this->Clear();
             }
         };
 
@@ -684,21 +708,27 @@ namespace XSub::GDI
             run_play();
         }
     }
-
-    auto ImageSubPlayer::Stop() noexcept -> void
+    
+    auto ImageSubPlayer::Stop(bool await_for_last) noexcept -> void
     {
         this->m_Mutex.lock();
         if (this->m_IsPlaying)
         {
-            this->m_IsPlaying = { false };
             this->m_Mutex.unlock();
-            this->Clear();
+            if(await_for_last) while (true)
+            {
+                std::lock_guard<std::mutex> lock(this->m_Mutex);
+                if (this->m_LastImageSubEntry == nullptr)
+                {
+                    break;
+                }
+            }
+            this->m_IsPlaying = { false };
         }
         else
         {
             this->m_Mutex.unlock();
         }
     }
-
 
 }

@@ -48,22 +48,24 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                          _PROJECT_WORKSPACE
                         L"/dc3wy/sub/271.xsub"
                     };*/
-                    XSubPlayerWindowGDI->Load
-                    (
-                        {
-                             _PROJECT_WORKSPACE
-                             L"/dc3wy/sub/271.xsub"
-                        }
-                    );
-                    //XSubPlayerWindowGDI->Play(23.8f, true);
-                    //::Sleep(10000);
-                    //XSubPlayerWindowGDI->Stop();
-                    while (true)
+
+                    XSub::GDI::ImageSubFile SubFile
+                    {
+                         _PROJECT_WORKSPACE
+                         L"/dc3wy/sub/271.xsub"
+                    };
+                    XSubPlayerWindowGDI->Load(SubFile);
+                    XSubPlayerWindowGDI->Play(23.8f, true);
+                    ::Sleep(10000);
+                    XSubPlayerWindowGDI->Stop(true);
+                    XSubPlayerWindowGDI->UnLoad();
+
+                    /*while (true)
                     {
                         auto time{ chilitimer.peek() + 23.8f };
                         XSubPlayerWindowGDI->Update(time);
                         ::Sleep(1);
-                    }
+                    }*/
                 }
             ).detach();
         }

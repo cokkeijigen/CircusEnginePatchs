@@ -90,8 +90,8 @@ namespace XSub::GDI
     class ImageSubPlayer: public PlayerWindow
     {
 
-        XSub::GDI::ImageSub* m_CurrentImageSub{};
-        XSub::ImageSubEntry* m_LastImageSubEntry{};
+        const XSub::GDI::ImageSub* m_CurrentImageSub{};
+        const XSub::ImageSubEntry* m_LastImageSubEntry{};
         bool m_CurrentImageSubIsShared{};
         bool m_IsPlaying{};
 
@@ -105,15 +105,22 @@ namespace XSub::GDI
 
         auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
 
+        auto UnLoad(bool lock) noexcept -> void;
     public:
+
+        ~ImageSubPlayer() noexcept override;
 
         ImageSubPlayer(HWND parent, HINSTANCE hInstance = ::GetModuleHandleW(NULL)) noexcept;
 
-        auto GetCurrentImageSub(bool shared = false) noexcept -> ImageSub*;
+        auto GetCurrentImageSub(bool shared = false) noexcept -> const ImageSub*;
 
         auto Load(std::wstring_view path) noexcept -> bool;
 
-        auto SetCurrentImageSub(XSub::GDI::ImageSub* sub) noexcept -> void;
+        auto Load(const XSub::GDI::ImageSub* sub) noexcept -> void;
+
+        auto Load(const XSub::GDI::ImageSub& sub) noexcept -> void;
+
+        auto UnLoad() noexcept -> void;
 
         auto GetLastImageSubEntry() const noexcept -> const XSub::ImageSubEntry*;
 
@@ -121,6 +128,6 @@ namespace XSub::GDI
 
         auto Play(float start = 0.f, bool as_thread = true) noexcept -> void;
 
-        auto Stop() noexcept -> void;
+        auto Stop(bool await_for_last = false) noexcept -> void;
     };
 }
