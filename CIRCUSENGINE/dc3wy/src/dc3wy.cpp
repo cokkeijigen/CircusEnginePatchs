@@ -191,12 +191,12 @@ namespace DC3WY {
             return { false };
         }
 
-        std::string path{ ".\\cn_Data" };
+        std::string path{ ".\\cn_Data\\" };
 
         auto pos{ file.rfind("\\") };
         if (pos != std::string_view::npos)
         {
-            path.append(file.substr(pos)).append(".xsub");
+            path.append(file.substr(pos + 1)).append(".xsub");
         }
         else
         {
@@ -310,9 +310,9 @@ namespace DC3WY {
                             (name[5] == 'p' || name[5] == 'P') &&
                             (name[6] == 'g' || name[6] == 'G')
                         };
-                        if (is_gop)
+                        if (is_gop) // gop.mpg
                         {
-
+                            DC3WY::LoadXSubAndPlayIfExist("274", false);
                         }
                         else if(name.size() == 9)
                         {
@@ -325,17 +325,20 @@ namespace DC3WY {
                                 (name[6] == 'p' || name[6] == 'P') &&
                                 (name[7] == 'g' || name[7] == 'G')
                             };
-                            if (name[3] == '1')
+                            if (is_op_0_mpg)
                             {
-
-                            }
-                            else if (name[3] == '2')
-                            {
-
+                                if (name[3] == '1') // op01.mpg
+                                {
+                                    DC3WY::LoadXSubAndPlayIfExist("270", false);
+                                }
+                                else if (name[3] == '2') // op02.mpg
+                                {
+                                    DC3WY::LoadXSubAndPlayIfExist("272", false);
+                                }
                             }
                         }
                     }
-                };
+                }
             }
 
             console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data());
