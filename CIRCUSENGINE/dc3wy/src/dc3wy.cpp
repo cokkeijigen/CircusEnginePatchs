@@ -20,6 +20,11 @@ namespace DC3WY {
     XSub::GDI::ImageSubPlayer* DC3WY::SubPlayer{};
     static IDirectSoundBuffer* CurrentPlayingBuffer{};
 
+    static auto EnableBacklogAllIconEx(HWND hWnd, bool append) -> void
+    {
+
+    }
+
     auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
         if (uMsg == WM_CREATE) 
@@ -52,6 +57,14 @@ namespace DC3WY {
                 {
                     new XSub::GDI::ImageSubPlayer{ hWnd }
                 };
+
+                DC3WY::SubPlayer->SetDefualtPoint
+                (
+                    XSub::Point
+                    {
+                        .align{ XSub::Align::Center },
+                    }
+                );
                 //DC3WY::SubPlayer->MessageLoop(true);
                 //std::thread
                 //{
@@ -298,7 +311,7 @@ namespace DC3WY {
                 if (pos != std::string_view::npos)
                 {
                     auto name{ current_file_name.substr(pos + 1) };
-                    if (name.size() >= 8)
+                    if (name.size() >= 7)
                     {
                         auto is_gop
                         {
@@ -314,7 +327,7 @@ namespace DC3WY {
                         {
                             DC3WY::LoadXSubAndPlayIfExist("274", false);
                         }
-                        else if(name.size() == 9)
+                        else if(name.size() == 8)
                         {
                             auto is_op_0_mpg
                             {
@@ -343,13 +356,17 @@ namespace DC3WY {
 
             console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data());
         }
-
         auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
 
         if (DC3WY::SubPlayer != nullptr)
         {
             auto is_load { DC3WY::SubPlayer->IsLoad() };
-            if (is_load) { DC3WY::SubPlayer->Play(); };
+            if (is_load)
+            {
+                DC3WY::SubPlayer->UseDefualtAlign(true);
+                DC3WY::SubPlayer->UseDefualtHorizontal();
+                DC3WY::SubPlayer->Play();
+            };
         }
         return { result };
     }
@@ -357,8 +374,14 @@ namespace DC3WY {
 
     auto DC3WY::ComStopVideo_Hook(void) -> int32_t
     {
+        if (DC3WY::SubPlayer != nullptr)
+        {
+            DC3WY::SubPlayer->Stop();
+            DC3WY::SubPlayer->UnLoad();
+            DC3WY::SubPlayer->UnuseDefualtPoint();
+        }
         console::fmt::write("[DC3WY::ComStopVideo]\n");
-        auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
+        auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
         return { result };
     }
 

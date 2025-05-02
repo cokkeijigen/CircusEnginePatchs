@@ -590,7 +590,35 @@ namespace XSub::GDI
                         )
                     };
 
-                    if (ety.point.align & Align::Right)
+                    XSub::Point point { ety.point };
+
+
+                    if (this->m_DefaultPointFlag & 0x00FF0000)
+                    {
+                        if (this->m_DefaultPointFlag & 0xFF000000)
+                        {
+                            point.align =
+                            {
+                                point.align |
+                                this->m_DefaultPoint.align
+                            };
+                        }
+                        else
+                        {
+                            point.align = { this->m_DefaultPoint.align };
+                        }
+                    }
+                    if (this->m_DefaultPointFlag & 0x0000FF00)
+                    {
+                        point.vertical = { this->m_DefaultPoint.vertical };
+                    }
+                    if (this->m_DefaultPointFlag & 0x000000FF)
+                    {
+                        point.horizontal = { this->m_DefaultPoint.horizontal };
+                    }
+
+
+                    if (point.align & Align::Right)
                     {
                         x =
                         {
@@ -605,7 +633,7 @@ namespace XSub::GDI
                             )
                         };
                     }
-                    else if (ety.point.align & Align::Center)
+                    else if (point.align & Align::Center)
                     {
                         x =
                         {
@@ -631,7 +659,7 @@ namespace XSub::GDI
                         };
                     }
 
-                    if (ety.point.align & Align::Bottom)
+                    if (point.align & Align::Bottom)
                     {
                         y =
                         {
@@ -647,7 +675,7 @@ namespace XSub::GDI
                         };
 
                     }
-                    else if (ety.point.align & Align::Middle)
+                    else if (point.align & Align::Middle)
                     {
                         y =
                         {
@@ -865,10 +893,33 @@ namespace XSub::GDI
         this->m_DefaultPoint.horizontal = { horizontal };
     }
 
-    auto ImageSubPlayer::UseDefualtPoint() noexcept -> void
+    auto ImageSubPlayer::UseDefualtPoint(bool mix_mode) noexcept -> void
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
-        this->m_DefaultPointFlag = { -1 };
+        this->m_DefaultPointFlag =
+        {
+            mix_mode ? 0xFFFFFFFFu : 0x00FFFFFFu
+        };
+    }
+
+    auto ImageSubPlayer::UseDefualtAlign(bool mix_mode) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        auto flag{ reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag) };
+        if (mix_mode) { flag[3] = 0xFF; }
+        flag[2] = { 0xFF };
+    }
+
+    auto ImageSubPlayer::UseDefualtVertical() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag)[1] = 0xFF;
+    }
+
+    auto ImageSubPlayer::UseDefualtHorizontal() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag)[0] = 0xFF;
     }
 
     auto ImageSubPlayer::UnuseDefualtPoint() noexcept -> void
@@ -877,4 +928,21 @@ namespace XSub::GDI
         this->m_DefaultPointFlag = { NULL };
     }
 
+    auto ImageSubPlayer::UnuseDefualtAlign() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag)[2] = 0x00;
+    }
+
+    auto ImageSubPlayer::UnuseDefualtVertical() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag)[1] = 0x00;
+    }
+
+    auto ImageSubPlayer::UnuseDefualtHorizontal() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        reinterpret_cast<uint8_t*>(&this->m_DefaultPointFlag)[0] = 0x00;
+    }
 }

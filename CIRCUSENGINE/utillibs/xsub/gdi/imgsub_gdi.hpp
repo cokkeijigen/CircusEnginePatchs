@@ -100,7 +100,7 @@ namespace XSub::GDI
         bool m_CurrentImageSubIsShared{};
         bool m_IsPlaying{};
 
-        int32_t m_DefaultPointFlag{};
+        uint32_t m_DefaultPointFlag{};
         XSub::Point m_DefaultPoint{};
         BLENDFUNCTION mutable m_Blend
         {
@@ -153,9 +153,9 @@ namespace XSub::GDI
 
         auto SetDefualtHorizontal(uint16_t horizontal) noexcept -> void;
 
-        auto UseDefualtPoint() noexcept -> void;
+        auto UseDefualtPoint(bool mix_mode = false) noexcept -> void;
 
-        auto UseDefualtAlign() noexcept -> void;
+        auto UseDefualtAlign(bool mix_mode = false) noexcept -> void;
 
         auto UseDefualtVertical() noexcept -> void;
 
