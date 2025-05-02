@@ -404,7 +404,7 @@ namespace DC3WY {
         __asm
         {
             sub esp, 0x04
-            mov eax, dword ptr ss:[esp+0x04] // ret addr
+            mov eax, dword ptr ss:[esp+0x04]  // ret addr
             mov dword ptr ss:[esp], eax
             mov eax, dword ptr ss:[esp+0x130] // file name
             mov dword ptr ss:[esp+0x04], eax
