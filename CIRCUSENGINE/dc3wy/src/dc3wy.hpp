@@ -34,7 +34,7 @@ namespace DC3WY
     {
         L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
         L"仅供学习交流使用，禁止一切直播录播和商用行为\n\n"
-        L"补丁原代码已开源至GitHub\n\n"
+        L"补丁源代码已开源至GitHub\n\n"
         L"https://github.com/cokkeijigen/dc3_cn"
     };
 
