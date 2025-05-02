@@ -728,10 +728,6 @@ namespace XSub::GDI
             {
                 this->m_Mutex.lock();
                 this->m_IsPlaying = { true };
-                if (this->m_OnPlay != nullptr)
-                {
-                    this->m_OnPlay();
-                }
                 this->m_Mutex.unlock();
                 std::chrono::steady_clock::time_point begin_time_point
                 {
@@ -793,10 +789,6 @@ namespace XSub::GDI
             {
                 this->m_Mutex.lock();
                 this->m_IsPlaying = { true };
-                if (this->m_OnPlay != nullptr)
-                {
-                    this->m_OnPlay();
-                }
                 this->m_Mutex.unlock();
                 while (true)
                 {
@@ -842,10 +834,6 @@ namespace XSub::GDI
                 }
             }
             this->m_IsPlaying = { false };
-            if (this->m_OnStop != nullptr)
-            {
-                this->m_OnStop();
-            }
         }
         else
         {
@@ -889,15 +877,4 @@ namespace XSub::GDI
         this->m_DefaultPointFlag = { NULL };
     }
 
-    auto ImageSubPlayer::OnPlay(std::function<void(void)> callback) noexcept -> void
-    {
-        std::lock_guard<std::mutex> lock(this->m_Mutex);
-        this->m_OnPlay = { callback };
-    }
-
-    auto ImageSubPlayer::OnStop(std::function<void(void)> callback) noexcept -> void
-    {
-        std::lock_guard<std::mutex> lock(this->m_Mutex);
-        this->m_OnStop = { callback };
-    }
 }
