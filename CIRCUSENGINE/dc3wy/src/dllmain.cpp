@@ -137,7 +137,7 @@ namespace DC3WY
                 return { result };
             }
         }
-        return Patch::Hooker::Call<SendMessageA>(hWnd, uMsg, wParam, lParam);
+        return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
     }
 
     static auto INIT_ALL_PATCH(void) -> void

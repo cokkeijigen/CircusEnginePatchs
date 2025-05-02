@@ -98,8 +98,8 @@ namespace DC3WY {
                 }
                 auto mii = MENUITEMINFO
                 {
-                   .cbSize = sizeof(MENUITEMINFO),
-                   .fMask = MIIM_STATE
+                   .cbSize{ sizeof(MENUITEMINFO) },
+                   .fMask{ MIIM_STATE }
                 };
                 ::GetMenuItemInfoW(SystemMenu, 0x1919810, FALSE, &mii);
                 ::ModifyMenuW
