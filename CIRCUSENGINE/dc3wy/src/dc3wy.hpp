@@ -26,7 +26,7 @@ namespace DC3WY
 
 	static constexpr inline wchar_t TitleName[]
 	{
-		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Ver.1.00"
+		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
         L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
 	};
 
