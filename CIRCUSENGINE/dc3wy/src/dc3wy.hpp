@@ -24,8 +24,6 @@ namespace DC3WY
 
     extern Utils::FontManager FontManager;
 
-    extern XSub::GDI::ImageSubPlayer* SubPlayer;
-
 	static constexpr inline wchar_t TitleName[]
 	{
 		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Ver.1.00"
