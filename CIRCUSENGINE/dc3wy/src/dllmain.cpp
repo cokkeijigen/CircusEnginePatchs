@@ -15,16 +15,22 @@ namespace DC3WY
             DWORD attr { ::GetFileAttributesW(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
-                if (path.ends_with(L".mes"))
-                {
-                    console::fmt::write<console::txt::dark_yellow>(L"[LOAD] %s\n", path.substr(pos + 1).data());
-                }
+                DEBUG_ONLY
+                ({
+                    if (path.ends_with(L".mes"))
+                    {
+                        console::fmt::write<console::txt::dark_yellow>(L"[LOAD] %s\n", path.substr(pos + 1).data());
+                    }
+                })
                 return new_path;
             }
-            if (path.ends_with(L".mes"))
-            {
-                console::fmt::write(L"[LOAD] %s\n", path.substr(pos + 1).data());
-            }
+            DEBUG_ONLY
+            ({
+                if (path.ends_with(L".mes"))
+                {
+                    console::fmt::write(L"[LOAD] %s\n", path.substr(pos + 1).data());
+                }
+            })
         }
         return {};
     }
@@ -39,16 +45,27 @@ namespace DC3WY
             DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
             if (attr != INVALID_FILE_ATTRIBUTES)
             {
-                if (path.ends_with(".mes"))
-                {
-                    console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>("[LOAD] %s\n", path.substr(pos + 1).data());
-                }
+                DEBUG_ONLY
+                ({
+                    if (path.ends_with(".mes"))
+                    {
+                        console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>
+                        (
+                            "[LOAD] %s\n", path.substr(pos + 1).data()
+                        );
+                    }
+                })
                 return new_path;
             }
-            if (path.ends_with(".mes"))
-            {
-                console::fmt::write("[LOAD] %s\n", path.substr(pos + 1).data());
-            }
+
+            DEBUG_ONLY
+            ({
+                if (path.ends_with(".mes"))
+                {
+                    console::fmt::write("[LOAD] %s\n", path.substr(pos + 1).data());
+                }
+            })
+           
         }
         return {};
     }
@@ -101,12 +118,34 @@ namespace DC3WY
         return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
     }
 
+    static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+    {
+        if (uMsg == 0xCu && wParam == 0x104u)
+        {
+            auto ctr_id{ ::GetDlgCtrlID(hWnd) };
+            if (ctr_id == 1005)
+            {
+                auto result
+                {
+                    ::SendMessageW
+                    (
+                        { hWnd }, { 0x0000000Cu },
+                        { sizeof(DC3WY::PatchDesc) / sizeof(wchar_t) },
+                        { reinterpret_cast<LPARAM>(DC3WY::PatchDesc) }
+                    )
+                };
+                return { result };
+            }
+        }
+        return Patch::Hooker::Call<SendMessageA>(hWnd, uMsg, wParam, lParam);
+    }
+
     static auto INIT_ALL_PATCH(void) -> void
     {
-        console::make("DEBUG LOG FOR DC3WY");
+        DEBUG_ONLY(console::make("DEBUG LOG FOR DC3WY"));
         Patch::Hooker::Begin();
         Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
-        //Patch::Hooker::Add<DC3WY::CreateFileW>(::CreateFileW);
+        Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA);
         Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
         Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
         Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx);

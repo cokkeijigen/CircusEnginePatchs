@@ -176,7 +176,7 @@ namespace DC3WY {
                 }
 
                 auto size{ DC3WY::SubPlayer->GetCurrentSize() };
-                console::fmt::write("Size{ .cx=%d .cy=%d }\n", size.cx, size.cy);
+                DEBUG_ONLY(console::fmt::write("Size{ .cx=%d .cy=%d }\n", size.cx, size.cy));
             }
         }
         else if (uMsg == WM_SIZING)
@@ -211,10 +211,13 @@ namespace DC3WY {
         bool is_load { DC3WY::SubPlayer->Load(path) };
         if (is_load)
         {
-            console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>
-            (
-                "[LOAD] %s\n", path.data()
-            );
+            DEBUG_ONLY
+            ({
+                console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>
+                (
+                    "[LOAD] %s\n", path.data()
+                );
+            })
             if (play) { DC3WY::SubPlayer->Play(); }
         }
         return { is_load };
@@ -346,7 +349,7 @@ namespace DC3WY {
                 }
             }
 
-            console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data());
+            DEBUG_ONLY(console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data()));
         }
         auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
 
@@ -365,6 +368,7 @@ namespace DC3WY {
         {
             DC3WY::FontManager.GUI()->HideWindow();
         }
+        
         return { result };
     }
 
@@ -376,7 +380,7 @@ namespace DC3WY {
             DC3WY::SubPlayer->UnLoad();
             DC3WY::SubPlayer->UnuseDefualtPoint();
         }
-        console::fmt::write("[DC3WY::ComStopVideo]\n");
+        DEBUG_ONLY(console::fmt::write("[DC3WY::ComStopVideo]\n"));
         auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
         return { result };
     }

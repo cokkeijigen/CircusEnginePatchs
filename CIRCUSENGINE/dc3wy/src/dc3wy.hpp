@@ -28,8 +28,17 @@ namespace DC3WY
 
 	static constexpr inline wchar_t TitleName[]
 	{
-		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Beta.0.8" 
+		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Ver.1.00"
+        L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
 	};
+
+    static constexpr inline wchar_t PatchDesc[]
+    {
+        L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
+        L"仅供学习交流使用，禁止一切直播录播和商用行为\n\n"
+        L"补丁原代码已开源至GitHub\n\n"
+        L"https://github.com/cokkeijigen/dc3_cn"
+    };
 
 	static inline const char* ChapterTitles[][2]
 	{
@@ -59,7 +68,7 @@ namespace DC3WY
         { "WY_8_0821_C1_SMM", "提供资料" },
         { "WY_8_0819_B1_SMM", "报告与惊愕与祝福" },
         { "WY_8_0819_A1_SMM", "和恋人迎来的早晨" },
-        { "WY_8_0818_E1_SMM", "和李初体验" },
+        { "WY_8_0818_E1_SMM", "和李的初体验" },
         { "WY_8_0818_D1_SMM", "小说" },
         { "WY_8_0804_F3_SMM", "前世之事" },
         { "WY_8_0804_F2_SMM", "召唤外星人的仪式" },
