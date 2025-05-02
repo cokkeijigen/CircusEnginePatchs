@@ -29,6 +29,11 @@ namespace XSub
         );
     }
 
+    inline auto operator|=(Align& a, Align b) -> Align&
+    {
+        return { a = a | b };
+    }
+
     #pragma pack(push, 1)
     struct Point
     {
