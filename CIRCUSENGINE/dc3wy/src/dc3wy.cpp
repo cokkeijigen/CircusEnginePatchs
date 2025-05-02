@@ -150,8 +150,7 @@ namespace DC3WY {
             {
                 auto x{ static_cast<int>(LOWORD(lParam)) };
                 auto y{ static_cast<int>(HIWORD(lParam)) };
-                DC3WY::SubPlayer->SyncToParentWindow(true);
-                DC3WY::SubPlayer->SetPosition(x, y);
+                DC3WY::SubPlayer->SetPosition(x, y, true);
             }
         }
         else if (uMsg == WM_SIZE)
