@@ -70,7 +70,6 @@ namespace DC3WY
         std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
         return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
     }
-
     
     static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
     {

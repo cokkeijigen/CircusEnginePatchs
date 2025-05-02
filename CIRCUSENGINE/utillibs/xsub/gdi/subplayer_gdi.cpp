@@ -239,9 +239,15 @@ namespace XSub::GDI
         return { result };
     }
 
+    auto PlayerWindow::GetCurrentSize() const noexcept -> SIZE
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        return { this->m_Size };
+    }
+
     auto PlayerWindow::Show(UINT delay) noexcept -> bool
     {
-        std::lock_guard<std::mutex> lock();
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
         if (this->m_That != nullptr)
         {
             if (delay > 0)

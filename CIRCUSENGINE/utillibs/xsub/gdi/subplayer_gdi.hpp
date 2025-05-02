@@ -63,6 +63,8 @@ namespace XSub::GDI
 
         auto SetPosition(LONG x, LONG y, bool update = false) noexcept -> bool;
 
+        auto GetCurrentSize() const noexcept -> SIZE;
+
         auto SyncToParentWindow(bool update_layer_bitmap = false, bool force = false) noexcept -> bool;
 
         auto UpdateLayerBitmap(bool force = false) noexcept -> bool;

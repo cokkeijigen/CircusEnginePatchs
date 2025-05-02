@@ -389,7 +389,6 @@ namespace Utils {
 		auto UpdateDisplay(bool state = false) -> FontManagerGUI&;
 		auto UpdateBoxState() -> FontManagerGUI&;
 		auto ShowWindow(bool topMost = false) const -> BOOL;
-		auto HideWindow() const -> BOOL;
 		auto IsFullScreen() const -> bool;
         auto OnChanged() -> void;
 	public:
@@ -412,6 +411,7 @@ namespace Utils {
 		auto Wait() -> FontManagerGUI&;
 		auto IsWindowVisible() -> bool;
 		auto UpdateDisplayState() -> FontManagerGUI&;
+        auto HideWindow() const->BOOL;
 
 		static auto CreatePtr(HWND parent, HFONT hFont, HINSTANCE hInstance = ::GetModuleHandleW(NULL)) -> std::unique_ptr<FontManagerGUI>;
 		static auto CreatePtr(HFONT hFont, HINSTANCE hInstance = ::GetModuleHandleW(NULL)) -> std::unique_ptr<FontManagerGUI>;

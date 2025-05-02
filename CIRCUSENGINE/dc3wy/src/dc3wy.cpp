@@ -20,11 +20,6 @@ namespace DC3WY {
     XSub::GDI::ImageSubPlayer* DC3WY::SubPlayer{};
     static IDirectSoundBuffer* CurrentPlayingBuffer{};
 
-    static auto EnableBacklogAllIconEx(HWND hWnd, bool append) -> void
-    {
-
-    }
-
     auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
         if (uMsg == WM_CREATE) 
@@ -65,30 +60,6 @@ namespace DC3WY {
                         .align{ XSub::Align::Center },
                     }
                 );
-                //DC3WY::SubPlayer->MessageLoop(true);
-                //std::thread
-                //{
-                //    []()
-                //    {
-                //        ::Sleep(1000);
-                //        DC3WY::SubPlayer->Show();
-                //        auto is_load
-                //        {
-                //            DC3WY::SubPlayer->Load(std::string_view{ ".\\cn_Data\\271.xsub"})
-                //        };
-                //        utils::chilitimer chilitimer{};
-                //        DC3WY::SubPlayer->Play
-                //        (
-                //            { false },
-                //            [&chilitimer]() -> float
-                //            {
-                //                return { chilitimer.peek() + 23.8f };
-                //            }
-                //        );
-                //        //console::fmt::write("is_load{ %s }\n", is_load ? "true": "false");
-                //        //DC3WY::SubPlayer->Play(23.8f);
-                //    }
-                //}.detach();
             }
         }
         else if (uMsg == WM_SYSCOMMAND)
@@ -97,6 +68,23 @@ namespace DC3WY {
             {
                 if (DC3WY::FontManager.GUI() != nullptr)
                 {
+                    auto is_op_movie_playing
+                    {
+                        DC3WY::SubPlayer != nullptr &&
+                        SubPlayer->IsPlaying() &&
+                        DC3WY::CurrentPlayingBuffer == nullptr
+                    };
+                    if (is_op_movie_playing)
+                    {
+                        ::MessageBoxW
+                        (
+                            { hWnd },
+                            { L"当前无法更改字体！" },
+                            { L"WARNING" },
+                            { MB_OK }
+                        );
+                        return FALSE;
+                    }
                     DC3WY::FontManager.GUIChooseFont();
                 }
                 return TRUE;
@@ -168,6 +156,7 @@ namespace DC3WY {
         }
         else if (uMsg == WM_SIZE)
         {
+
             if (DC3WY::FontManager.GUI() != nullptr)
             {
                 DC3WY::FontManager.GUIUpdateDisplayState();
@@ -185,6 +174,9 @@ namespace DC3WY {
                     DC3WY::SubPlayer->Show();
                     DC3WY::SubPlayer->SyncToParentWindow(true);
                 }
+
+                auto size{ DC3WY::SubPlayer->GetCurrentSize() };
+                console::fmt::write("Size{ .cx=%d .cy=%d }\n", size.cx, size.cy);
             }
         }
         else if (uMsg == WM_SIZING)
@@ -313,7 +305,7 @@ namespace DC3WY {
                     auto name{ current_file_name.substr(pos + 1) };
                     if (name.size() >= 7)
                     {
-                        auto is_gop
+                        auto is_gop_mpg
                         {
                             (name[0] == 'g' || name[0] == 'G') &&
                             (name[1] == 'o' || name[1] == 'O') &&
@@ -323,7 +315,7 @@ namespace DC3WY {
                             (name[5] == 'p' || name[5] == 'P') &&
                             (name[6] == 'g' || name[6] == 'G')
                         };
-                        if (is_gop) // gop.mpg
+                        if (is_gop_mpg) // gop.mpg
                         {
                             DC3WY::LoadXSubAndPlayIfExist("274", false);
                         }
@@ -368,9 +360,13 @@ namespace DC3WY {
                 DC3WY::SubPlayer->Play();
             };
         }
+
+        if (DC3WY::FontManager.GUI() != nullptr)
+        {
+            DC3WY::FontManager.GUI()->HideWindow();
+        }
         return { result };
     }
-
 
     auto DC3WY::ComStopVideo_Hook(void) -> int32_t
     {
