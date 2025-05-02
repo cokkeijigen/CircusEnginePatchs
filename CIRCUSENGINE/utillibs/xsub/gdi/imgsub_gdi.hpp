@@ -110,6 +110,9 @@ namespace XSub::GDI
             .AlphaFormat{ AC_SRC_ALPHA }
         };
 
+        std::function<void(void)> m_OnPlay{};
+        std::function<void(void)> m_OnStop{};
+
         auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
 
         auto UnLoad(bool lock) noexcept -> void;
@@ -168,6 +171,10 @@ namespace XSub::GDI
         auto UnuseDefualtVertical() noexcept -> void;
 
         auto UnuseDefualtHorizontal() noexcept -> void;
+
+        auto OnPlay(std::function<void(void)> callback) noexcept -> void;
+
+        auto OnStop(std::function<void(void)> callback) noexcept -> void;
 
     };
 }
