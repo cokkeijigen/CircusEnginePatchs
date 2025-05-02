@@ -143,10 +143,10 @@ namespace XSub::GDI
         }
         this->m_Mutex.unlock();
 
-        if (parent != nullptr)
+        /*if (parent != nullptr)
         {
             ::SetForegroundWindow(parent);
-        }
+        }*/
     }
 
     auto PlayerWindow::operator=(PlayerWindow&& other) noexcept -> PlayerWindow&
@@ -317,17 +317,27 @@ namespace XSub::GDI
         {
             const int& width { this->m_Size.cx };
             const int& height{ this->m_Size.cy };
-            static const int captionHeight
+
+            static const int nScreenWidth { ::GetSystemMetrics(SM_CXSCREEN)  };
+            static const int nScreenHeight{ ::GetSystemMetrics(SM_CYSCREEN)  };
+            static const int captionHeight{ ::GetSystemMetrics(SM_CYCAPTION) };
+
+            LONG lStyle{ ::GetWindowLongW(this->m_Parent, GWL_STYLE) };
+            auto is_full_screen = bool
             {
-                ::GetSystemMetrics(SM_CYCAPTION)
+                (lStyle & WS_POPUP) == WS_POPUP &&
+                rect.left <= 0 && rect.top <= 0 &&
+                rect.right  >= nScreenWidth &&
+                rect.bottom >= nScreenHeight
             };
+
             this->m_Point = POINT
             {
                 .x = int{ ((rect.left + rect.right) / 2) - (width / 2) },
                 .y = int
                 {
                     (((rect.top + rect.bottom) / 2) - (height / 2)) +
-                    ((captionHeight + 1) / 2)
+                    (is_full_screen ? 0 : ((captionHeight + 1) / 2))
                 }
             };
             this->m_Mutex.unlock();
@@ -542,6 +552,7 @@ namespace XSub::GDI
                                 break;
                             }
                         }
+                       
                         ::Sleep(1);
                     }
                 }

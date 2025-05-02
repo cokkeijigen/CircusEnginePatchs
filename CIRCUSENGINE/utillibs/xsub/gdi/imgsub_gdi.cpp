@@ -3,7 +3,9 @@
 #include <thread>
 #include <shlwapi.h>
 #include <imgsub_gdi.hpp>
+
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "msimg32.lib")
 
 namespace XSub::GDI
 {
@@ -123,10 +125,6 @@ namespace XSub::GDI
     ImageSubFile::ImageSubFile(std::wstring_view path) noexcept : ImageSub{ true }
     {
         if (path.empty()) { return; }
-        GdiplusStartup::AutoGdiplusStartup();
-
-        this->m_MemDC = { ::CreateCompatibleDC(NULL) };
-        if (this->m_MemDC == nullptr) { return; }
 
         auto stream{ static_cast<IStream*>(nullptr) };
         auto creates_tream_on_file_hr
@@ -142,13 +140,54 @@ namespace XSub::GDI
         {
             return;
         }
+        else
+        {
+            this->Init(stream);
+        }
+        stream->Release();
+    }
+
+    ImageSubFile::ImageSubFile(std::string_view path) noexcept
+    {
+        if (path.empty()) { return; }
+        auto stream{ static_cast<IStream*>(nullptr) };
+        auto creates_tream_on_file_hr
+        {
+            ::SHCreateStreamOnFileA
+            (
+                { path.data() },
+                { STGM_READ },
+                { &stream }
+            )
+        };
+        if (FAILED(creates_tream_on_file_hr) || stream == nullptr)
+        {
+            return;
+        }
+        else
+        {
+            this->Init(stream);
+        }
+        stream->Release();
+    }
+
+    ImageSubFile::ImageSubFile(IStream* steam) noexcept
+    {
+        this->Init(steam);
+    }
+
+    auto ImageSubFile::Init(IStream* stream) noexcept -> void
+    {
+        GdiplusStartup::AutoGdiplusStartup();
+
+        this->m_MemDC = { ::CreateCompatibleDC(NULL) };
+        if (this->m_MemDC == nullptr) { return; }
 
         STATSTG stat{};
         {
             HRESULT stat_hr{ stream->Stat(&stat, STATFLAG_NONAME) };
             if (FAILED(stat_hr) || stat.cbSize.QuadPart < sizeof(XSub::XsubHeader))
             {
-                stream->Release();
                 return;
             }
         }
@@ -159,7 +198,6 @@ namespace XSub::GDI
             stream->Read(this->m_Header, sizeof(XSub::XsubHeader), &bytes_read);
             if (bytes_read != sizeof(XSub::XsubHeader))
             {
-                stream->Release();
                 return;
             }
         }
@@ -174,7 +212,6 @@ namespace XSub::GDI
 
         if (!is_magic)
         {
-            stream->Release();
             return;
         }
 
@@ -188,7 +225,6 @@ namespace XSub::GDI
 
         if (!is_type)
         {
-            stream->Release();
             return;
         }
 
@@ -208,7 +244,6 @@ namespace XSub::GDI
             auto seek_hr{ stream->Seek(move, STREAM_SEEK_SET, &position) };
             if (FAILED(seek_hr))
             {
-                stream->Release();
                 return;
             }
 
@@ -222,7 +257,6 @@ namespace XSub::GDI
 
             if (bytes_read != this->m_RawEntries.size())
             {
-                stream->Release();
                 return;
             }
         }
@@ -249,7 +283,6 @@ namespace XSub::GDI
             auto seek_hr{ stream->Seek(move, STREAM_SEEK_SET, &position) };
             if (FAILED(seek_hr))
             {
-                stream->Release();
                 return;
             }
 
@@ -260,7 +293,6 @@ namespace XSub::GDI
             };
             if (FAILED(create_stream_hr) || img_stream == nullptr)
             {
-                stream->Release();
                 return;
             }
 
@@ -279,7 +311,6 @@ namespace XSub::GDI
 
             if (FAILED(copy_to_hr))
             {
-                stream->Release();
                 img_stream->Release();
                 return;
             }
@@ -287,14 +318,12 @@ namespace XSub::GDI
             auto bitmap{ Gdiplus::Bitmap(img_stream) };
             if (bitmap.GetLastStatus() != Gdiplus::Ok)
             {
-                stream->Release();
                 return;
             }
             bitmap.GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &this->m_Bitmap);
             ::SelectObject(this->m_MemDC, this->m_Bitmap);
             img_stream->Release();
         }
-        stream->Release();
     }
 
     ImageSubFile::ImageSubFile(ImageSubFile&& other) noexcept
@@ -313,7 +342,8 @@ namespace XSub::GDI
         }
         return { *this };
     }
-    ImageSubFile::~ImageSubFile() noexcept 
+
+    ImageSubFile::~ImageSubFile() noexcept
     {
         this->m_SubEntries.clear();
 
@@ -387,6 +417,16 @@ namespace XSub::GDI
         return { this->m_CurrentImageSub->IsValid() };
     }
 
+    auto ImageSubPlayer::Load(std::string_view path) noexcept -> bool
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->UnLoad(false);
+        this->m_LastImageSubEntry = { nullptr };
+        this->m_CurrentImageSubIsShared = { false };
+        this->m_CurrentImageSub = { new ImageSubFile{ path } };
+        return { this->m_CurrentImageSub->IsValid() };
+    }
+
     auto ImageSubPlayer::Load(const XSub::GDI::ImageSub* sub) noexcept -> void
     {
         std::lock_guard<std::mutex> lock(this->m_Mutex);
@@ -418,6 +458,19 @@ namespace XSub::GDI
     auto ImageSubPlayer::UnLoad() noexcept -> void
     {
         this->UnLoad(true);
+    }
+
+    auto ImageSubPlayer::IsLoad() const noexcept -> bool
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        auto result{ this->m_CurrentImageSub != nullptr };
+        return { result };
+    }
+
+    auto ImageSubPlayer::IsPlaying() const noexcept -> bool
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        return { this->m_IsPlaying };
     }
 
     auto ImageSubPlayer::GetLastImageSubEntry() const noexcept -> const XSub::ImageSubEntry*
@@ -787,6 +840,42 @@ namespace XSub::GDI
         {
             this->m_Mutex.unlock();
         }
+    }
+
+    auto ImageSubPlayer::SetDefualtPoint(XSub::Point point) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPoint = { point };
+    }
+
+    auto ImageSubPlayer::SetDefualtAlign(XSub::Align align) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPoint.align = { align };
+    }
+
+    auto ImageSubPlayer::SetDefualtVertical(uint16_t vertical) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPoint.vertical = { vertical };
+    }
+
+    auto ImageSubPlayer::SetDefualtHorizontal(uint16_t horizontal) noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPoint.horizontal = { horizontal };
+    }
+
+    auto ImageSubPlayer::UseDefualtPoint() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPointFlag = { -1 };
+    }
+
+    auto ImageSubPlayer::UnuseDefualtPoint() noexcept -> void
+    {
+        std::lock_guard<std::mutex> lock(this->m_Mutex);
+        this->m_DefaultPointFlag = { NULL };
     }
 
 }

@@ -67,11 +67,17 @@ namespace XSub::GDI
         std::span<uint8_t> m_RawEntries{};
         XsubHeader* m_Header{};
 
+        auto Init(IStream* stream) noexcept -> void;
+
     public:
 
         ~ImageSubFile() noexcept override;
 
         ImageSubFile(std::wstring_view path) noexcept;
+
+        ImageSubFile(std::string_view  path) noexcept;
+
+        ImageSubFile(IStream* steam) noexcept;
 
         ImageSubFile(ImageSubFile&& other) noexcept;
 
@@ -89,12 +95,13 @@ namespace XSub::GDI
 
     class ImageSubPlayer: public PlayerWindow
     {
-
         const XSub::GDI::ImageSub* m_CurrentImageSub{};
         const XSub::ImageSubEntry* m_LastImageSubEntry{};
         bool m_CurrentImageSubIsShared{};
         bool m_IsPlaying{};
 
+        int32_t m_DefaultPointFlag{};
+        XSub::Point m_DefaultPoint{};
         BLENDFUNCTION mutable m_Blend
         {
             .BlendOp{ AC_SRC_OVER },
@@ -116,11 +123,17 @@ namespace XSub::GDI
 
         auto Load(std::wstring_view path) noexcept -> bool;
 
+        auto Load(std::string_view  path) noexcept -> bool;
+
         auto Load(const XSub::GDI::ImageSub* sub) noexcept -> void;
 
         auto Load(const XSub::GDI::ImageSub& sub) noexcept -> void;
 
         auto UnLoad() noexcept -> void;
+
+        auto IsLoad() const noexcept -> bool;
+
+        auto IsPlaying() const noexcept -> bool;
 
         auto GetLastImageSubEntry() const noexcept -> const XSub::ImageSubEntry*;
 
@@ -131,5 +144,30 @@ namespace XSub::GDI
         auto Play(bool as_thread, std::function<float(void)> get_time) noexcept -> void;
 
         auto Stop(bool await_for_last = false) noexcept -> void;
+
+        auto SetDefualtPoint(XSub::Point point) noexcept -> void;
+
+        auto SetDefualtAlign(XSub::Align align) noexcept -> void;
+
+        auto SetDefualtVertical(uint16_t vertical) noexcept -> void;
+
+        auto SetDefualtHorizontal(uint16_t horizontal) noexcept -> void;
+
+        auto UseDefualtPoint() noexcept -> void;
+
+        auto UseDefualtAlign() noexcept -> void;
+
+        auto UseDefualtVertical() noexcept -> void;
+
+        auto UseDefualtHorizontal() noexcept -> void;
+
+        auto UnuseDefualtPoint() noexcept -> void;
+
+        auto UnuseDefualtAlign() noexcept -> void;
+
+        auto UnuseDefualtVertical() noexcept -> void;
+
+        auto UnuseDefualtHorizontal() noexcept -> void;
+
     };
 }

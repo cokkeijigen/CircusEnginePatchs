@@ -34,6 +34,7 @@ file(GLOB HEADER_DIR ALL_DIRS
     "${CMAKE_CURRENT_LIST_DIR}/*/*"
     "${CMAKE_CURRENT_LIST_DIR}/*/*/*"
     "${CMAKE_CURRENT_LIST_DIR}/*/*/*/*"
+    "${CMAKE_CURRENT_LIST_DIR}/*/*/*/*/*"
 )
 target_include_directories(${PROJECT_NAME} PUBLIC  
     ${DETOURS_DIR}
@@ -41,4 +42,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 target_link_libraries(${PROJECT_NAME}
     "${DETOURS_DIR}/detours.lib"
+    "Gdiplus.lib"
 )

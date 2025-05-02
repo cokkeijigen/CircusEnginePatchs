@@ -1,9 +1,7 @@
 #include <iostream>
-#include <windows.h>
 #include <dc3wy.hpp>
-#include <patch.hpp>
 #include <console.hpp>
-#include <fontmanager.hpp>
+#include <xtime.hpp>
 
 namespace DC3WY {
 
@@ -18,9 +16,11 @@ namespace DC3WY {
         != INVALID_FILE_ATTRIBUTES
     };
 
-    static Utils::FontManager FontManager{};
+    Utils::FontManager DC3WY::FontManager{};
+    XSub::GDI::ImageSubPlayer* DC3WY::SubPlayer{};
+    static IDirectSoundBuffer* CurrentPlayingBuffer{};
 
-    static auto CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+    auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
         if (uMsg == WM_CREATE) 
         {
@@ -44,6 +44,38 @@ namespace DC3WY {
             if (!DC3WY::FontManager.IsInit())
             {
                 DC3WY::FontManager.Init(hWnd);
+            }
+
+            if (DC3WY::SubPlayer == nullptr)
+            {
+                DC3WY::SubPlayer =
+                {
+                    new XSub::GDI::ImageSubPlayer{ hWnd }
+                };
+                //DC3WY::SubPlayer->MessageLoop(true);
+                //std::thread
+                //{
+                //    []()
+                //    {
+                //        ::Sleep(1000);
+                //        DC3WY::SubPlayer->Show();
+                //        auto is_load
+                //        {
+                //            DC3WY::SubPlayer->Load(std::string_view{ ".\\cn_Data\\271.xsub"})
+                //        };
+                //        utils::chilitimer chilitimer{};
+                //        DC3WY::SubPlayer->Play
+                //        (
+                //            { false },
+                //            [&chilitimer]() -> float
+                //            {
+                //                return { chilitimer.peek() + 23.8f };
+                //            }
+                //        );
+                //        //console::fmt::write("is_load{ %s }\n", is_load ? "true": "false");
+                //        //DC3WY::SubPlayer->Play(23.8f);
+                //    }
+                //}.detach();
             }
         }
         else if (uMsg == WM_SYSCOMMAND)
@@ -111,111 +143,220 @@ namespace DC3WY {
                 return TRUE;
             }
         }
+        else if (uMsg == WM_MOVE)
+        {
+            if (DC3WY::SubPlayer != nullptr)
+            {
+                auto x{ static_cast<int>(LOWORD(lParam)) };
+                auto y{ static_cast<int>(HIWORD(lParam)) };
+                DC3WY::SubPlayer->SyncToParentWindow(true);
+                DC3WY::SubPlayer->SetPosition(x, y);
+            }
+        }
         else if (uMsg == WM_SIZE)
         {
             if (DC3WY::FontManager.GUI() != nullptr)
             {
                 DC3WY::FontManager.GUIUpdateDisplayState();
             }
+
+            if (DC3WY::SubPlayer != nullptr)
+            {
+                if (wParam == SIZE_MINIMIZED)
+                {
+                    DC3WY::SubPlayer->Hide();
+                    DC3WY::SubPlayer->UpdateLayer();
+                }
+                else if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+                {
+                    DC3WY::SubPlayer->Show();
+                    DC3WY::SubPlayer->SyncToParentWindow(true);
+                }
+            }
+        }
+        else if (uMsg == WM_SIZING)
+        {
+            if (DC3WY::SubPlayer != nullptr)
+            {
+                DC3WY::SubPlayer->SyncToParentWindow(true);
+            }
         }
         return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
 
-    static auto ReplacePathW(std::wstring_view path) -> std::wstring_view
+    static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
     {
-        static std::wstring new_path{};
-        size_t pos{ path.find_last_of(L"\\/") };
-        if (pos != std::wstring_view::npos)
+        if (DC3WY::SubPlayer == nullptr)
         {
-            new_path = std::wstring{ L".\\cn_Data" }.append(path.substr(pos));
-            DWORD attr { ::GetFileAttributesW(new_path.c_str()) };
-            if (attr != INVALID_FILE_ATTRIBUTES)
-            {
-                if (path.ends_with(L".mes"))
-                {
-                    console::fmt::write<console::txt::dark_yellow>(L"[LOAD] %s\n", path.substr(pos + 1).data());
-                }
-                return new_path;
-            }
-            if (path.ends_with(L".mes"))
-            {
-                console::fmt::write(L"[LOAD] %s\n", path.substr(pos + 1).data());
-            }
-        }
-        return {};
-    }
-    
-    static auto ReplacePathA(std::string_view path) -> std::string_view
-    {
-        static std::string new_path{};
-        size_t pos{ path.find_last_of("\\/") };
-        if (pos != std::wstring_view::npos)
-        {
-            new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
-            DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
-            if (attr != INVALID_FILE_ATTRIBUTES)
-            {
-                if (path.ends_with(".mes"))
-                {
-                    console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>("[LOAD] %s\n", path.substr(pos + 1).data());
-                }
-                return new_path;
-            }
-            if (path.ends_with(".mes"))
-            {
-                console::fmt::write("[LOAD] %s\n", path.substr(pos + 1).data());
-            }
-        }
-        return {};
-    }
-
-    static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
-    {
-        std::string_view new_path { DC3WY::ReplacePathA(lpFN) };
-        return Patch::Hooker::Call<DC3WY::CreateFileA>(new_path.empty()? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
-    }
-
-    static auto WINAPI CreateFileW(LPCWSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
-    {
-        std::wstring_view new_path{ DC3WY::ReplacePathW(lpFN) };
-        return Patch::Hooker::Call<DC3WY::CreateFileW>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
-    }
-
-    static auto WINAPI FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) -> HANDLE
-    {
-        std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
-        return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
-    }
-
-    static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
-    {
-        if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
-        {
-            if (0xA1EC == uChar) // § -> ♪
-            {
-                HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
-                if (font != nullptr)
-                {
-                    font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
-                    DWORD result{ ::GetGlyphOutlineW(hdc, L'♪', fuf, lpgm, cjbf, pvbf, lpmat) };
-                    static_cast<void>(::SelectObject(hdc, font));
-                    return result;
-                }
-            }
-
-            if (uChar == 0x23) { uChar = 0x20; }
-
-            HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
-            if (font != nullptr)
-            {
-                font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
-                DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
-                static_cast<void>(::SelectObject(hdc, font));
-                return result;
-            }
+            return { false };
         }
 
-        return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
+        std::string path{ ".\\cn_Data" };
+
+        auto pos{ file.rfind("\\") };
+        if (pos != std::string_view::npos)
+        {
+            path.append(file.substr(pos)).append(".xsub");
+        }
+        else
+        {
+            path.append(file).append(".xsub");
+        }
+
+        bool is_load { DC3WY::SubPlayer->Load(path) };
+        if (is_load)
+        {
+            console::fmt::write<console::cdpg::dDfault, console::txt::dark_yellow>
+            (
+                "[LOAD] %s\n", path.data()
+            );
+            if (play) { DC3WY::SubPlayer->Play(); }
+        }
+        return { is_load };
+    }
+
+    static auto __fastcall AudioRelease(int32_t* m_this, int32_t, uint32_t index) -> DWORD
+    {
+        auto RawCall{ reinterpret_cast<decltype(DC3WY::AudioRelease)*>(0x432000) };
+        return RawCall(m_this, NULL, index);
+    }
+
+    auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) -> DWORD
+    {
+        auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
+        auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+
+        m_this[0x05 * index + 0x15] = 0x00;
+        if (index - 0x01 <= 0x03 && *UnknownPtr != NULL)
+        {
+            auto uint8_ptr{ reinterpret_cast<uint8_t*>(*UnknownPtr) };
+            *(uint8_ptr + (0x20 * index) + 0x4D10) = 0x00;
+        }
+
+        auto buffer{ DirectSoundBuffers[index] };
+        if (buffer != nullptr)
+        {
+            auto is_current_playing_buffer
+            {
+                DC3WY::CurrentPlayingBuffer != nullptr &&
+                buffer == DC3WY::CurrentPlayingBuffer
+            };
+            if (is_current_playing_buffer)
+            {
+                DC3WY::SubPlayer->Stop();
+                DC3WY::SubPlayer->UnLoad();
+                DC3WY::CurrentPlayingBuffer = { nullptr };
+            }
+            buffer->SetCurrentPosition(0x00);
+            buffer->Stop();
+            auto result{ DC3WY::AudioRelease(m_this, NULL, index) };
+            return { result };
+        }
+        return { NULL };
+    }
+
+    static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t index) -> int
+    {
+        auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
+        auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+        if (index == 0x01)
+        {
+            *reinterpret_cast<uint32_t*>(*UnknownPtr + 0x136C) = flag;
+        }
+        auto buffer{ DirectSoundBuffers[index] };
+        if (buffer != nullptr)
+        {
+            auto result{ buffer->Play(0x00, 0x00, flag != 0x00) };
+            if (DC3WY::CurrentPlayingBuffer == nullptr)
+            {
+                auto is_load{ DC3WY::LoadXSubAndPlayIfExist(file, true) };
+                if (is_load)
+                {
+                    DC3WY::CurrentPlayingBuffer = { buffer };
+                }
+            }
+            return { result };
+        }
+        return { NULL };
+    }
+
+    auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
+    {
+        std::string_view current_file_name{ reinterpret_cast<const char*>(0x4E65F8) };
+        if (!current_file_name.empty())
+        {
+            std::string_view new_path{ DC3WY::ReplacePathA(current_file_name) };
+            if (!new_path.empty())
+            {
+                auto dest{ const_cast<char*>(current_file_name.data()) };
+                std::copy(new_path.begin(), new_path.end(), dest);
+                dest[new_path.size()] = {};
+            }
+            else
+            {
+                auto pos{ current_file_name.rfind("\\") };
+                if (pos != std::string_view::npos)
+                {
+                    auto name{ current_file_name.substr(pos + 1) };
+                    if (name.size() >= 8)
+                    {
+                        auto is_gop
+                        {
+                            (name[0] == 'g' || name[0] == 'G') &&
+                            (name[1] == 'o' || name[1] == 'O') &&
+                            (name[2] == 'p' || name[2] == 'P') &&
+                            (name[3] == '.') &&
+                            (name[4] == 'm' || name[4] == 'M') &&
+                            (name[5] == 'p' || name[5] == 'P') &&
+                            (name[6] == 'g' || name[6] == 'G')
+                        };
+                        if (is_gop)
+                        {
+
+                        }
+                        else if(name.size() == 9)
+                        {
+                            auto is_op_0_mpg
+                            {
+                                (name[0] == 'o' || name[0] == 'O') &&
+                                (name[1] == 'p' || name[1] == 'P') &&
+                                (name[2] == '0' && name[4] == '.') &&
+                                (name[5] == 'm' || name[5] == 'M') &&
+                                (name[6] == 'p' || name[6] == 'P') &&
+                                (name[7] == 'g' || name[7] == 'G')
+                            };
+                            if (name[3] == '1')
+                            {
+
+                            }
+                            else if (name[3] == '2')
+                            {
+
+                            }
+                        }
+                    }
+                };
+            }
+
+            console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data());
+        }
+
+        auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
+
+        if (DC3WY::SubPlayer != nullptr)
+        {
+            auto is_load { DC3WY::SubPlayer->IsLoad() };
+            if (is_load) { DC3WY::SubPlayer->Play(); };
+        }
+        return { result };
+    }
+
+
+    auto DC3WY::ComStopVideo_Hook(void) -> int32_t
+    {
+        console::fmt::write("[DC3WY::ComStopVideo]\n");
+        auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
+        return { result };
     }
 
     static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
@@ -226,14 +367,27 @@ namespace DC3WY {
             if (_name.size() != 0)
             {
                 line = 3;
-                row  = 4;
+                row = 4;
                 return { static_cast<BOOL>(true) };
             }
         }
         return { static_cast<BOOL>(false) };
     }
 
-    static __declspec(naked) auto JmpSetNameIconEx(void) -> void
+    __declspec(naked) auto DC3WY::JmpAudioPlayHook(void) -> void
+     {
+        __asm
+        {
+            sub esp, 0x04
+            mov eax, dword ptr ss:[esp+0x04] // ret addr
+            mov dword ptr ss:[esp], eax
+            mov eax, dword ptr ss:[esp+0x130] // file name
+            mov dword ptr ss:[esp+0x04], eax
+            jmp DC3WY::AudioPlay_Hook
+        }
+     }
+
+    __declspec(naked) auto JmpSetNameIconEx(void) -> void
     {
         __asm
         {
@@ -265,21 +419,4 @@ namespace DC3WY {
             jmp eax
         }
     }
-
-
-
-	auto DC3WY::INIT_ALL_PATCH(void) -> void
-	{
-		console::make("DEBUG LOG FOR DC3WY");
-        Patch::Hooker::Begin();
-        Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
-        Patch::Hooker::Add<DC3WY::CreateFileW>(::CreateFileW);
-        Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
-        Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
-        Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
-        Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx);
-        Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
-        Patch::Hooker::Commit();
-	}
-
 }

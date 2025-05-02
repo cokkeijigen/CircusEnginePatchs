@@ -1,12 +1,34 @@
 #pragma once
+#include <windows.h>
+#include <dsound.h>
+#include <patch.hpp>
+#include <fontmanager.hpp>
+#include <imgsub_gdi.hpp>
 
-namespace DC3WY {
+namespace DC3WY
+{
 
-	extern auto INIT_ALL_PATCH(void) -> void;
+    extern auto CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
+
+    extern auto __fastcall AudioStop_Hook(int32_t*, int32_t, uint32_t) -> DWORD;
+
+    extern auto JmpSetNameIconEx(void) -> void;
+
+    extern auto JmpAudioPlayHook(void) -> void;
+
+    extern auto ComPlayVideo_Hook(void) -> int32_t;
+
+    extern auto ComStopVideo_Hook(void) -> int32_t;
+
+    extern auto ReplacePathA(std::string_view path) -> std::string_view;
+
+    extern Utils::FontManager FontManager;
+
+    extern XSub::GDI::ImageSubPlayer* SubPlayer;
 
 	static constexpr inline wchar_t TitleName[]
 	{
-		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Beta.0.5" 
+		L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - Beta.0.8" 
 	};
 
 	static inline const char* ChapterTitles[][2]

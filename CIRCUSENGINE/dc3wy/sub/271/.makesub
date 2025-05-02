@@ -2,8 +2,8 @@
 .width 1024
 .height 576
 .fade 0.3
-.jp::pos left, top, 0, 10
-.cn::pos bottom, left, 0, 10
+.jp::pos left, top, 5, 10
+.cn::pos bottom, left, 5, 10
 
 :image-sub
 .time 0:00:02.19,0:00:04.47
