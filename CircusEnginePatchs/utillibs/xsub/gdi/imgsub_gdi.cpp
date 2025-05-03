@@ -536,33 +536,21 @@ namespace XSub::GDI
                 auto fadein { imgsub->start + ety.fadein };
                 auto fadeout{ imgsub->end - ety.fadeout  };
 
+                float alpha{ 255.f };
                 if (time <= fadein)
                 {
-                    this->m_Blend.SourceConstantAlpha =
+                    alpha =
                     {
-                        static_cast<uint8_t>
-                        (
-                            ((time - imgsub->start) / ety.fadein)
-                            * 255.f
-                        )
+                        ((time - imgsub->start) / ety.fadein)
+                        * 255.f
                     };
                 }
                 else if (time >= fadeout)
                 {
-                    this->m_Blend.SourceConstantAlpha =
+                    alpha =
                     {
-                        static_cast<uint8_t>
-                        (
-                            ((imgsub->end - time) / ety.fadeout)
-                            * 255.f
-                        )
-                    };
-                }
-                else
-                {
-                    this->m_Blend.SourceConstantAlpha =
-                    {
-                        static_cast<uint8_t>(255)
+                        ((imgsub->end - time) / ety.fadeout)
+                        * 255.f
                     };
                 }
 
@@ -620,85 +608,58 @@ namespace XSub::GDI
 
                     if (point.align & Align::Right)
                     {
-                        x =
+                        auto _x
                         {
-                            static_cast<int32_t>
-                            (
-                                float
-                                (
-                                    this->m_Size.cx
-                                    - (float(ety.width) * scale_x)
-                                    - (float(ety.point.horizontal) * scale_x)
-                                ) + 0.5f
-                            )
+                            float(this->m_Size.cx)
+                            - (float(ety.width) * scale_x)
+                            - (float(ety.point.horizontal) * scale_x)
                         };
+                        x = { static_cast<int32_t>(_x + 0.5f) };
                     }
                     else if (point.align & Align::Center)
                     {
-                        x =
+                        auto _x
                         {
-                            static_cast<int32_t>
-                            (
-                                float
-                                (
-                                    ((this->m_Size.cx - float(ety.width * scale_x)) / 2.f)
-                                    + float(ety.point.horizontal) * scale_x
-                                ) + 0.5f
-                            )
+                            ((this->m_Size.cx - float(ety.width * scale_x)) / 2.f)
+                            + float(ety.point.horizontal) * scale_x
                         };
+                        x = { static_cast<int32_t>(_x + 0.5f) };
                     }
                     else
                     {
-                        x =
+                        auto _x
                         {
-                            static_cast<int32_t>
-                            (
-                                float(ety.point.horizontal)
-                                * scale_x + 0.5f
-                            )
+                            float(ety.point.horizontal) * scale_x
                         };
+                        x = { static_cast<int32_t>(_x + 0.5f) };
                     }
 
                     if (point.align & Align::Bottom)
                     {
-                        y =
+                        auto y_
                         {
-                            static_cast<int32_t>
-                            (
-                                float
-                                (
-                                    this->m_Size.cy
-                                    - (float(ety.height) * scale_y)
-                                    - (float(ety.point.vertical) * scale_y)
-                                ) + 0.5f
-                            )
+                            float(this->m_Size.cy)
+                            - (float(ety.height) * scale_y)
+                            - (float(ety.point.vertical) * scale_y)
                         };
-
+                        y = { static_cast<int32_t>(y_ + 0.5f) };
                     }
                     else if (point.align & Align::Middle)
                     {
-                        y =
+                        auto y_
                         {
-                            static_cast<int32_t>
-                            (
-                                float
-                                (
-                                    ((this->m_Size.cy - (float(ety.height) * scale_y)) / 2.f)
-                                    + float(ety.point.vertical) * scale_y
-                                )
-                            )
+                            ((this->m_Size.cy - (float(ety.height) * scale_y)) / 2.f)
+                            + float(ety.point.vertical) * scale_y
                         };
+                        y = { static_cast<int32_t>(y_ + 0.5f) };
                     }
                     else
                     {
-                        y =
+                        auto y_
                         {
-                            static_cast<int32_t>
-                            (
-                                float(ety.point.vertical)
-                                * scale_y + 0.5f
-                            )
+                            float(ety.point.vertical) * scale_y
                         };
+                        y = { static_cast<int32_t>(y_ + 0.5f) };
                     }
                 }
                 auto alpha_blend = BOOL
@@ -715,7 +676,13 @@ namespace XSub::GDI
                         { ety.y },
                         { ety.width  },
                         { ety.height },
-                        { this->m_Blend }
+                        BLENDFUNCTION
+                        {
+                            .BlendOp{ AC_SRC_OVER },
+                            .BlendFlags{ 0 },
+                            .SourceConstantAlpha{  static_cast<uint8_t>(alpha) },
+                            .AlphaFormat{ AC_SRC_ALPHA }
+                        }
                     )
                 };
                 if (static_cast<bool>(alpha_blend))
