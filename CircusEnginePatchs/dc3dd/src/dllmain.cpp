@@ -1,6 +1,10 @@
+#include <iostream>
 #include <windows.h>
+#include <dc3dd.hpp>
+#include <console.hpp>
 
-extern "C" {
+extern "C"
+{
 
     __declspec(dllexport) auto hook(void) -> void {}
 
