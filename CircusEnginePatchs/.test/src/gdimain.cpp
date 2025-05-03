@@ -7,21 +7,6 @@
 #include <xsub/gdi/imgsub_gdi.hpp>
 #include <SubManner.hpp>
 
-GDI::Window* gdi{ nullptr };
-
-static void DrawRoundedRectangle(Gdiplus::Graphics& graphics, Gdiplus::Rect rect, int cornerRadius)
-{
-    Gdiplus::GraphicsPath path{};
-    Gdiplus::SolidBrush brush((Gdiplus::Color::Black & 0xFFFFFF) | 0x70 << 24);
-    path.AddArc(rect.X, rect.Y, cornerRadius, cornerRadius, 180, 90);
-    path.AddArc(rect.GetRight() - cornerRadius, rect.Y, cornerRadius, cornerRadius, 270, 90);
-    path.AddArc(rect.GetRight() - cornerRadius, rect.GetBottom() - cornerRadius, cornerRadius, cornerRadius, 0, 90);
-    path.AddArc(rect.X, rect.GetBottom() - cornerRadius, cornerRadius, cornerRadius, 90, 90);
-    path.CloseFigure();
-    graphics.FillPath(&brush, &path);
-}
-
-//XSub::GDI::PlayerWindow* XSubPlayerWindowGDI{ nullptr };
 XSub::GDI::ImageSubPlayer* XSubPlayerWindowGDI{ nullptr };
 static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
@@ -65,6 +50,15 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                         }
                     );
                     ::Sleep(10000);
+                    XSubPlayerWindowGDI->SetDefualtPoint
+                    (
+                        XSub::Point
+                        {
+                            .align{ XSub::Align::Center },
+                        }
+                    );
+                    XSubPlayerWindowGDI->UseDefualtPoint(true);
+                    ::Sleep(10000);
                     XSubPlayerWindowGDI->Stop(true);
                     XSubPlayerWindowGDI->UnLoad();
 
@@ -78,97 +72,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             ).detach();
         }
 
-        if (gdi == nullptr)
-        {
-            //gdi = new GDI::Window(hwnd);
-
-            /*constexpr auto filePath
-            {
-                _PROJECT_WORKSPACE
-                L"/dc3wy/sub/271/271_CHN_01_JP.png"
-            };*/
-
-            {
-
-                //static Gdiplus::Image* image{ nullptr };
-
-                //if (image == nullptr)
-                //{
-                //    image = Gdiplus::Image::FromFile(filePath);
-                //}
-
-                //if (image != nullptr)
-                //{
-                //    auto width{ image->GetWidth() };
-                //    auto height{ image->GetHeight() };
-                //    Gdiplus::Graphics graphics(gdi->m_MemDC);
-                //    graphics.Clear(Gdiplus::Color(0x90, 0, 0, 0));
-
-                //    graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-
-                //    Gdiplus::ColorMatrix colorMatrix{
-                //       1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                //       0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-                //       0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                //       0.0f, 0.0f, 0.0f, 0.8f, 0.0f,
-                //       0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-                //    };
-                //    Gdiplus::ImageAttributes imgAttr{};
-                //    imgAttr.SetColorMatrix(&colorMatrix,
-                //        Gdiplus::ColorMatrixFlagsDefault,
-                //        Gdiplus::ColorAdjustTypeBitmap);
-                //    Gdiplus::Rect rect(0, 0, width, height);
-
-                //    graphics.DrawImage(image, rect, 0, 0, width, height, Gdiplus::UnitPixel, &imgAttr);
-                //}
-            }
-            {
-                /*std::thread
-                (
-                    [](void) -> void
-                    {
-                        auto get_fade_alpha
-                        {
-                            [](float duration, float startTime, float curtime) -> float
-                            {
-                                float elapsedTime = curtime - startTime;
-
-                                if (elapsedTime <= 0.0f) return 0.0f;
-                                if (elapsedTime >= duration) return 255.0f;
-                                float progress = elapsedTime / duration;
-                                return progress * 255.0f;
-                            }
-                        };
-
-                        constexpr auto filePath
-                        {
-                            _PROJECT_WORKSPACE
-                            L"/dc3wy/sub/273.xsub"
-                        };
-
-
-                        utils::chilitimer chilitimer{};
-                        XSub::GDI::ImageSub sub{ filePath };
-                        while (true)
-                        {
-                            auto time{ chilitimer.peek() + 14.f };
-                            auto is_draw{ sub.Draw(time, gdi->m_MemDC, gdi->m_Size)};
-                            console::fmt::write
-                            (
-                                "time{ %f } is_draw{ %s }\n",
-                                time,
-                                is_draw ? "true": "false"
-                            );
-                            if (is_draw)
-                            {
-                                gdi->UpdateLayer();
-                            }
-                            ::Sleep(1);
-                        }
-                    }
-                ).detach();*/
-            }
-        }
+  
         break;
     }
     case WM_MOVE:
@@ -208,27 +112,7 @@ static auto CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
                 XSubPlayerWindowGDI->Show();
                 XSubPlayerWindowGDI->SyncToParentWindow(true);
             }
-            if (gdi != nullptr)
-            {
-                //gdi->SyncToParentWindow();
-                //gdi->UpdateLayerBitmap(true);
-               /* gdi->UpdateLayerBitmap();
-                Gdiplus::Graphics graphics(gdi->m_MemDC);
-                graphics.Clear(Gdiplus::Color(0, 0, 0, 0));
-                DrawRoundedRectangle(graphics, { 0, 0, gdi->m_Size.cx, gdi->m_Size.cy }, 1);
-                gdi->UpdateLayer();
-                BITMAP bitmap{};
-                auto get_object_result = int
-                {
-                    ::GetObjectW(gdi->m_Bitmap, sizeof(BITMAP), &bitmap)
-                };
-                console::fmt::write
-                (
-                    "bmp{ %d, %d } cx{ %d } cy{ %d }\n",
-                    bitmap.bmWidth, bitmap.bmHeight,
-                    gdi->m_Size.cx, gdi->m_Size.cy
-                );*/
-            }
+            
         }
         else if (wParam == SIZE_MAXIMIZED)
         {
