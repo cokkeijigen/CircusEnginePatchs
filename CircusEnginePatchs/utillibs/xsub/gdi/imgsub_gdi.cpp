@@ -533,9 +533,6 @@ namespace XSub::GDI
             for (int i{ 0 }; i < static_cast<int>(imgsub->count); i++)
             {
                 const auto& ety{ imgsub->entries[i] };
-                auto fadein{ imgsub->start + ety.fadein };
-                auto fadeout{ imgsub->end - ety.fadeout };
-
                 int32_t width{ ety.width }, height{ ety.height }, x{}, y{};
                 {
                     auto ety_aspect_ratio
@@ -644,7 +641,9 @@ namespace XSub::GDI
                     }
                 }
 
-                auto alpha{ static_cast<uint8_t>(255) };
+                auto fadein { imgsub->start + ety.fadein };
+                auto fadeout{ imgsub->end - ety.fadeout  };
+                auto alpha  { static_cast<uint8_t>(255)  };
                 {
                     if (time <= fadein)
                     {
