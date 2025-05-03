@@ -102,13 +102,6 @@ namespace XSub::GDI
 
         uint32_t m_DefaultPointFlag{};
         XSub::Point m_DefaultPoint{};
-        BLENDFUNCTION mutable m_Blend
-        {
-            .BlendOp{ AC_SRC_OVER },
-            .BlendFlags{ 0 },
-            .SourceConstantAlpha{ 0 },
-            .AlphaFormat{ AC_SRC_ALPHA }
-        };
 
         auto SafeDraw(std::function<bool(HDC, const SIZE&)> do_draw) noexcept -> bool;
 
