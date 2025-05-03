@@ -1,0 +1,66 @@
+.name 273
+.width 1024
+.height 576
+.fade 0.3
+.jp::pos left, top, 5, 10
+.cn::pos bottom, left, 5, 10
+
+:image-sub
+.time 0:00:14.47,0:00:20.02
+.cn 273_CHN_00_CN.png
+.jp 273_CHN_00_JP.png
+:end
+
+:image-sub
+.time 0:00:20.38,0:00:26.10
+.cn 273_CHN_01_CN.png
+.jp 273_CHN_01_JP.png
+:end
+
+:image-sub
+.time 0:00:26.30,0:00:31.77
+.cn 273_CHN_02_CN.png
+.jp 273_CHN_02_JP.png
+:end
+
+:image-sub
+.time 0:00:32.31,0:00:37.54
+.cn 273_CHN_03_CN.png
+.jp 273_CHN_03_JP.png
+:end
+
+:image-sub
+.time 0:00:37.70,0:00:44.08
+.cn 273_CHN_04_CN.png
+.jp 273_CHN_04_JP.png
+:end
+
+:image-sub
+.time 0:00:44.32,0:00:51.18
+.cn 273_CHN_05_CN.png
+.jp 273_CHN_05_JP.png
+:end
+
+:image-sub
+.time 0:00:51.75,0:00:57.40
+.cn 273_CHN_06_CN.png
+.jp 273_CHN_06_JP.png
+:end
+
+:image-sub
+.time 0:00:57.67,0:01:03.30
+.cn 273_CHN_07_CN.png
+.jp 273_CHN_07_JP.png
+:end
+
+:image-sub
+.time 0:01:03.59,0:01:09.37
+.cn 273_CHN_08_CN.png
+.jp 273_CHN_08_JP.png
+:end
+
+:image-sub
+.time 0:01:09.52,0:01:16.13
+.cn 273_CHN_09_CN.png
+.jp 273_CHN_09_JP.png
+:end

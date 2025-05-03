@@ -1,0 +1,127 @@
+.name 270
+.width 1024
+.height 576
+.fade 0.3
+.jp::pos left, top, 5, 10
+.cn::pos bottom, left, 5, 10
+
+:image-sub
+.time 0:00:01.38,0:00:04.20
+.cn 270_CHN_00_CN.png fade(0.1)
+.jp 270_CHN_00_JP.png fade(0.1)
+:end
+
+:image-sub
+.time 0:00:04.22,0:00:06.48
+.cn 270_CHN_01_CN.png fade(0.1)
+.jp 270_CHN_01_JP.png fade(0.1)
+:end
+
+:image-sub
+.time 0:00:06.48,0:00:08.58
+.cn 270_CHN_02_CN.png fade(0.1)
+.jp 270_CHN_02_JP.png fade(0.1)
+:end
+
+:image-sub
+.time 0:00:10.18,0:00:14.08
+.cn 270_CHN_03_CN.png
+.jp 270_CHN_03_JP.png
+:end
+
+:image-sub
+.time 0:00:16.20,0:00:18.53
+.cn 270_CHN_04_CN.png
+.jp 270_CHN_04_JP.png
+:end
+
+:image-sub
+.time 0:00:18.74,0:00:21.35
+.cn 270_CHN_05_CN.png
+.jp 270_CHN_05_JP.png
+:end
+
+:image-sub
+.time 0:00:22.03,0:00:25.77
+.cn 270_CHN_06_CN.png
+.jp 270_CHN_06_JP.png
+:end
+
+:image-sub
+.time 0:00:27.54,0:00:30.21
+.cn 270_CHN_07_CN.png
+.jp 270_CHN_07_JP.png
+:end
+
+:image-sub
+.time 0:00:30.45,0:00:33.20
+.cn 270_CHN_08_CN.png
+.jp 270_CHN_08_JP.png
+:end
+
+:image-sub
+.time 0:00:33.56,0:00:36.49
+.cn 270_CHN_09_CN.png
+.jp 270_CHN_09_JP.png
+:end
+
+:image-sub
+.time 0:00:36.49,0:00:39.23
+.cn 270_CHN_10_CN.png
+.jp 270_CHN_10_JP.png
+:end
+
+:image-sub
+.time 0:00:39.23,0:00:44.41
+.cn 270_CHN_11_CN.png
+.jp 270_CHN_11_JP.png
+:end
+
+:image-sub
+.time 0:00:44.62,0:00:47.86
+.cn 270_CHN_12_CN.png
+.jp 270_CHN_12_JP.png
+:end
+
+:image-sub
+.time 0:00:48.19,0:00:51.84
+.cn 270_CHN_13_CN.png
+.jp 270_CHN_13_JP.png
+:end
+
+:image-sub
+.time 0:00:52.02,0:00:56.62
+.cn 270_CHN_14_CN.png
+.jp 270_CHN_14_JP.png
+:end
+
+:image-sub
+.time 0:00:56.96,0:01:03.57
+.cn 270_CHN_15_CN.png
+.jp 270_CHN_15_JP.png
+:end
+
+:image-sub
+.time 0:01:03.78,0:01:08.82
+.cn 270_CHN_16_CN.png
+.jp 270_CHN_16_JP.png
+:end
+
+:image-sub
+.time 0:01:08.82,0:01:11.58
+.cn 270_CHN_00_CN.png fade(0.1)
+.jp 270_CHN_00_JP.png fade(0.1)
+:end
+
+:image-sub
+.time 0:01:11.58,0:01:13.84
+.cn 270_CHN_01_CN.png fade(0.1)
+.jp 270_CHN_01_JP.png fade(0.1)
+:end
+
+:image-sub
+.time 0:01:13.84,0:01:16.07
+.cn 270_CHN_02_CN.png fade(0.1)
+.jp 270_CHN_02_JP.png fade(0.1)
+:end
+
