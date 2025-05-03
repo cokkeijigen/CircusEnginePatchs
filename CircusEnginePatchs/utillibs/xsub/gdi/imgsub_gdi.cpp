@@ -533,26 +533,8 @@ namespace XSub::GDI
             for (int i{ 0 }; i < static_cast<int>(imgsub->count); i++)
             {
                 const auto& ety{ imgsub->entries[i] };
-                auto fadein { imgsub->start + ety.fadein };
-                auto fadeout{ imgsub->end - ety.fadeout  };
-
-                float alpha{ 255.f };
-                if (time <= fadein)
-                {
-                    alpha =
-                    {
-                        ((time - imgsub->start) / ety.fadein)
-                        * 255.f
-                    };
-                }
-                else if (time >= fadeout)
-                {
-                    alpha =
-                    {
-                        ((imgsub->end - time) / ety.fadeout)
-                        * 255.f
-                    };
-                }
+                auto fadein{ imgsub->start + ety.fadein };
+                auto fadeout{ imgsub->end - ety.fadeout };
 
                 int32_t width{ ety.width }, height{ ety.height }, x{}, y{};
                 {
@@ -566,7 +548,8 @@ namespace XSub::GDI
                     {
                         static_cast<int32_t>
                         (
-                            float(ety.width) * scale_x + 0.5f
+                            float(ety.width) * scale_x
+                            + 0.5f
                         )
                     };
 
@@ -574,13 +557,12 @@ namespace XSub::GDI
                     {
                         static_cast<int32_t>
                         (
-                            float(width) / ety_aspect_ratio + 0.5f
+                            float(width) / ety_aspect_ratio
+                            + 0.5f
                         )
                     };
 
                     XSub::Point point { ety.point };
-
-
                     if (this->m_DefaultPointFlag & 0x00FF0000)
                     {
                         if (this->m_DefaultPointFlag & 0xFF000000)
@@ -598,13 +580,12 @@ namespace XSub::GDI
                     }
                     if (this->m_DefaultPointFlag & 0x0000FF00)
                     {
-                        point.vertical = { this->m_DefaultPoint.vertical };
+                        point.vertical   = { this->m_DefaultPoint.vertical   };
                     }
                     if (this->m_DefaultPointFlag & 0x000000FF)
                     {
                         point.horizontal = { this->m_DefaultPoint.horizontal };
                     }
-
 
                     if (point.align & Align::Right)
                     {
@@ -662,6 +643,29 @@ namespace XSub::GDI
                         y = { static_cast<int32_t>(y_ + 0.5f) };
                     }
                 }
+
+                auto alpha{ static_cast<uint8_t>(255) };
+                {
+                    if (time <= fadein)
+                    {
+                        auto _alpha
+                        {
+                            ((time - imgsub->start) / ety.fadein)
+                            * 255.f
+                        };
+                        alpha = { static_cast<uint8_t>(_alpha) };
+                    }
+                    else if (time >= fadeout)
+                    {
+                        auto _alpha
+                        {
+                            ((imgsub->end - time) / ety.fadeout)
+                            * 255.f
+                        };
+                        alpha = { static_cast<uint8_t>(_alpha) };
+                    }
+                }
+
                 auto alpha_blend = BOOL
                 {
                     ::AlphaBlend
@@ -680,11 +684,12 @@ namespace XSub::GDI
                         {
                             .BlendOp{ AC_SRC_OVER },
                             .BlendFlags{ 0 },
-                            .SourceConstantAlpha{  static_cast<uint8_t>(alpha) },
-                            .AlphaFormat{ AC_SRC_ALPHA }
+                            .SourceConstantAlpha{ alpha },
+                            .AlphaFormat{ AC_SRC_ALPHA  }
                         }
                     )
                 };
+
                 if (static_cast<bool>(alpha_blend))
                 {
                     count++;
