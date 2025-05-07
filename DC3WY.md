@@ -65,4 +65,9 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
 
 ### GetGlyphOutlineA
 - 主要是更改游戏字体与文本编码
+```cpp
+Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
+```
+
+
 
