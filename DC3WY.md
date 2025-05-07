@@ -206,7 +206,7 @@
         return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
     ```
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_09.png)
+	![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_09.png)
 - 那么如何引用到游戏中呢？很简单，就是在`GetGlyphOutlineA`中设置就行了，这就是我为什么需要Hook它。
 - 在`GetGlyphOutlineA`中可以通过`FontManager::GetJISFont`和`FontManager::GetGBKFont`来获取当前选择字体的`HFONT`对象。
 但是这两个函数都是需要一个`size`作为参数的，那么从哪获取呢？答案很简单，直接从第一个参数`HDC hdc`中获取即可。
