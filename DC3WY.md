@@ -208,7 +208,8 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 ```cpp
 tagTEXTMETRICA lptm{};
 ::GetTextMetricsA(hdc, &lptm);
-lptm.tmHeight; // 这个就可以作为size使用
+auto size{ lptm.tmHeight }; // 这个就可以作为size使用
+HFONT font{ DC3WY::FontManager.GetGBKFont(size) };
 ```
 - 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。
 ※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，
