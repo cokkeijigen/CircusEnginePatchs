@@ -70,7 +70,6 @@ auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
 Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
 ```
 ```cpp
-//  dllmain.cpp
 static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
 {
     /* 此处省略，后面会与FontManager一起详细讲解 */ 
@@ -138,7 +137,8 @@ static constexpr inline wchar_t TitleName[]
     L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
     L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
 };
-
+```
+```cpp
 auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
     if (uMsg == WM_CREATE) 
@@ -152,6 +152,76 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         /* 其他逻辑…… */
     }
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
+```
+- 初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，详细：
+[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
+
+```cpp
+
+Utils::FontManager DC3WY::FontManager{};
+
+auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (uMsg == WM_CREATE) 
+    {
+        // 设置窗口标题
+        ::SetWindowTextW(hWnd, DC3WY::TitleName);
+
+        HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
+        if (SystemMenu != nullptr)
+        {
+            // 向系统菜单添加 “更改字体” 选项，标识为0x114514
+            ::AppendMenuW(SystemMenu, MF_UNCHECKED, 0x114514, L"更改字体");
+        }
+        if (!DC3WY::FontManager.IsInit())
+        {
+            DC3WY::FontManager.Init(hWnd);
+        }
+
+    }
+    else if (uMsg == WM_SYSCOMMAND)
+    {
+        if (wParam == 0x114514)
+        {
+            if (DC3WY::FontManager.GUI() != nullptr)
+            {
+                // 显示选择字体窗口
+                DC3WY::FontManager.GUIChooseFont();
+            }
+            return TRUE;
+        }
+    }
+    else
+    {
+        /* 其他逻辑…… */
+    }
+    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
+```
+- 可以通过`FontManager::GetJISFont`或者`FontManager::GetGBKFont`获取当前选择的字体的`HFONT`对象，<br>这两个函数的参数是需要一个`szie`，
+那么这个`size`从哪来？以及要如何让游戏使用？<br>
+- 这就是为什么需要Hook `GetGlyphOutlineA`的原因。字体的大小信息可以从`GetGlyphOutlineA`第一个参数`HDC hdc`中获取。<br>
+只需要调用`GetTextMetricsA`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))即可
+- 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。
+※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，
+如果通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象，
+如果不还原回去下次就无法通过大小确定是哪个字体了。
+```cpp
+static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
+{
+    if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
+    {
+        HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
+        if (font != nullptr)
+        {
+            font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
+            DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+            static_cast<void>(::SelectObject(hdc, font));
+            return result;
+        }
+    }
+    return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
 }
 ```
 # 在写了在写了……
