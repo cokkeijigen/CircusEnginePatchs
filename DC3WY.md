@@ -27,94 +27,94 @@
 ## 0x01 一些系统API的HOOK
 ### CreateFileA与FindFirstFileA
 - 为了实现与原版文件共存，因此需要Hook这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
-```cpp
-Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);       // 添加Hook
-Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
-```
+
+    ```cpp
+    Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);       // 添加Hook
+    Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
+    ```
 - 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
-```cpp
-auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
-{
-    static std::string new_path{};
-    size_t pos{ path.find_last_of("\\/") };
-    if (pos != std::wstring_view::npos)
+    ```cpp
+    auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
     {
-        new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
-        DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
-        if (attr != INVALID_FILE_ATTRIBUTES)
+        static std::string new_path{};
+        size_t pos{ path.find_last_of("\\/") };
+        if (pos != std::wstring_view::npos)
         {
-            return new_path;
+            new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
+            DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
+            if (attr != INVALID_FILE_ATTRIBUTES)
+            {
+                return new_path;
+            }
         }
+        return {};
     }
-    return {};
-}
-
-  static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
-  {
-      std::string_view new_path{ DC3WY::ReplacePathA(lpFN) };
-      return Patch::Hooker::Call<DC3WY::CreateFileA>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
-  }
-
-  static auto WINAPI FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) -> HANDLE
-  {
-      std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
-      return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
-  }
-```
-
+    
+      static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
+      {
+          std::string_view new_path{ DC3WY::ReplacePathA(lpFN) };
+          return Patch::Hooker::Call<DC3WY::CreateFileA>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
+      }
+    
+      static auto WINAPI FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) -> HANDLE
+      {
+          std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
+          return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
+      }
+    ```
 ### GetGlyphOutlineA
 - 这个主要是用来更改游戏字体与文本编码
-```cpp
-Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA); // 添加Hook
-```
-```cpp
-static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
-{
-    /* 此处暂时省略，后面会与FontManager一起详细讲解 */ 
-    return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
-}
-```
+    ```cpp
+    Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA); // 添加Hook
+    ```
+    ```cpp
+    static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
+    {
+        /* 此处暂时省略，后面会与FontManager一起详细讲解 */ 
+        return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
+    }
+    ```
 ### SendMessageA
 - 这是一个给窗口发送消息的函数，详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) <br>那为什么要Hook它呢？那当然是为了更改这个对话框的文本内容。
   ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
 - 这个可以搜索字符串`データVer`定位到`sub_40DA40`这个函数
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
 - 通过`ida`反编译可以一目了然，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
-```cpp
-Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA); // 添加Hook
-```
-```cpp
-static constexpr inline wchar_t PatchDesc[]
-{
-    L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
-    L"仅供学习交流使用，禁止一切直播录播和商用行为\n\n"
-    L"补丁源代码已开源至GitHub\n\n"
-    L"https://github.com/cokkeijigen/dc3_cn"
-};
-
-static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    // 为了确保此条消息是更改对话框文本的，还需要判断wParam和DlgCtrlID
-    if (uMsg == 0xCu && wParam == 0x104u)
+    ```cpp
+    Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA); // 添加Hook
+    ```
+    ```cpp
+    static constexpr inline wchar_t PatchDesc[]
     {
-        auto ctr_id{ ::GetDlgCtrlID(hWnd) };
-        if (ctr_id == 1005)
+        L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
+        L"仅供学习交流使用，禁止一切直播录播和商用行为\n\n"
+        L"补丁源代码已开源至GitHub\n\n"
+        L"https://github.com/cokkeijigen/dc3_cn"
+    };
+    
+    static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+    {
+        // 为了确保此条消息是更改对话框文本的，还需要判断wParam和DlgCtrlID
+        if (uMsg == 0xCu && wParam == 0x104u)
         {
-            auto result
+            auto ctr_id{ ::GetDlgCtrlID(hWnd) };
+            if (ctr_id == 1005)
             {
-                ::SendMessageW
-                (
-                    { hWnd }, { 0x0000000Cu },
-                    { sizeof(DC3WY::PatchDesc) / sizeof(wchar_t) },
-                    { reinterpret_cast<LPARAM>(DC3WY::PatchDesc) }
-                )
-            };
-            return { result };
+                auto result
+                {
+                    ::SendMessageW
+                    (
+                        { hWnd }, { 0x0000000Cu },
+                        { sizeof(DC3WY::PatchDesc) / sizeof(wchar_t) },
+                        { reinterpret_cast<LPARAM>(DC3WY::PatchDesc) }
+                    )
+                };
+                return { result };
+            }
         }
+        return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
     }
-    return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
-}
-```
+    ```
 - 至于这个`バージョン情報`的字符串如何更改，后面会讲到，接着往下看不用急。
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.1.png)
@@ -364,6 +364,11 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 - 这里停下来之后，然后取消断点，接着在堆栈窗口选中顶部的地址按下回车就能来到我们要找的函数了，效果都一样，只不过断`CoCreateInstance`的前提是你得知道它用了这个，不然就只能靠断文件相关的API这种图方法找了。
 
   ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_13.png)
+  
+  
+  
+  
+
 
 
 
