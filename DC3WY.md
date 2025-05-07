@@ -117,7 +117,7 @@
     ```
 - 至于这个`バージョン情報`的字符串如何更改，后面会讲到，接着往下看不用急。
 
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.1.png)
+	![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.1.png)
 
 - 当然也可以直接去Hook `sub_40DA40`这个函数来实现修改，我这里偷个懒直接Hook `SendMessageA`了。
 
@@ -128,32 +128,32 @@
 - 这个函数很好找，直接去查找`RegisterClassA`的引用，详细可以到官方文档查看：[RegisterClassA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-registerclassa)
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_08.png) <br>
 - 依旧是通过`ida`反编译查看，这个`WndClass.lpfnWndProc = sub_40FC20;` 就是`DC3WY::WndProc`了
-```cpp
-Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20)); // 添加Hook
-```
-```cpp
-static constexpr inline wchar_t TitleName[]
-{
-    L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
-    L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
-};
-```
-```cpp
-auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    if (uMsg == WM_CREATE) 
+    ```cpp
+    Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20)); // 添加Hook
+    ```
+    ```cpp
+    static constexpr inline wchar_t TitleName[]
     {
-        // 设置窗口标题
-        ::SetWindowTextW(hWnd, DC3WY::TitleName);
-        /* 一些初始化操作，此处省略…… */
-    }
-    else
+        L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
+        L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
+    };
+    ```
+    ```cpp
+    auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
-        /* 其他逻辑…… */
+        if (uMsg == WM_CREATE) 
+        {
+            // 设置窗口标题
+            ::SetWindowTextW(hWnd, DC3WY::TitleName);
+            /* 一些初始化操作，此处省略…… */
+        }
+        else
+        {
+            /* 其他逻辑…… */
+        }
+        return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
-    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
-}
-```
+    ```
 - 初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，具体实现大家自行查看源码：[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
 
 ```cpp
