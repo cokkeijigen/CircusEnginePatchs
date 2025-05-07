@@ -157,16 +157,16 @@
 - 初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，具体实现大家自行查看源码：[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
 
     ```cpp
-
+	
     Utils::FontManager DC3WY::FontManager{};
-
+	
     auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
         if (uMsg == WM_CREATE) 
         {
             // 设置窗口标题
             ::SetWindowTextW(hWnd, DC3WY::TitleName);
-
+	
             HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
             if (SystemMenu != nullptr)
             {
@@ -177,7 +177,7 @@
             {
                 DC3WY::FontManager.Init(hWnd);
             }
-
+	
         }
         else if (uMsg == WM_SYSCOMMAND)
         {
@@ -237,7 +237,7 @@
         return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
     }
     ```
-- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。注意这里使用的是`FontManager::GetJISFont`，其他要替换其他在特殊符号也同理，不多说了。
+- 音符`♪`符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。注意这里使用的是`FontManager::GetJISFont`，其他要替换其他在特殊符号也同理，不多说了。
     ```cpp
     if (0xA1EC == uChar) // § -> ♪
     {
