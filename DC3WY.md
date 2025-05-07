@@ -1,5 +1,5 @@
 # DC3WY 中文本地化笔记
-
+### <a id="FontManager">`FontManager`</a>
 | 工具 |说明 |
 |:---|:---|
 | [MesTextTool](https://github.com/cokkeijigen/MesTextTool) | Mes文本的提取导入 |
@@ -68,6 +68,36 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
 ```cpp
 Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
 ```
+```cpp
+static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
+    {
+        if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
+        {
+            if (0xA1EC == uChar) // § -> ♪
+            {
+                HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
+                if (font != nullptr)
+                {
+                    font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
+                    DWORD result{ ::GetGlyphOutlineW(hdc, L'♪', fuf, lpgm, cjbf, pvbf, lpmat) };
+                    static_cast<void>(::SelectObject(hdc, font));
+                    return result;
+                }
+            }
 
+            if (uChar == 0x23) { uChar = 0x20; }
 
+            HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
+            if (font != nullptr)
+            {
+                font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
+                DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+                static_cast<void>(::SelectObject(hdc, font));
+                return result;
+            }
+        }
+        return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
+    }
+```
+- 关于[FontManager](#FontManager) : 
 
