@@ -363,7 +363,7 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 - 这里停下来之后，然后取消断点，接着在堆栈窗口选中顶部的地址按下回车就能来到我们要找的函数了，效果都一样，只不过断`CoCreateInstance`的前提是你得知道它用了这个，不然就只能靠断文件相关的API这种图方法找了。
 
-  
+  ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_13.png)
 
 
 
