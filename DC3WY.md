@@ -26,12 +26,10 @@
 
 ## 0x01 一些系统API的HOOK
 ### CreateFileA与FindFirstFileA
-- 为了实现与原版文件共存，因此需要HOOK这两个函数，api详细可以到官方文档查看：
-[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，
-[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
+- 为了实现与原版文件共存，因此需要HOOK这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
 ```cpp
-Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
-Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
+Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA); // 添加Hook
+Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
 ```
 - 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
 ```cpp
@@ -67,7 +65,7 @@ auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
 ### GetGlyphOutlineA
 - 这个主要是用来更改游戏字体与文本编码
 ```cpp
-Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
+Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA); // 添加Hook
 ```
 ```cpp
 static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
@@ -78,14 +76,14 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ```
 ### 
 ### SendMessageA
-- 这是一个给窗口发送消息的函数，api详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) <br>
+- 这是一个给窗口发送消息的函数，详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) 
 - 那为什么要Hook它呢？那当然是为了更改这个对话框的文本内容。
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
 - 这个可以搜索字符串`データVer`定位到`sub_40DA40`这个函数
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
 - 通过`ida`反编译可以一目了然，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
 ```cpp
-Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA);
+Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA); // 添加Hook
 ```
 ```cpp
 static constexpr inline wchar_t PatchDesc[]
@@ -128,12 +126,11 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 ### DC3WY::WndProc <0x40FC20>
 - 为什么要Hook这个函数？这个函数是游戏窗口过程函数，在我们需要拿到游戏窗口句柄或者在创建窗口时做一些初始化操作，那么Hook游戏的`WndProc`是最好的选择。
-- 这个函数很好找，直接去查找`RegisterClassA`的引用，api详细可以到官方文档查看：
-[RegisterClassA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-registerclassa)
+- 这个函数很好找，直接去查找`RegisterClassA`的引用，详细可以到官方文档查看：[RegisterClassA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-registerclassa)
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_08.png) <br>
 - 依旧是通过`ida`反编译查看，这个`WndClass.lpfnWndProc = sub_40FC20;` 就是`DC3WY::WndProc`了
 ```cpp
-Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
+Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20)); // 添加Hook
 ```
 ```cpp
 static constexpr inline wchar_t TitleName[]
@@ -234,7 +231,7 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
     return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
 }
 ```
-- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。其他，要替换其他在特殊符号也同理，不多说了。
+- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。注意这里使用的是`FontManager::GetJISFont`，其他要替换其他在特殊符号也同理，不多说了。
 ```cpp
 if (0xA1EC == uChar) // § -> ♪
 {
