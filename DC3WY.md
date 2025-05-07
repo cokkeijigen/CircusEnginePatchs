@@ -156,196 +156,196 @@
     ```
 - 初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，具体实现大家自行查看源码：[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
 
-```cpp
+    ```cpp
 
-Utils::FontManager DC3WY::FontManager{};
+    Utils::FontManager DC3WY::FontManager{};
 
-auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    if (uMsg == WM_CREATE) 
+    auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
-        // 设置窗口标题
-        ::SetWindowTextW(hWnd, DC3WY::TitleName);
+        if (uMsg == WM_CREATE) 
+        {
+            // 设置窗口标题
+            ::SetWindowTextW(hWnd, DC3WY::TitleName);
 
-        HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
-        if (SystemMenu != nullptr)
-        {
-            // 向系统菜单添加 “更改字体” 选项，标识为0x114514
-            ::AppendMenuW(SystemMenu, MF_UNCHECKED, 0x114514, L"更改字体");
-        }
-        if (!DC3WY::FontManager.IsInit())
-        {
-            DC3WY::FontManager.Init(hWnd);
-        }
+            HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
+            if (SystemMenu != nullptr)
+            {
+                // 向系统菜单添加 “更改字体” 选项，标识为0x114514
+                ::AppendMenuW(SystemMenu, MF_UNCHECKED, 0x114514, L"更改字体");
+            }
+            if (!DC3WY::FontManager.IsInit())
+            {
+                DC3WY::FontManager.Init(hWnd);
+            }
 
-    }
-    else if (uMsg == WM_SYSCOMMAND)
-    {
-        if (wParam == 0x114514)
+        }
+        else if (uMsg == WM_SYSCOMMAND)
         {
+            if (wParam == 0x114514)
+            {
+                if (DC3WY::FontManager.GUI() != nullptr)
+                {
+                    // 显示选择字体窗口
+                    DC3WY::FontManager.GUIChooseFont();
+                }
+                return TRUE;
+            }
+        }
+        else if (uMsg == WM_SIZE)
+        {
+            // 当窗口大小改变时需要更新一下显示的状态，针对全屏与窗口模式切换
             if (DC3WY::FontManager.GUI() != nullptr)
             {
-                // 显示选择字体窗口
-                DC3WY::FontManager.GUIChooseFont();
+                DC3WY::FontManager.GUIUpdateDisplayState();
             }
-            return TRUE;
         }
-    }
-    else if (uMsg == WM_SIZE)
-    {
-        // 当窗口大小改变时需要更新一下显示的状态，针对全屏与窗口模式切换
-        if (DC3WY::FontManager.GUI() != nullptr)
+        else
         {
-            DC3WY::FontManager.GUIUpdateDisplayState();
+            /* 其他逻辑…… */
         }
+        return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
-    else
-    {
-        /* 其他逻辑…… */
-    }
-    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
-}
-```
+    ```
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_09.png)
 - 那么如何引用到游戏中呢？很简单，就是在`GetGlyphOutlineA`中设置就行了，这就是我为什么需要Hook它。
 - 在`GetGlyphOutlineA`中可以通过`FontManager::GetJISFont`和`FontManager::GetGBKFont`来获取当前选择字体的`HFONT`对象。
 但是这两个函数都是需要一个`size`作为参数的，那么从哪获取呢？答案很简单，直接从第一个参数`HDC hdc`中获取即可。
 - 使用`GetTextMetricsA`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))获取当前字体的`TEXTMETRIC`，
-这个`TEXTMETRIC`。
-```cpp
-tagTEXTMETRICA lptm{};
-::GetTextMetricsA(hdc, &lptm);
-auto size{ lptm.tmHeight }; // 这个就可以作为size使用
-HFONT font{ DC3WY::FontManager.GetGBKFont(size) };
-```
+  这个`TEXTMETRIC`。
+    ```cpp
+    tagTEXTMETRICA lptm{};
+    ::GetTextMetricsA(hdc, &lptm);
+    auto size{ lptm.tmHeight }; // 这个就可以作为size使用
+    HFONT font{ DC3WY::FontManager.GetGBKFont(size) };
+    ```
 - 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。<br>
-※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，当通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象(详细：[Utils::FontManager::m_GUI::OnChanged](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManager.cpp#L24)、[Utils::FontManagerGUI::MakeFont](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManagerGUI.cpp#L711))，如果不还原，下次就无法通过大小确定是哪个字体了。
-```cpp
-static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
-{
-    if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
+  ※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，当通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象(详细：[Utils::FontManager::m_GUI::OnChanged](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManager.cpp#L24)、[Utils::FontManagerGUI::MakeFont](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManagerGUI.cpp#L711))，如果不还原，下次就无法通过大小确定是哪个字体了。
+    ```cpp
+    static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
     {
-        HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
+        if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
+        {
+            HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
+            if (font != nullptr)
+            {
+                font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
+                DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+                static_cast<void>(::SelectObject(hdc, font));
+                return result;
+            }
+        }
+        return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
+    }
+    ```
+- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。注意这里使用的是`FontManager::GetJISFont`，其他要替换其他在特殊符号也同理，不多说了。
+    ```cpp
+    if (0xA1EC == uChar) // § -> ♪
+    {
+        HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
         if (font != nullptr)
         {
             font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
-            DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+            DWORD result{ ::GetGlyphOutlineW(hdc, L'♪', fuf, lpgm, cjbf, pvbf, lpmat) };
             static_cast<void>(::SelectObject(hdc, font));
             return result;
         }
     }
-    return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
-}
-```
-- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。注意这里使用的是`FontManager::GetJISFont`，其他要替换其他在特殊符号也同理，不多说了。
-```cpp
-if (0xA1EC == uChar) // § -> ♪
-{
-    HFONT font{ DC3WY::FontManager.GetJISFont(lptm.tmHeight) };
-    if (font != nullptr)
-    {
-        font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
-        DWORD result{ ::GetGlyphOutlineW(hdc, L'♪', fuf, lpgm, cjbf, pvbf, lpmat) };
-        static_cast<void>(::SelectObject(hdc, font));
-        return result;
-    }
-}
-```
+    ```
 
 - 初始化`XSub::GDI::ImageSubPlayer`。这也是我自己写的一个字幕播放器，目前还是个临时方案~~（等我把libass整明白了再继续完善）~~，具体实现大家自行查看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
 
-```cpp
-XSub::GDI::ImageSubPlayer* SubPlayer{};
+    ```cpp
+    XSub::GDI::ImageSubPlayer* SubPlayer{};
 
-auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    if (uMsg == WM_CREATE) 
+    auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
-        /* 此处省略…… */
-        if (DC3WY::SubPlayer == nullptr)
+        if (uMsg == WM_CREATE) 
         {
-            // 使用new来创建XSub::GDI::ImageSubPlayer实例
-            DC3WY::SubPlayer =
+            /* 此处省略…… */
+            if (DC3WY::SubPlayer == nullptr)
             {
-                new XSub::GDI::ImageSubPlayer{ hWnd }
-            };
-			
-            // 设置一个默认字幕位置
-            DC3WY::SubPlayer->SetDefualtPoint
-            (
-                XSub::Point
+                // 使用new来创建XSub::GDI::ImageSubPlayer实例
+                DC3WY::SubPlayer =
                 {
-                    .align{ XSub::Align::Center },
+                    new XSub::GDI::ImageSubPlayer{ hWnd }
+                };
+
+                // 设置一个默认字幕位置
+                DC3WY::SubPlayer->SetDefualtPoint
+                (
+                    XSub::Point
+                    {
+                        .align{ XSub::Align::Center },
+                    }
+                );
+            }
+        }
+        else if (uMsg == WM_MOVE)
+        {
+            if (DC3WY::SubPlayer != nullptr)
+            {
+                // 游戏窗口移动时要更新字幕窗口的位置
+                auto x{ static_cast<int>(LOWORD(lParam)) };
+                auto y{ static_cast<int>(HIWORD(lParam)) };
+                DC3WY::SubPlayer->SetPosition(x, y, true);
+            }
+        }
+        else if(uMsg == WM_SIZE)
+        {
+            if (DC3WY::SubPlayer != nullptr)
+            {
+                if (wParam == SIZE_MINIMIZED)
+                {
+                    // 当窗口最小化时隐藏
+                    DC3WY::SubPlayer->Hide();
+                    DC3WY::SubPlayer->UpdateLayer();
                 }
-            );
-        }
-    }
-    else if (uMsg == WM_MOVE)
-    {
-        if (DC3WY::SubPlayer != nullptr)
-        {
-            // 游戏窗口移动时要更新字幕窗口的位置
-            auto x{ static_cast<int>(LOWORD(lParam)) };
-            auto y{ static_cast<int>(HIWORD(lParam)) };
-            DC3WY::SubPlayer->SetPosition(x, y, true);
-        }
-    }
-	else if(uMsg == WM_SIZE)
-    {
-        if (DC3WY::SubPlayer != nullptr)
-        {
-            if (wParam == SIZE_MINIMIZED)
-            {
-                // 当窗口最小化时隐藏
-                DC3WY::SubPlayer->Hide();
-                DC3WY::SubPlayer->UpdateLayer();
-            }
-            else if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
-            {
-                DC3WY::SubPlayer->Show();
-                // 窗口显示或者改变大小时要重新同步
-                DC3WY::SubPlayer->SyncToParentWindow(true);
+                else if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+                {
+                    DC3WY::SubPlayer->Show();
+                    // 窗口显示或者改变大小时要重新同步
+                    DC3WY::SubPlayer->SyncToParentWindow(true);
+                }
             }
         }
+        else
+        {
+            /* 其他逻辑…… */
+        }
+        return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
     }
-    else
-    {
-        /* 其他逻辑…… */
-    }
-    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
-}
-```
+    ```
 
 - 我这里声明一个辅助函数来加载和播放字幕
 
-```cpp
-static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
-{
-    if (DC3WY::SubPlayer == nullptr)
+    ```cpp
+    static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
     {
-        return { false };
+        if (DC3WY::SubPlayer == nullptr)
+        {
+            return { false };
+        }
+    
+        std::string path{ ".\\cn_Data\\" };
+    
+        auto pos{ file.rfind("\\") };
+        if (pos != std::string_view::npos)
+        {
+            path.append(file.substr(pos + 1)).append(".xsub");
+        }
+        else
+        {
+            path.append(file).append(".xsub");
+        }
+    
+        bool is_load { DC3WY::SubPlayer->Load(path) };
+        if (is_load)
+        {
+            if (play) { DC3WY::SubPlayer->Play(); }
+        }
+        return { is_load };
     }
-
-    std::string path{ ".\\cn_Data\\" };
-
-    auto pos{ file.rfind("\\") };
-    if (pos != std::string_view::npos)
-    {
-        path.append(file.substr(pos + 1)).append(".xsub");
-    }
-    else
-    {
-        path.append(file).append(".xsub");
-    }
-
-    bool is_load { DC3WY::SubPlayer->Load(path) };
-    if (is_load)
-    {
-        if (play) { DC3WY::SubPlayer->Play(); }
-    }
-    return { is_load };
-}
-```
+    ```
 
 
 
