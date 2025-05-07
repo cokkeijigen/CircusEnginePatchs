@@ -81,13 +81,13 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 - 这是一个给窗口发送消息的函数，api详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) <br>
 - 那为什么要Hook它呢？那当然是为了更改这个对话框的文本内容。
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
-- 这个可以搜索字符串`データVer`定位到
+- 这个可以搜索字符串`データVer`定位到`sub_40DA40`这个函数
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
+- 可以通过`ida`反编译得知，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
 ```cpp
 Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA);
 ```
 ```cpp
-
 static constexpr inline wchar_t PatchDesc[]
 {
     L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
@@ -118,4 +118,5 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
 }
 ```
+- 当然也可以直接去Hook `sub_40DA40`这个函数来实现修改，我这里偷个懒直接Hook `SendMessageA`了。
 # 在写了在写了……
