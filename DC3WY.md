@@ -237,7 +237,7 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ```
 - 音符（♪）符号与其他特殊符号的支持
 这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。其他<br>
-要替换其他在GBK编码中不存在的特殊符号也同理。
+要替换其他在特殊符号也同理，不多说了。
 ```cpp
 if (0xA1EC == uChar) // § -> ♪
 {
@@ -250,12 +250,6 @@ if (0xA1EC == uChar) // § -> ♪
         return result;
     }
 }
-```
-- 另外，由于`mes`的字符串加密算法是每个字节`-0x20`，正好半角空格是`0x20`因此注定不能直接使用半角空格，
-要支持半角空格也一样需要先替换成其他字符再到`GetGlyphOutlineA`里替换，我这里使用了`#`来代替半角空格。
-```
-// '#' -> ' '
-if (uChar == 0x23) { uChar = 0x20; }
 ```
 
 # 在写了在写了……
