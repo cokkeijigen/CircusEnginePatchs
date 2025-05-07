@@ -119,4 +119,34 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 ```
 - 当然也可以直接去Hook `sub_40DA40`这个函数来实现修改，我这里偷个懒直接Hook `SendMessageA`了。
+
+## 0x02 一些游戏函数的HOOK
+
+### DC3WY::WndProc <0x40FC20>
+- 为什么要Hook这个函数？这个函数是游戏窗口过程函数，在我们需要拿到游戏窗口句柄或者在游戏创建窗口时做一些初始化操作，那么Hook游戏的`WndProc`是最好的选择。
+- 这个函数很好找，直接去查找`RegisterClassA`的引用
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_08.png) <br>
+- 依旧是通过`ida`反编译查看，这个`WndClass.lpfnWndProc = sub_40FC20;` 就是`DC3WY::WndProc`了
+```cpp
+Patch::Hooker::Add<DC3WY::WndProc>(reinterpret_cast<void*>(0x40FC20));
+```
+```cpp
+static constexpr inline wchar_t TitleName[]
+{
+    L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
+    L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
+};
+
+auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (uMsg == WM_CREATE) 
+    {
+        // 设置窗口标题
+        ::SetWindowTextW(hWnd, DC3WY::TitleName);
+        /* 一些初始化操作，此处省略…… */
+    }
+    /* 其他逻辑…… */
+    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
+```
 # 在写了在写了……
