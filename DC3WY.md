@@ -83,7 +83,7 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
 - 这个可以搜索字符串`データVer`定位到`sub_40DA40`这个函数
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
-- 可以通过`ida`反编译得知，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
+- 通过`ida`反编译可以一目了然，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
 ```cpp
 Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA);
 ```
