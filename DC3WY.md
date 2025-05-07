@@ -26,7 +26,7 @@
 
 ## 0x01 一些系统API的HOOK
 ### CreateFileA与FindFirstFileA
-- 为了实现与原版文件共存，因此需要HOOK这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
+- 为了实现与原版文件共存，因此需要Hook这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
 ```cpp
 Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);       // 添加Hook
 Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
@@ -94,6 +94,7 @@ static constexpr inline wchar_t PatchDesc[]
 
 static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
+    // 为了确保此条消息是更改对话框文本的，还需要判断wParam和DlgCtrlID
     if (uMsg == 0xCu && wParam == 0x104u)
     {
         auto ctr_id{ ::GetDlgCtrlID(hWnd) };
@@ -218,8 +219,7 @@ auto size{ lptm.tmHeight }; // 这个就可以作为size使用
 HFONT font{ DC3WY::FontManager.GetGBKFont(size) };
 ```
 - 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。<br>
-※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，当通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象(详细：[Utils::FontManager::m_GUI::OnChanged](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManager.cpp#L24)、[Utils::FontManagerGUI::MakeFont](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManagerGUI.cpp#L711)),
-如果不还原回去下次就无法通过大小确定是哪个字体了。
+※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，当通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象(详细：[Utils::FontManager::m_GUI::OnChanged](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManager.cpp#L24)、[Utils::FontManagerGUI::MakeFont](https://github.com/cokkeijigen/circus_engine_patchs/blob/master/CircusEnginePatchs/utillibs/fontmanager/FontManagerGUI.cpp#L711))，如果不还原，下次就无法通过大小确定是哪个字体了。
 ```cpp
 static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
 {
