@@ -252,7 +252,7 @@
     }
     ```
 
-- 初始化`XSub::GDI::ImageSubPlayer`。这也是我自己写的一个字幕播放器，目前还是个临时方案~~（等我把libass整明白了再继续完善）~~，具体实现大家自行查看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
+- 初始化`XSub::GDI::ImageSubPlayer`。这也是我自己写的一个字幕播放器，目前还是个临时方案 ~~（等我把libass整明白了再继续完善）~~ ，具体实现大家自行查看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
 
     ```cpp
     XSub::GDI::ImageSubPlayer* SubPlayer{};
