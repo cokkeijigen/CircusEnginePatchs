@@ -124,7 +124,8 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 ### DC3WY::WndProc <0x40FC20>
 - 为什么要Hook这个函数？这个函数是游戏窗口过程函数，在我们需要拿到游戏窗口句柄或者在游戏创建窗口时做一些初始化操作，那么Hook游戏的`WndProc`是最好的选择。
-- 这个函数很好找，直接去查找`RegisterClassA`的引用
+- 这个函数很好找，直接去查找`RegisterClassA`的引用，api详细可以到官方文档查看：
+[RegisterClassA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-registerclassa)
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_08.png) <br>
 - 依旧是通过`ida`反编译查看，这个`WndClass.lpfnWndProc = sub_40FC20;` 就是`DC3WY::WndProc`了
 ```cpp
