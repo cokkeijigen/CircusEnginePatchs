@@ -27,8 +27,8 @@
 ## 0x01 一些系统API的HOOK
 ### CreateFileA与FindFirstFileA
 - 为了实现与原版文件共存，因此需要HOOK这两个函数，api详细可以到官方文档查看：
-[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)，
-[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)
+[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，
+[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
 ```cpp
 Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
 Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
