@@ -77,4 +77,8 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ```
 ### 
 ### SendMessageA
+- 这是一个给窗口发送消息的函数，api详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) <br>
+- 那为什么要Hook它呢？那当然是为了更改这个对话框的文本内容。
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
+
 # 在写了在写了……
