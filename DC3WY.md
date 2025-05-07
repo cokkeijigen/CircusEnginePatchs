@@ -236,9 +236,7 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
     return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
 }
 ```
-- 音符（♪）符号与其他特殊符号的支持
-这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。其他<br>
-要替换其他在特殊符号也同理，不多说了。
+- 音符（♪）符号与其他特殊符号的支持这个实现也很简单，只需要将`♪`换成一个GBK编码里存在的字符，例如`§`，然后再在`GetGlyphOutlineA`里替换即可。其他，要替换其他在特殊符号也同理，不多说了。
 ```cpp
 if (0xA1EC == uChar) // § -> ♪
 {
@@ -250,6 +248,42 @@ if (0xA1EC == uChar) // § -> ♪
         static_cast<void>(::SelectObject(hdc, font));
         return result;
     }
+}
+```
+
+- 初始化`XSub::GDI::ImageSubPlayer`，这也是我自己写的一个字幕播放器，目前还是个临时方案~~（等我把libass整明白了再继续完善）~~，具体实现大家自行观看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
+
+```cpp
+XSub::GDI::ImageSubPlayer* SubPlayer{};
+
+auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (uMsg == WM_CREATE) 
+    {
+        /* 此处省略…… */
+        if (DC3WY::SubPlayer == nullptr)
+        {
+            // 使用new来创建XSub::GDI::ImageSubPlayer实例
+            DC3WY::SubPlayer =
+            {
+                new XSub::GDI::ImageSubPlayer{ hWnd }
+            };
+			
+            // 设置一个默认字幕位置
+            DC3WY::SubPlayer->SetDefualtPoint
+            (
+                XSub::Point
+                {
+                    .align{ XSub::Align::Center },
+                }
+            );
+        }
+    }
+    else
+    {
+        /* 其他逻辑…… */
+    }
+    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
 }
 ```
 
