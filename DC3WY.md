@@ -325,8 +325,12 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_10.png)
 
 - 运行直到发现路径是OP视频的为止，然后直接取消断点，然后按下`Alt+F9`运行到用户代码，可以看到上面有个`CoCreateInstance`，这里就是我们要找的函数了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_11.png)
+
 - 然后就是第二种方法，那就是直接断`CoCreateInstance`，这个函数普通断点可能停不下来，所以建议使用设置硬件断点（执行）。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_12.png)
-- 这里停下来之后，然后取消断点，接着在堆栈窗口选中顶部的地址按下回车就能来到我们要找的函数了。
+
+- 这里停下来之后，然后取消断点，接着在堆栈窗口选中顶部的地址按下回车就能来到我们要找的函数了，效果都一样。<br>那话又说回来了，为什么要演示两种方法呢，原因很简单，就是让你知道你在不知道它是用什么API的情况下，可以尝试断文件相关API的土方法。
+
+  
 
 
 
