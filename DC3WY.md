@@ -316,6 +316,39 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 ```
 
+- 我这里声明一个辅助函数来加载和播放字幕
+
+```cpp
+static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
+{
+    if (DC3WY::SubPlayer == nullptr)
+    {
+        return { false };
+    }
+
+    std::string path{ ".\\cn_Data\\" };
+
+    auto pos{ file.rfind("\\") };
+    if (pos != std::string_view::npos)
+    {
+        path.append(file.substr(pos + 1)).append(".xsub");
+    }
+    else
+    {
+        path.append(file).append(".xsub");
+    }
+
+    bool is_load { DC3WY::SubPlayer->Load(path) };
+    if (is_load)
+    {
+        if (play) { DC3WY::SubPlayer->Play(); }
+    }
+    return { is_load };
+}
+```
+
+
+
 ### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640>
 
 - 这两个是控制OP视频播放与停止的函数，当时在找这个两个函数的时，那过程是相当的抽象，直接说结论，这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`的引用也能找到，但是太多了，直接上调试器，我有两种方法可以快速定位。
