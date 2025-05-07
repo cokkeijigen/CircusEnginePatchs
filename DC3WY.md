@@ -326,6 +326,12 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
   ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_11.png)
 
-- 然后就是第二种方法，那就是直接断`CoCreateInstance`，这个函数普通断点可能停不下来，所以建议使用硬件断点（执行）。
+- 然后就是第二种方法，那就是直接断`CoCreateInstance`，这个函数普通断点可能停不下来，所以建议使用设置硬件断点（执行）。
+
+  ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_12.png)
+
+- 这里停下来之后，直接在堆栈窗口按下回车就能来到我们要找的函数了。
+
+
 
 # 在写了在写了……
