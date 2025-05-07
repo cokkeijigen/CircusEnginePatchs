@@ -70,7 +70,6 @@ auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
 Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
 ```
 ```cpp
-//  dllmain.cpp
 static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
 {
     /* 此处省略，后面会与FontManager一起详细讲解 */ 
@@ -198,6 +197,26 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         /* 其他逻辑…… */
     }
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
+```
+- 应用字体需要在`GetGlyphOutlineA`里，先通过`FontManager::GetJISFont`或者`FontManager::GetGBKFont`获取当前选择的字体的`HFONT`对象，<br>
+这两个函数的参数是需要一个`szie`，那么这个`size`从哪来？很简单，从第一个参数`HDC hdc`中获取。<br>
+只需要调用`GetTextMetricsA`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))
+```cpp
+static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
+{
+    if (tagTEXTMETRICA lptm{}; ::GetTextMetricsA(hdc, &lptm))
+    {
+        HFONT font{ DC3WY::FontManager.GetGBKFont(lptm.tmHeight) };
+        if (font != nullptr)
+        {
+            font = { reinterpret_cast<HFONT>(::SelectObject(hdc, font)) };
+            DWORD result{ Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat) };
+            static_cast<void>(::SelectObject(hdc, font));
+            return result;
+        }
+    }
+    return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
 }
 ```
 # 在写了在写了……
