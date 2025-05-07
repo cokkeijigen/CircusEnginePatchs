@@ -316,9 +316,9 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 ```
 
-### 游戏的视频相关函数：DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640>
+### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640>
 
-
+- 这两个是控制视频播放与停止的函数。
 
 
 
