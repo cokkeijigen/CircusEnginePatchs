@@ -145,7 +145,10 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         ::SetWindowTextW(hWnd, DC3WY::TitleName);
         /* 一些初始化操作，此处省略…… */
     }
-    /* 其他逻辑…… */
+    else
+    {
+        /* 其他逻辑…… */
+    }
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
 }
 ```
