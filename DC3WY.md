@@ -1,5 +1,5 @@
 # DC3WY 中文本地化笔记
-### <a id="FontManager">`FontManager`</a>
+
 | 工具 |说明 |
 |:---|:---|
 | [MesTextTool](https://github.com/cokkeijigen/MesTextTool) | Mes文本的提取导入 |
@@ -61,8 +61,6 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
       return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
   }
 ```
-# 在写了在写了……
-
 ### GetGlyphOutlineA
 - 主要是更改游戏字体与文本编码
 ```cpp
@@ -101,3 +99,6 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ```
 - 关于[FontManager](#FontManager) : 
 
+### <a id="FontManager">`FontManager`</a>
+
+# 在写了在写了……
