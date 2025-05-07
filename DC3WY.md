@@ -319,17 +319,13 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 ### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640>
 
 - 这两个是控制OP视频播放与停止的函数，当时在找这个两个函数的时，那过程是相当的抽象，直接说结论，这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`的引用也能找到，但是太多了，直接上调试器，我有两种方法可以快速定位。
-- 首先是使用土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`它并没有使用，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。
-- ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_10.png)
 
-- 运行直到发现路径是OP视频的为止，然后直接取消断点，然后按下`Alt+F9`运行到用户代码，可以看到上面有个`CoCreateInstance`，这里就是我们要找的函数了。
+- 首先是使用土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`它并没有使用，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。<br>
 
-  ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_11.png)
+  ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_10.png)
 
-- 然后就是第二种方法，那就是直接断`CoCreateInstance`，这个函数普通断点可能停不下来，所以建议使用设置硬件断点（执行）。
-
-  ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_12.png)
-
+- 运行直到发现路径是OP视频的为止，然后直接取消断点，然后按下`Alt+F9`运行到用户代码，可以看到上面有个`CoCreateInstance`，这里就是我们要找的函数了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_11.png)
+- 然后就是第二种方法，那就是直接断`CoCreateInstance`，这个函数普通断点可能停不下来，所以建议使用设置硬件断点（执行）。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_12.png)
 - 这里停下来之后，然后取消断点，接着在堆栈窗口选中顶部的地址按下回车就能来到我们要找的函数了。
 
 
