@@ -282,7 +282,34 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             );
         }
     }
-
+    else if (uMsg == WM_MOVE)
+    {
+        if (DC3WY::SubPlayer != nullptr)
+        {
+             // 游戏窗口移动时要更新字幕窗口的位置
+             auto x{ static_cast<int>(LOWORD(lParam)) };
+             auto y{ static_cast<int>(HIWORD(lParam)) };
+             DC3WY::SubPlayer->SetPosition(x, y, true);
+        }
+    }
+	else if(uMsg == WM_SIZE)
+    {
+        if (DC3WY::SubPlayer != nullptr)
+        {
+            if (wParam == SIZE_MINIMIZED)
+            {
+                // 当窗口最小化时隐藏
+                DC3WY::SubPlayer->Hide();
+                DC3WY::SubPlayer->UpdateLayer();
+            }
+            else if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+            {
+                DC3WY::SubPlayer->Show();
+                // 窗口显示或者改变大小时要重新同步
+                DC3WY::SubPlayer->SyncToParentWindow(true);
+            }
+        }
+    }
     else
     {
         /* 其他逻辑…… */
