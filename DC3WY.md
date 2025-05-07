@@ -63,8 +63,9 @@ auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
       return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
   }
 ```
+
 ### GetGlyphOutlineA
-- 主要是更改游戏字体与文本编码
+- 这个主要是用来更改游戏字体与文本编码
 ```cpp
 Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
 ```
