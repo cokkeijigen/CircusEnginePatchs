@@ -61,3 +61,4 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
       return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
   }
 ```
+# 在写了在写了……
