@@ -199,8 +199,9 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
 }
 ```
-- 应用字体需要在`GetGlyphOutlineA`里，先通过`FontManager::GetJISFont`或者`FontManager::GetGBKFont`获取当前选择的字体的`HFONT`对象，<br>
-这两个函数的参数是需要一个`szie`，那么这个`size`从哪来？很简单，从第一个参数`HDC hdc`中获取。<br>只需要调用`GetTextMetricsA`
+- 可以通过`FontManager::GetJISFont`或者`FontManager::GetGBKFont`获取当前选择的字体的`HFONT`对象，<br>这两个函数的参数是需要一个`szie`，
+那么这个`size`从哪来？以及要如何让游戏使用？<br>
+很简单，这就是为什么需要Hook`GetGlyphOutlineA`的原因了 从第一个参数`HDC hdc`中获取。<br>只需要调用`GetTextMetricsA`
 ([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))即可
 - 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。
 ※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，
