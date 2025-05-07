@@ -200,10 +200,16 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 ```
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_09.png)
-- 可以通过`FontManager::GetJISFont`或者`FontManager::GetGBKFont`获取当前选择的字体的`HFONT`对象，<br>这两个函数的参数是需要一个`szie`，
-那么这个`size`从哪来？以及要如何让游戏使用？<br>
-很简单，这就是为什么需要Hook`GetGlyphOutlineA`的原因了 从第一个参数`HDC hdc`中获取。<br>只需要调用`GetTextMetricsA`
-([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))即可
+- 那么如何引用到游戏中呢？很简单，就是在`GetGlyphOutlineA`中设置就行了，这就是我为什么需要Hook它。
+- 在`GetGlyphOutlineA`中可以通过`FontManager::GetJISFont`和`FontManager::GetGBKFont`来获取当前选择字体的`HFONT`对象。
+但是这两个函数都是需要一个`size`作为参数的，那么从哪获取呢？答案很简单，直接从第一个参数`HDC hdc`中获取即可。
+- 使用`GetTextMetricsA`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))获取当前字体的`TEXTMETRIC`，
+这个`TEXTMETRIC`。
+```cpp
+tagTEXTMETRICA lptm{};
+::GetTextMetricsA(hdc, &lptm);
+lptm.tmHeight; // 这个就可以作为size使用
+```
 - 获取到`HFONT`对象后再通过`SelectObject`([详细](https://learn.microsoft.com/windows/win32/api/wingdi/nf-wingdi-gettextmetrics))来设置`hdc`的新字体。
 ※ 注意：用完需要再调用`SelectObject`还原回去。为什么要还原回去呢？因为这个游戏使用了多种大小的字体，而`FontManager`会将字体大小作为`key`将`HFONT`存到`map`中，
 如果通过`FontManagerGUI`更改字体大小时，会把这个`map`中的所有字体通过原始大小进行计算，获得缩放比例再更新并创建出与其大小相对新的`HFONT`对象，
