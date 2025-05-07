@@ -35,21 +35,21 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
 ```
 - 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
 ```cpp
-  auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
-  {
-      static std::string new_path{};
-      size_t pos{ path.find_last_of("\\/") };
-      if (pos != std::wstring_view::npos)
-      {
-          new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
-          DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
-          if (attr != INVALID_FILE_ATTRIBUTES)
-          {
-              return new_path;
-          }
-      }
-      return {};
-  }
+auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
+{
+    static std::string new_path{};
+    size_t pos{ path.find_last_of("\\/") };
+    if (pos != std::wstring_view::npos)
+    {
+        new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
+        DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
+        if (attr != INVALID_FILE_ATTRIBUTES)
+        {
+            return new_path;
+        }
+    }
+    return {};
+}
 
   static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
   {
@@ -69,6 +69,7 @@ Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
 Patch::Hooker::Add<DC3WY::GetGlyphOutlineA>(::GetGlyphOutlineA);
 ```
 ```cpp
+//  dllmain.cpp
 static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
 {
     /* 此处省略，后面会与FontManager一起详细讲解 */ 
@@ -82,4 +83,39 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
 - 这个可以搜索字符串`データVer`定位到
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
+```cpp
+Patch::Hooker::Add<DC3WY::SendMessageA>(::SendMessageA);
+```
+```cpp
+
+static constexpr inline wchar_t PatchDesc[]
+{
+    L"本补丁由【COKEZIGE STUDIO】制作并免费发布\n\n"
+    L"仅供学习交流使用，禁止一切直播录播和商用行为\n\n"
+    L"补丁源代码已开源至GitHub\n\n"
+    L"https://github.com/cokkeijigen/dc3_cn"
+};
+
+static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (uMsg == 0xCu && wParam == 0x104u)
+    {
+        auto ctr_id{ ::GetDlgCtrlID(hWnd) };
+        if (ctr_id == 1005)
+        {
+            auto result
+            {
+                ::SendMessageW
+                (
+                    { hWnd }, { 0x0000000Cu },
+                    { sizeof(DC3WY::PatchDesc) / sizeof(wchar_t) },
+                    { reinterpret_cast<LPARAM>(DC3WY::PatchDesc) }
+                )
+            };
+            return { result };
+        }
+    }
+    return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
+}
+```
 # 在写了在写了……
