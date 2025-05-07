@@ -138,7 +138,8 @@ static constexpr inline wchar_t TitleName[]
     L"【COKEZIGE STUDIO】Da Capo Ⅲ With You - CHS Ver.1.00"
     L" ※仅供学习交流使用，禁止一切直播录播和商用行为※" 
 };
-
+```
+```cpp
 auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
     if (uMsg == WM_CREATE) 
@@ -146,6 +147,51 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         // 设置窗口标题
         ::SetWindowTextW(hWnd, DC3WY::TitleName);
         /* 一些初始化操作，此处省略…… */
+    }
+    else
+    {
+        /* 其他逻辑…… */
+    }
+    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
+```
+- 初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，详细：
+[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
+
+```cpp
+
+Utils::FontManager DC3WY::FontManager{};
+
+auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (uMsg == WM_CREATE) 
+    {
+        // 设置窗口标题
+        ::SetWindowTextW(hWnd, DC3WY::TitleName);
+
+        HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
+        if (SystemMenu != nullptr)
+        {
+            // 向系统菜单添加 “更改字体” 选项，标识为0x114514
+            ::AppendMenuW(SystemMenu, MF_UNCHECKED, 0x114514, L"更改字体");
+        }
+        if (!DC3WY::FontManager.IsInit())
+        {
+            DC3WY::FontManager.Init(hWnd);
+        }
+
+    }
+    else if (uMsg == WM_SYSCOMMAND)
+    {
+        if (wParam == 0x114514)
+        {
+            if (DC3WY::FontManager.GUI() != nullptr)
+            {
+                // 显示选择字体窗口
+                DC3WY::FontManager.GUIChooseFont();
+            }
+            return TRUE;
+        }
     }
     else
     {
