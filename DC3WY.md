@@ -25,3 +25,39 @@
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_05.png) <br>
 
 ## 0x01 一些系统API的HOOK
+### CreateFileA与FindFirstFileA
+- 为了实现与原版文件共存，因此需要HOOK这两个函数
+```cpp
+Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);
+Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA);
+```
+- 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
+```cpp
+  auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
+  {
+      static std::string new_path{};
+      size_t pos{ path.find_last_of("\\/") };
+      if (pos != std::wstring_view::npos)
+      {
+          new_path = std::string{ ".\\cn_Data" }.append(path.substr(pos));
+          DWORD attr { ::GetFileAttributesA(new_path.c_str()) };
+          if (attr != INVALID_FILE_ATTRIBUTES)
+          {
+              return new_path;
+          }
+      }
+      return {};
+  }
+
+  static auto WINAPI CreateFileA(LPCSTR lpFN, DWORD dwDA, DWORD dwSM, LPSECURITY_ATTRIBUTES lpSA, DWORD dwCD, DWORD dwFAA, HANDLE hTF) -> HANDLE
+  {
+      std::string_view new_path{ DC3WY::ReplacePathA(lpFN) };
+      return Patch::Hooker::Call<DC3WY::CreateFileA>(new_path.empty() ? lpFN : new_path.data(), dwDA, dwSM, lpSA, dwCD, dwFAA, hTF);
+  }
+
+  static auto WINAPI FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) -> HANDLE
+  {
+      std::string_view new_path{ DC3WY::ReplacePathA(lpFileName) };
+      return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
+  }
+```
