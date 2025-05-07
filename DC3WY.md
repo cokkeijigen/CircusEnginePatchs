@@ -28,7 +28,7 @@
 ### CreateFileA与FindFirstFileA
 - 为了实现与原版文件共存，因此需要HOOK这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
 ```cpp
-Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA); // 添加Hook
+Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);       // 添加Hook
 Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
 ```
 - 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
@@ -286,10 +286,10 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         if (DC3WY::SubPlayer != nullptr)
         {
-             // 游戏窗口移动时要更新字幕窗口的位置
-             auto x{ static_cast<int>(LOWORD(lParam)) };
-             auto y{ static_cast<int>(HIWORD(lParam)) };
-             DC3WY::SubPlayer->SetPosition(x, y, true);
+            // 游戏窗口移动时要更新字幕窗口的位置
+            auto x{ static_cast<int>(LOWORD(lParam)) };
+            auto y{ static_cast<int>(HIWORD(lParam)) };
+            DC3WY::SubPlayer->SetPosition(x, y, true);
         }
     }
 	else if(uMsg == WM_SIZE)
