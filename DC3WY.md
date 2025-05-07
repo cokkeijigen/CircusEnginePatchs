@@ -320,7 +320,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 - 这两个是控制OP视频播放与停止的函数，当时在找这个两个函数的时，那过程是相当的抽象，直接说结论，这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`的引用也能找到，但是太多了，直接上调试器，我有两种方法可以快速定位。
 
-- 首先是使用土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`它并没有使用，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。<br>
+- 首先是使用土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`，不过它并没有使用这个，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。<br>
 
   ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_10.png)
 
