@@ -118,6 +118,10 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     return Patch::Hooker::Call<DC3WY::SendMessageA>(hWnd, uMsg, wParam, lParam);
 }
 ```
+- 至于这个`バージョン情報`的字符串如何更改，后面会讲到，接着往下看不用急。
+
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.1.png)
+
 - 当然也可以直接去Hook `sub_40DA40`这个函数来实现修改，我这里偷个懒直接Hook `SendMessageA`了。
 
 ## 0x02 一些游戏函数的HOOK
