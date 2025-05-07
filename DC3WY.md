@@ -74,5 +74,5 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
 }
 ```
 ### 
-### GetGlyphOutlineA
+### SendMessageA
 # 在写了在写了……
