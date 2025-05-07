@@ -192,6 +192,14 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return TRUE;
         }
     }
+    else if (uMsg == WM_SIZE)
+    {
+        // 当窗口大小改变时需要更新一下显示的状态，针对全屏与窗口模式切换
+        if (DC3WY::FontManager.GUI() != nullptr)
+        {
+            DC3WY::FontManager.GUIUpdateDisplayState();
+        }
+    }
     else
     {
         /* 其他逻辑…… */
@@ -274,6 +282,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             );
         }
     }
+
     else
     {
         /* 其他逻辑…… */
