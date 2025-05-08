@@ -524,7 +524,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 来到`ida`反编译，简单观察，`dword_4A95EC`应该是个存放多个`DirectSoundBuffer`的数组，`a2`就很明显了是个`index`，`a1`不明，暂且当做是一个`flag`吧<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_26.png)
 
-在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看` sub_431870`被调用时的堆栈，真好在`esp+0x12C`发现了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_27.png)
+在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看` sub_431870`被调用时的堆栈，正好在`esp+0x12C`发现了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_27.png)
 ```cpp
 Patch::Mem::JmpWrite(0x431870, DC3WY::JmpAudioPlayHook); // 函数逻辑不复杂，我这里手写不调用原函数，因此使用JmpWrite添加Hook
 ```
