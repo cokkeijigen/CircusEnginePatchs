@@ -520,4 +520,29 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 停下来之后，就可以取消断点了，接着在堆栈窗口选中顶部的地址按下回车回到调用处<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_24.png)
 
+这里就是我们要找的播放函数了<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_25.png)
+
+在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看堆栈时发现文件路径的字符串，就在` sub_431870`被调用时`esp+0x12C`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_26.png)
+
+```cpp
+Patch::Mem::JmpWrite(0x431870, DC3WY::JmpAudioPlayHook); // 添加Hook
+```
+因为要拿到文件名，所以这里需要手写内联汇编
+```cpp
+__declspec(naked) auto DC3WY::JmpAudioPlayHook(void) -> void
+ {
+    __asm
+    {
+        sub esp, 0x04	                  // 需要使用栈传递文件名参数，所以这里esp+0x04
+        mov eax, dword ptr ss:[esp+0x04]  // 这里交换call的返回地址
+        mov dword ptr ss:[esp], eax
+        mov eax, dword ptr ss:[esp+0x130] // 因为上面esp+0x04了，所以文件名的地址变成了 0x12C+0x04 -> esp + 0x130
+        mov dword ptr ss:[esp+0x04], eax  // 根据传参顺序，最后一个入栈对应参数一
+        jmp DC3WY::AudioPlay_Hook
+    }
+ }
+```
+
+
+
 # 在写了在写了……
