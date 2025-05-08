@@ -424,7 +424,9 @@ namespace XSub::GDI
         this->m_LastImageSubEntry = { nullptr };
         this->m_CurrentImageSubIsShared = { false };
         this->m_CurrentImageSub = { new ImageSubFile{ path } };
-        return { this->m_CurrentImageSub->IsValid() };
+        auto is_valid { this->m_CurrentImageSub->IsValid() };
+        if (is_valid) { this->UnLoad(false); }
+        return { !is_valid };
     }
 
     auto ImageSubPlayer::Load(const XSub::GDI::ImageSub* sub) noexcept -> void
@@ -449,9 +451,9 @@ namespace XSub::GDI
             if (this->m_CurrentImageSub != nullptr)
             {
                 delete this->m_CurrentImageSub;
-                this->m_CurrentImageSub = nullptr;
             }
         }
+        this->m_CurrentImageSub = nullptr;
         if (lock) this->m_Mutex.unlock();
     }
 

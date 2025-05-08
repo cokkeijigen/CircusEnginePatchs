@@ -19,6 +19,7 @@ namespace DC3WY {
     Utils::FontManager DC3WY::FontManager{};
     XSub::GDI::ImageSubPlayer* SubPlayer{};
     static IDirectSoundBuffer* CurrentPlayingBuffer{};
+    static bool IsOpMoviePlaying{ false };
 
     auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
@@ -69,13 +70,7 @@ namespace DC3WY {
             {
                 if (DC3WY::FontManager.GUI() != nullptr)
                 {
-                    auto is_op_movie_playing
-                    {
-                        DC3WY::SubPlayer != nullptr &&
-                        SubPlayer->IsPlaying() &&
-                        DC3WY::CurrentPlayingBuffer == nullptr
-                    };
-                    if (is_op_movie_playing)
+                    if (DC3WY::IsOpMoviePlaying)
                     {
                         ::MessageBoxW
                         (
@@ -353,7 +348,9 @@ namespace DC3WY {
         }
         auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
 
-        if (DC3WY::SubPlayer != nullptr)
+        DC3WY::IsOpMoviePlaying = { result >= 0 };
+
+        if (DC3WY::IsOpMoviePlaying && DC3WY::SubPlayer != nullptr)
         {
             auto is_load { DC3WY::SubPlayer->IsLoad() };
             if (is_load)
@@ -380,6 +377,7 @@ namespace DC3WY {
             DC3WY::SubPlayer->UnLoad();
             DC3WY::SubPlayer->UnuseDefualtPoint();
         }
+        DC3WY::IsOpMoviePlaying = { false };
         DEBUG_ONLY(console::fmt::write("[DC3WY::ComStopVideo]\n"));
         auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
         return { result };
