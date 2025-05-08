@@ -386,7 +386,27 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_13.png)
 
-这个`sub_444680`就是这游戏用来创建COM实例并播放视频的函数了，这里都是调用着COM接口的虚函数，看不懂没关系，因为我们只需要找一个播放字幕时机的函数，不过我这里没有选择Hook这个函数，而是调用它的上层，这个函数就只有一个调用地方。<br>![Image_text](http://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_14.png)
+这个`sub_444680`就是这游戏用来创建COM实例并播放视频的函数了，这里都是调用着COM接口的虚函数，看不懂没关系，因为我们只需要找一个播放字幕时机的函数，不过我这里没有选择Hook这个函数，这个函数就只有一个调用地方，我选择Hook调用它的上层函数，也就是这个`sub_444920`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_14.png)
 
+简单看一下这个`sub_444920`，<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_15.png)
+
+这个`String1`应该就是文件路径了，`ida`点进去可以看到地址是`0x4E65F8`，通过观察它的大小为`260`也就是`MAX_PATH`的大小。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_16.png)
+
+这里先简单对他进行一个Hook
+
+```cpp
+Patch::Hooker::Add<DC3WY::ComPlayVideo_Hook>(reinterpret_cast<void*>(0x444920)); // 添加Hook
+```
+
+```cpp
+auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
+{
+    std::string_view movie_file_path{ reinterpret_cast<const char*>(0x4E65F8) };
+    auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
+    return { result };
+}
+```
+
+现在播放函数有了，还差个停止播放的函数。
 
 # 在写了在写了……
