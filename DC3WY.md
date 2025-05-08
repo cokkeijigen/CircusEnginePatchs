@@ -575,7 +575,7 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
                 DC3WY::CurrentPlayingBuffer = { buffer };
             }
         }
-        
+        return { result };
     }
     return { NULL };
 }
