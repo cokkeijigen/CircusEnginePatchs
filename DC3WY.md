@@ -168,7 +168,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 ```
 
-初始化`Utils::FontManager`，这是我自己写的一个字体选择器GUI，具体实现大家自行查看源码：[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
+**初始化`Utils::FontManager`**，这是我自己写的一个字体选择器GUI，具体实现大家自行查看源码：[utillibs/fontmanager](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/fontmanager)。
 
 ```cpp
 
@@ -273,7 +273,7 @@ if (0xA1EC == uChar) // § -> ♪
 }
 ```
 
-初始化`XSub::GDI::ImageSubPlayer`。这也是我自己写的一个字幕播放器，目前还是个临时方案 ~~（等我把libass整明白了再继续完善）~~ ，具体实现大家自行查看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
+**初始化`XSub::GDI::ImageSubPlayer`。** 这也是我自己写的一个字幕播放器，目前还是个临时方案 ~~（等我把libass整明白了再继续完善）~~ ，具体实现大家自行查看源码：[dc3wy/sub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/dc3wy/sub)、[utillibs/xsub](https://github.com/cokkeijigen/circus_engine_patchs/tree/master/CircusEnginePatchs/utillibs/xsub)。
 
 ```cpp
 XSub::GDI::ImageSubPlayer* SubPlayer{};
