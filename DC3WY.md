@@ -563,8 +563,8 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
     if (buffer != nullptr)
     {
         auto result{ buffer->Play(0x00, 0x00, flag != 0x00) };
-        
-		// 如果当前的音频Buffer等于nullptr，则代表现在无字幕播放
+
+        // 如果当前的音频Buffer等于nullptr，则代表现在无字幕播放
         if (DC3WY::CurrentPlayingBuffer == nullptr)
         {
             // 加载音频文件对应的字幕，true代表加载完后立即播放
