@@ -524,7 +524,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 来到`ida`反编译，简单观察，`dword_4A95EC`应该是个存放多个`DirectSoundBuffer`的数组，`a2`就很明显了是个`index`，`a1`不明，暂且当做是一个`flag`吧<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_26.png)
 
-在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看` sub_431870`被调用时的堆栈在`esp+0x12C`发现了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_27.png)
+在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看` sub_431870`被调用时的堆栈，真好在`esp+0x12C`发现了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_27.png)
 
 ```cpp
 Patch::Mem::JmpWrite(0x431870, DC3WY::JmpAudioPlayHook); // 添加Hook
@@ -543,6 +543,42 @@ __declspec(naked) auto DC3WY::JmpAudioPlayHook(void) -> void
         jmp DC3WY::AudioPlay_Hook
     }
  }
+```
+代码基本照抄`ida`反编译的内容，在播放之后在插入一个我们自己播放字幕播放代码即可
+```cpp
+#include <dsound.h> // 为了方便使用DirectSound的API
+
+static IDirectSoundBuffer* CurrentPlayingBuffer{}; // 需要记录当前播放字幕的音频Buffer
+
+static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t index) -> int
+{
+    auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
+	auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+    
+    if (index == 0x01)
+    {
+        *reinterpret_cast<uint32_t*>(*UnknownPtr + 0x136C) = flag;
+    }
+    
+    auto buffer{ DirectSoundBuffers[index] };
+    if (buffer != nullptr)
+    {
+        auto result{ buffer->Play(0x00, 0x00, flag != 0x00) };
+        
+		// 如果当前的音频Buffer等于nullptr，则代表现在无字幕播放
+        if (DC3WY::CurrentPlayingBuffer == nullptr)
+        {
+            // 加载音频文件对应的字幕，true代表加载完后立即播放
+            auto is_load{ DC3WY::LoadXSubAndPlayIfExist(file, true) };
+            if (is_load)
+            {
+                DC3WY::CurrentPlayingBuffer = { buffer };
+            }
+        }
+        
+    }
+    return { NULL };
+}
 ```
 
 
