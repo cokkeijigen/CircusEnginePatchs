@@ -372,7 +372,7 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 ### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640> （这里函数名自己取的）
 
-这两个是控制OP视频播放与停止的函数，当然Hook它们当然自不必说，因为需要一个字幕加载和播放的时机，而控制游戏的视频播放停止函数就是最好的选择。这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`（[详细](https://learn.microsoft.com/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)）的引用也能找到，但是太多了，直接上调试器，找到这两个函数有两种方法可以快速定位。
+这两个是控制OP视频的播放暂停的函数，当然Hook它们当然自不必说，因为需要一个字幕加载和播放的时机，而控制游戏的视频播放停止函数就是最好的选择。这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`（[详细](https://learn.microsoft.com/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)）的引用也能找到，但是太多了，直接上调试器，找到这两个函数有两种方法可以快速定位。
 
 首先是经典的土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`，不过它并没有使用这个，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。<br>
 
@@ -407,7 +407,7 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
 }
 ```
 
-现在播放函数有了，那还差个停止播放的函数，既然是通过`CoCreateInstance`创建的实例，那么我们可以直接查找其他使用这个实例的地方。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_17.png)
+现在播放函数有了，那还差个暂停视频的函数，既然是通过`CoCreateInstance`创建的实例，那么我们可以直接查找其他使用这个实例的地方。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_17.png)
 
 很幸运的是它的引用并不多，来到`sub_4443B0`可以看到，这个`ppv`被重新赋值为`0`，那么就可以大胆猜测这个函数应该是和视频停止播放相关<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_18.png)
 
@@ -429,7 +429,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 }
 ```
 
-这下播放停止视频的函数都有了，接着来写加载外挂字幕并和视频一起播放
+这下视频的播放暂停函数都有了，接着来写加载外挂字幕并和视频一起播放
 
 ```cpp
 auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
@@ -512,7 +512,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 ### DC3WY::AudioStop<0x432490>，DC3WY::AudioPlay<0x432490>（这里函数名自己取的）
 
-游戏的ED是使用了播放音频+滚动图片的方式呈现，要加字幕只能是去hook游戏播放音频相关的函数。它使用了`DirectSound`来播放音频，所以我们可以通过去给`DirectSound`的播放和停止接口函数下个断点，就能找到游戏的播放停止函数了。<br>
+游戏的ED是使用了播放音频+滚动图片的方式呈现，要加字幕只能是去hook游戏播放音频相关的函数。它使用了`DirectSound`来播放音频，所以我们可以通过去给`DirectSound`的播放和停止接口函数下个断点，就能找到游戏的播放暂停函数了。<br>
 
 首先我们先来到`x32dbg`的符号窗口，找到`dsound.dll`，然后右键`下载此模块的符号信息`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_22.png)
 
@@ -562,6 +562,7 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
     auto buffer{ DirectSoundBuffers[index] };
     if (buffer != nullptr)
     {
+        // 播放音频
         auto result{ buffer->Play(0x00, 0x00, flag != 0x00) };
 
         // 如果当前的音频Buffer等于nullptr，则代表现在无字幕播放
@@ -580,6 +581,6 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
 }
 ```
 
-
+接着就是找到暂停播放的函数了，来到`dsound.dll`符号这边，使用正则表达式`Stop[\s\S]+DirectSoundBuffer`过滤出暂停函数，可以发现一共有三个，不确定具体是调用了哪个，所以这里全都都下断点
 
 # 在写了在写了……
