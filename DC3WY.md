@@ -514,8 +514,8 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 游戏的ED是使用了播放音频+滚动图片的方式呈现，要加字幕只能是去hook游戏播放音频相关的函数。它使用了`DirectSound`来播放音频，所以我们可以通过去给`DirectSound`的播放和停止接口函数下个断点，就能找到游戏的播放停止函数了。<br>
 
-首先我们先来到`x32dbg`的符号窗口，找到`dsound.dll`，然后右键`下载此模块的符号信息`<br> ![Image_text](http://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_22.png)
+首先我们先来到`x32dbg`的符号窗口，找到`dsound.dll`，然后右键`下载此模块的符号信息`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_22.png)
 
-
+接着使用正则表达式`Play[\s\S]+DirectSoundBuffer`过滤出播放函数
 
 # 在写了在写了……
