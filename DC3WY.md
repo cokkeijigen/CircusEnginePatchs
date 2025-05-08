@@ -587,6 +587,66 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
 
 这里就是我们要找的暂停函数了<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_30.png)
 
-依旧是来到`ida`反编译看看<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_31.png)
+依旧看看`ida`的反编译<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_31.png)
+
+其中有个`(*(*result + 0x34))(result, 0);`不知道是什么，所以还是得来到`x32dbg`看看<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_32.png)
+
+嗯，这下知道了，这个是`DirectSoundBuffer::SetCurrentPosition`，另外我顺便也进去看了一下`sub_432000`，里面有调用`DirectSoundBuffer::Release`，那这很明显了，这个函数是用来做销毁清理（释放内存）的。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_33.png)
+
+好，现在开始写Hook代码
+
+```cpp
+Patch::Mem::JmpWrite(0x432490, DC3WY::AudioStop_Hook); // 同上
+```
+
+```cpp
+static IDirectSoundBuffer* CurrentPlayingBuffer{}; // 在AudioPlay_Hook中成功加载并播放字幕时会存放当前播放的Buffer
+
+// 注意，原函数是__thiscall，这里使用__fastcall来替代，第一个参数ECX，__thiscall第二个参数不是EDX所以要有个占位
+static auto __fastcall AudioRelease(int32_t* m_this, int32_t, uint32_t index) -> DWORD
+{
+    auto RawCall{ reinterpret_cast<decltype(DC3WY::AudioRelease)*>(0x432000) };
+    return RawCall(m_this, NULL, index);
+}
+
+// 同上
+auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) -> DWORD
+{
+    auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
+	auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+
+    m_this[0x05 * index + 0x15] = 0x00;
+    if (index - 0x01 <= 0x03 && *UnknownPtr != NULL)
+    {
+        auto uint8_ptr{ reinterpret_cast<uint8_t*>(*UnknownPtr) };
+        *(uint8_ptr + (0x20 * index) + 0x4D10) = 0x00;
+    }
+    
+    auto buffer{ DirectSoundBuffers[index] };
+    if (buffer != nullptr)
+    {
+        
+        auto is_current_playing_buffer
+        {
+            DC3WY::CurrentPlayingBuffer != nullptr &&
+            buffer == DC3WY::CurrentPlayingBuffer
+        };
+        if (is_current_playing_buffer)
+        {
+            DC3WY::SubPlayer->Stop();
+            DC3WY::SubPlayer->UnLoad();
+            DC3WY::CurrentPlayingBuffer = { nullptr };
+        }
+        
+        buffer->SetCurrentPosition(0x00);
+        buffer->Stop();
+        auto result{ DC3WY::AudioRelease(m_this, NULL, index) };
+        return { result };
+    }
+    return { NULL };
+}
+```
+
+
 
 # 在写了在写了……
