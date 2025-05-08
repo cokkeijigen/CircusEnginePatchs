@@ -660,44 +660,33 @@ auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) 
 static bool IsOpMoviePlaying{};
 
 auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
-  {
-      if (uMsg == WM_CREATE) 
-      {
-          /* 此处省略…… */
-      }
-      else if (uMsg == WM_SYSCOMMAND)
-      {
-          if (wParam == 0x114514)
-          {
-              if (DC3WY::FontManager.GUI() != nullptr)
-              {
-                  if (DC3WY::IsOpMoviePlaying)
-                  {
-                      // 前面也说了由于这个游戏播放视频会阻塞消息循环
-                      // 如果OP视频正在播放中就弹出这个弹窗
-                      ::MessageBoxW
-                      (
-                          { hWnd },
-                          { L"当前无法更改字体！" },
-                          { L"WARNING" },
-                          { MB_OK }
-                      );
-                      return FALSE;
-                  }
-                  DC3WY::FontManager.GUIChooseFont();
-              }
-              return TRUE;
-          }
-          else
-          {
-              /* 其他逻辑…… */
-          }
-      }
-      else
-      {
-          /* 其他逻辑…… */
-      }
-  }
+{
+	if (uMsg == WM_SYSCOMMAND)
+    {
+        if (wParam == 0x114514)
+        {
+            if (DC3WY::FontManager.GUI() != nullptr)
+            {
+                if (DC3WY::IsOpMoviePlaying)
+                {
+                    // 前面也说了由于这个游戏播放视频会阻塞消息循环
+                    // 如果OP视频正在播放中就弹出这个弹窗
+                    ::MessageBoxW
+                    (
+                        { hWnd },
+                        { L"当前无法更改字体！" },
+                        { L"WARNING" },
+                        { MB_OK }
+                    );
+                    return FALSE;
+                }
+                DC3WY::FontManager.GUIChooseFont();
+            }
+            return TRUE;
+        }
+    }
+    return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
+}
 ```
 
 
