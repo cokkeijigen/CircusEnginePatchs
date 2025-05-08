@@ -349,23 +349,24 @@ namespace DC3WY {
         auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
 
         DC3WY::IsOpMoviePlaying = { result >= 0 };
-
-        if (DC3WY::IsOpMoviePlaying && DC3WY::SubPlayer != nullptr)
+        if (DC3WY::IsOpMoviePlaying)
         {
-            auto is_load { DC3WY::SubPlayer->IsLoad() };
-            if (is_load)
+            if (DC3WY::SubPlayer != nullptr)
             {
-                DC3WY::SubPlayer->UseDefualtAlign(true);
-                DC3WY::SubPlayer->UseDefualtHorizontal();
-                DC3WY::SubPlayer->Play();
-            };
-        }
+                auto is_load{ DC3WY::SubPlayer->IsLoad() };
+                if (is_load)
+                {
+                    DC3WY::SubPlayer->UseDefualtAlign(true);
+                    DC3WY::SubPlayer->UseDefualtHorizontal();
+                    DC3WY::SubPlayer->Play();
+                };
+            }
 
-        if (DC3WY::FontManager.GUI() != nullptr)
-        {
-            DC3WY::FontManager.GUI()->HideWindow();
+            if (DC3WY::FontManager.GUI() != nullptr)
+            {
+                DC3WY::FontManager.GUI()->HideWindow();
+            }
         }
-        
         return { result };
     }
 
