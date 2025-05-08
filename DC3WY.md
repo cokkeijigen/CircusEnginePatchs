@@ -625,7 +625,6 @@ auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) 
     auto buffer{ DirectSoundBuffers[index] };
     if (buffer != nullptr)
     {
-        
         auto is_current_playing_buffer
         {
             DC3WY::CurrentPlayingBuffer != nullptr &&
