@@ -581,6 +581,12 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
 }
 ```
 
-接着就是找到暂停播放的函数了，来到`dsound.dll`符号这边，使用正则表达式`Stop[\s\S]+DirectSoundBuffer`过滤出暂停函数，也是三个，不确定具体是哪个，所以一样全都都下断点。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_28.png)
+接着就是找到暂停播放的函数了，还是来到`dsound.dll`符号这边，使用正则表达式`Stop[\s\S]+DirectSoundBuffer`过滤出暂停函数，也是三个，不确定具体是哪个，所以一样全都都下断点。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_28.png)
+
+停下来之后，就可以取消断点了，接着在堆栈窗口选中顶部的地址按下回车回到调用处<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_29.png)
+
+这里就是我们要找的暂停函数了<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_30.png)
+
+依旧是来到`ida`反编译看看<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_31.png)
 
 # 在写了在写了……
