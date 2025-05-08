@@ -25,6 +25,7 @@ namespace DC3WY {
         if (uMsg == WM_CREATE) 
         {
             ::SetWindowTextW(hWnd, DC3WY::TitleName);
+
             HMENU SystemMenu{ ::GetSystemMenu(hWnd, FALSE) };
             if (SystemMenu != nullptr)
             {
@@ -155,7 +156,6 @@ namespace DC3WY {
         }
         else if (uMsg == WM_SIZE)
         {
-
             if (DC3WY::FontManager.GUI() != nullptr)
             {
                 DC3WY::FontManager.GUIUpdateDisplayState();
@@ -261,6 +261,7 @@ namespace DC3WY {
         }
         return { NULL };
     }
+    
 
     static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t index) -> int
     {
@@ -289,22 +290,22 @@ namespace DC3WY {
 
     auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
     {
-        std::string_view current_file_name{ reinterpret_cast<const char*>(0x4E65F8) };
-        if (!current_file_name.empty())
+        std::string_view movie_file_path{ reinterpret_cast<const char*>(0x4E65F8) };
+        if (!movie_file_path.empty())
         {
-            std::string_view new_path{ DC3WY::ReplacePathA(current_file_name) };
+            std::string_view new_path{ DC3WY::ReplacePathA(movie_file_path) };
             if (!new_path.empty())
             {
-                auto dest{ const_cast<char*>(current_file_name.data()) };
+                auto dest{ const_cast<char*>(movie_file_path.data()) };
                 std::copy(new_path.begin(), new_path.end(), dest);
                 dest[new_path.size()] = {};
             }
             else
             {
-                auto pos{ current_file_name.rfind("\\") };
+                auto pos{ movie_file_path.rfind("\\") };
                 if (pos != std::string_view::npos)
                 {
-                    auto name{ current_file_name.substr(pos + 1) };
+                    auto name{ movie_file_path.substr(pos + 1) };
                     if (name.size() >= 7)
                     {
                         auto is_gop_mpg
@@ -348,7 +349,7 @@ namespace DC3WY {
                 }
             }
 
-            DEBUG_ONLY(console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", current_file_name.data()));
+            DEBUG_ONLY(console::fmt::write("[DC3WY::ComPlayVideo_Hook] %s\n", movie_file_path.data()));
         }
         auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
 
@@ -412,7 +413,7 @@ namespace DC3WY {
         }
      }
 
-    __declspec(naked) auto JmpSetNameIconEx(void) -> void
+    __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
     {
         __asm
         {

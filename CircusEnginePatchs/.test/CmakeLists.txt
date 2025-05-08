@@ -1,5 +1,6 @@
 project(UtilTest)
 
+set(CMAKE_CXX_STANDARD 23)
 set(SOURCES_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 file(GLOB_RECURSE SOURCES "${SOURCES_DIR}/*/*.cpp")
 add_library(${PROJECT_NAME} OBJECT ${SOURCES})
