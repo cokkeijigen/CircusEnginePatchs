@@ -647,6 +647,6 @@ auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) 
 }
 ```
 
-
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_34.png)音乐鉴赏模式下也能使用<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_35.png)
 
 # 在写了在写了……
