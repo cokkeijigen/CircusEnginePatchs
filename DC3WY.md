@@ -581,6 +581,6 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
 }
 ```
 
-接着就是找到暂停播放的函数了，来到`dsound.dll`符号这边，使用正则表达式`Stop[\s\S]+DirectSoundBuffer`过滤出暂停函数，可以发现一共有三个，不确定具体是调用了哪个，所以这里全都都下断点
+接着就是找到暂停播放的函数了，来到`dsound.dll`符号这边，使用正则表达式`Stop[\s\S]+DirectSoundBuffer`过滤出暂停函数，也是三个，不确定具体是哪个，所以一样全都都下断点。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_28.png)
 
 # 在写了在写了……
