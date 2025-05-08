@@ -522,7 +522,9 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 这里就是我们要找的播放函数了<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_25.png)
 
-在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看堆栈时发现文件路径的字符串，就在` sub_431870`被调用时`esp+0x12C`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_26.png)
+来到`ida`反编译看看<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_26.png)
+
+在Hook之前我们还得需要得到当前播放的文件名字，幸运的是我在查看` sub_431870`被调用时的堆栈在`esp+0x12C`发现了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_27.png)
 
 ```cpp
 Patch::Mem::JmpWrite(0x431870, DC3WY::JmpAudioPlayHook); // 添加Hook
