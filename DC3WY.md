@@ -661,8 +661,10 @@ static bool IsOpMoviePlaying{};
 
 auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
+	/* 这里忽略了其他逻辑…… */
 	if (uMsg == WM_SYSCOMMAND)
     {
+        /* 这里忽略了其他逻辑…… */
         if (wParam == 0x114514)
         {
             if (DC3WY::FontManager.GUI() != nullptr)
@@ -685,6 +687,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return TRUE;
         }
     }
+    /* 这里忽略了其他逻辑…… */
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
 }
 ```
