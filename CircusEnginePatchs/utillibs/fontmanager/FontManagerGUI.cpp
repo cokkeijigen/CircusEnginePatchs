@@ -43,7 +43,6 @@ namespace Utils {
 		case WM_CTLCOLORBTN:
 		case WM_CTLCOLORSTATIC:
         {
-            console::writeline("WM_CTLCOLORSTATIC or WM_CTLCOLORBTN");
 			::SetBkColor(reinterpret_cast<HDC>(wParam), m_this->DefaultBackgroundColor);
 			return reinterpret_cast<LRESULT>(m_this->DefaultSolidBrush);
 		}
