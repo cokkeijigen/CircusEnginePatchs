@@ -593,7 +593,7 @@ static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t i
 
 嗯，这下知道了，这个是`DirectSoundBuffer::SetCurrentPosition`，另外我顺便也进去看了一下`sub_432000`，里面有调用`DirectSoundBuffer::Release`，那这很明显了，这个函数是用来做销毁清理（释放内存）的。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_33.png)
 
-好，现在开始写Hook代码
+好，现在开始写Hook代码，主要逻辑也是基本照搬`ida`反编译内容
 
 ```cpp
 Patch::Mem::JmpWrite(0x432490, DC3WY::AudioStop_Hook); // 同上
