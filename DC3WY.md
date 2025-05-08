@@ -476,7 +476,7 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
              DC3WY::SubPlayer->UseDefualtAlign(true);
              // 使用默认的水平坐标
              DC3WY::SubPlayer->UseDefualtHorizontal();
-             // 播放
+             // 播放字幕
              DC3WY::SubPlayer->Play();
          };
      }
