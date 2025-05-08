@@ -557,7 +557,7 @@ static IDirectSoundBuffer* CurrentPlayingBuffer{}; // 需要记录当前播放�
 static auto __stdcall AudioPlay_Hook(const char* file, uint32_t flag, uint32_t index) -> int
 {
     auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
-	auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+    auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
     
     if (index == 0x01)
     {
@@ -619,7 +619,7 @@ static auto __fastcall AudioRelease(int32_t* m_this, int32_t, uint32_t index) ->
 auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) -> DWORD
 {
     auto UnknownPtr{ reinterpret_cast<uintptr_t*>(0x4A95A4) };
-	auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
+    auto DirectSoundBuffers{ reinterpret_cast<IDirectSoundBuffer**>(0x4A95EC) };
 
     m_this[0x05 * index + 0x15] = 0x00;
     if (index - 0x01 <= 0x03 && *UnknownPtr != NULL)
@@ -661,8 +661,8 @@ static bool IsOpMoviePlaying{};
 
 auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
-	/* 这里省略了其他逻辑…… */
-	if (uMsg == WM_SYSCOMMAND)
+    /* 这里省略了其他逻辑…… */
+    if (uMsg == WM_SYSCOMMAND)
     {
         /* 这里省略了其他逻辑…… */
         if (wParam == 0x114514)
