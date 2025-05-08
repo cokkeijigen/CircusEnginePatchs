@@ -386,7 +386,7 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_13.png)
 
-
+这个`sub_444680`就是这游戏用来创建COM实例并播放视频的函数了，这里都是调用着COM接口的虚函数，看不懂没关系，因为我们只需要找一个播放字幕时机的函数，不过我这里没有选择Hook这个函数，而是调用它的上层，<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_14.png)
 
 
 # 在写了在写了……
