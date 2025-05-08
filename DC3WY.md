@@ -409,6 +409,107 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
 
 现在播放函数有了，那还差个停止播放的函数，既然是通过`CoCreateInstance`创建的实例，那么我们可以直接查找其他使用这个实例的地方。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_17.png)
 
-很幸运的是它的引用并不多
+很幸运的是它的引用并不多，来到`sub_4443B0`可以看到，这个`ppv`被重新赋值为`0`，那么就可以大胆猜测这个函数应该是和视频停止播放相关<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_18.png)
+
+不太确定的，我们可以往上查找追踪，看看在哪调用了这个函数。可以看到只有一个<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_19.png)
+
+来看看这个`sub_444640`，可以发现它在调用`sub_4443B0`之后又将`String1`（也就是上面讲到的文件路径）赋值为`0`，这下基本确定，这个函数是和结束播放视频相关的了<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_20.png)
+
+我这里就选择Hook `sub_444640`了
+
+```cpp
+Patch::Hooker::Add<DC3WY::ComStopVideo_Hook>(reinterpret_cast<void*>(0x444640)); // 添加Hook
+```
+
+```cpp
+auto DC3WY::ComStopVideo_Hook(void) -> int32_t
+{
+    auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
+    return { result };
+}
+```
+
+这下播放停止视频的函数都有了，接着来写加载外挂字幕并和视频一起播放
+
+```cpp
+auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
+{
+    std::string_view movie_file_path{ reinterpret_cast<const char*>(0x4E65F8) };
+    if (!movie_file_path.empty())
+    {
+        auto pos{ movie_file_path.rfind("\\") };
+        if (pos != std::string_view::npos)
+        {
+            // 这里来截取文件名
+            auto name{ movie_file_path.substr(pos + 1) };
+            if (name.size() >= 7)
+            {
+                // 由于文件名并不长，所以我直接使用硬编码的方式来对比文件名
+                auto is_gop_mpg
+                {
+                    (name[0] == 'g' || name[0] == 'G') &&
+                    (name[1] == 'o' || name[1] == 'O') &&
+                    (name[2] == 'p' || name[2] == 'P') &&
+                    (name[3] == '.') &&
+                    (name[4] == 'm' || name[4] == 'M') &&
+                    (name[5] == 'p' || name[5] == 'P') &&
+                    (name[6] == 'g' || name[6] == 'G')
+                };
+                 if (is_gop_mpg) // gop.mpg
+                 {
+                     // 这个274是这个op视频对应的字幕文件，false表示只加载不播放
+                     DC3WY::LoadXSubAndPlayIfExist("274", false);
+                 }
+            }
+        }
+    }
+    
+    // 调用原来的函数
+    auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
+    
+     if (DC3WY::SubPlayer != nullptr)
+     {
+         auto is_load { DC3WY::SubPlayer->IsLoad() };
+         if (is_load)
+         {
+             // 设置使用默认的字幕对齐方式，true表示混合模式
+             DC3WY::SubPlayer->UseDefualtAlign(true);
+             // 使用默认的水平坐标
+             DC3WY::SubPlayer->UseDefualtHorizontal();
+             // 播放
+             DC3WY::SubPlayer->Play();
+         };
+     }
+    
+    if (DC3WY::FontManager.GUI() != nullptr)
+    {
+        // 由于这个游戏播放视频会阻塞消息循环，所以我这里需要隐藏（如果显示的话）FontManager避免造成卡死的BUG
+        DC3WY::FontManager.GUI()->HideWindow();
+    }
+    
+    return { result };
+}
+```
+
+```cpp
+auto DC3WY::ComStopVideo_Hook(void) -> int32_t
+{
+    if (DC3WY::SubPlayer != nullptr)
+    {
+        // 停止字幕播放
+        DC3WY::SubPlayer->Stop();
+        // 取消加载
+        DC3WY::SubPlayer->UnLoad();
+        // 恢复不使用默认字幕位置
+        DC3WY::SubPlayer->UnuseDefualtPoint();
+    }
+    auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
+    return { result };
+}
+```
+
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_21.png)
+
+
 
 # 在写了在写了……
