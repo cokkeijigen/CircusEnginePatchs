@@ -510,6 +510,8 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_21.png)
 
+### DC3WY::AudioStop<0x432490>，DC3WY::AudioPlay<0x432490>（这里函数名自己取的）
+
 
 
 # 在写了在写了……
