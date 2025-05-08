@@ -370,7 +370,7 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 
 
-### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640> （这里函数名是我自己取的）
+### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640> （这里函数名自己取的）
 
 这两个是控制OP视频播放与停止的函数，当然Hook它们当然自不必说，因为需要一个字幕加载和播放的时机，而控制游戏的视频播放停止函数就是最好的选择。这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`（[详细](https://learn.microsoft.com/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)）的引用也能找到，但是太多了，直接上调试器，找到这两个函数有两种方法可以快速定位。
 
