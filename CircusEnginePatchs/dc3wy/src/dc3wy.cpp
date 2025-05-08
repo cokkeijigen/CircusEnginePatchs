@@ -19,7 +19,7 @@ namespace DC3WY {
     Utils::FontManager DC3WY::FontManager{};
     XSub::GDI::ImageSubPlayer* SubPlayer{};
     static IDirectSoundBuffer* CurrentPlayingBuffer{};
-    static bool IsOpMoviePlaying{ false };
+    static bool IsOpMoviePlaying{};
 
     auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     {
