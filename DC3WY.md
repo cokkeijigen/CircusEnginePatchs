@@ -512,6 +512,6 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 ### DC3WY::AudioStop<0x432490>，DC3WY::AudioPlay<0x432490>（这里函数名自己取的）
 
-
+游戏的ED是使用了播放音频+滚动图片的方式呈现，要加字幕只能是去hook游戏播放音频相关的函数。它使用了`DirectSound`来播放音频，所以我们可以通过去给`DirectSound`的播放和停止接口函数下个断点，就能找到游戏的播放停止函数了。
 
 # 在写了在写了……
