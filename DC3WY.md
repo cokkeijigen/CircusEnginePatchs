@@ -602,7 +602,8 @@ Patch::Mem::JmpWrite(0x432490, DC3WY::AudioStop_Hook); // 同上
 ```cpp
 static IDirectSoundBuffer* CurrentPlayingBuffer{}; // 在AudioPlay_Hook中成功加载并播放字幕时会存放当前播放的Buffer
 
-// 注意，原函数是__thiscall，这里使用__fastcall来替代，第一个参数ECX，__fastcall第二个参数是EDX所以要有个占位
+// 注意，原函数是__thiscall，这里使用__fastcall来替代，第一个参数两者相同都是ECX
+// 而__fastcall第二个参数是EDX，__thiscall不用，所以要有个占位
 static auto __fastcall AudioRelease(int32_t* m_this, int32_t, uint32_t index) -> DWORD
 {
     auto RawCall{ reinterpret_cast<decltype(DC3WY::AudioRelease)*>(0x432000) };
