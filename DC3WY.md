@@ -518,6 +518,6 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 
 接着使用正则表达式`Play[\s\S]+DirectSoundBuffer`过滤出播放函数，可以发现一共有三个，不确定具体是调用了哪个，所以这里全都都下断点。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_23.png)
 
-
+停下来之后，就可以取消断点了，接着在堆栈窗口选中顶部的地址按下回车回到调用处<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_24.png)
 
 # 在写了在写了……
