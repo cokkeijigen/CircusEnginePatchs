@@ -407,6 +407,8 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
 }
 ```
 
-现在播放函数有了，那还差个停止播放的函数，
+现在播放函数有了，那还差个停止播放的函数，既然是通过`CoCreateInstance`创建的实例，那么我们可以直接查找其他使用这个实例的地方。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_17.png)
+
+很幸运的是它的引用并不多
 
 # 在写了在写了……
