@@ -686,6 +686,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             return TRUE;
         }
+        /* 这里省略了其他逻辑…… */
     }
     /* 这里省略了其他逻辑…… */
     return Patch::Hooker::Call<DC3WY::WndProc>(hWnd, uMsg, wParam, lParam);
