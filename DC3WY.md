@@ -422,6 +422,8 @@ Patch::Hooker::Add<DC3WY::ComStopVideo_Hook>(reinterpret_cast<void*>(0x444640));
 ```
 
 ```cpp
+static bool IsOpMoviePlaying{}; // 记录是否正在播放OP
+
 auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 {
     auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
@@ -467,26 +469,28 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
     // 调用原来的函数
     auto result{ Patch::Hooker::Call<DC3WY::ComPlayVideo_Hook>() };
     
-     if (DC3WY::SubPlayer != nullptr)
-     {
-         auto is_load { DC3WY::SubPlayer->IsLoad() };
-         if (is_load)
-         {
-             // 设置使用默认的字幕对齐方式，true表示混合模式
-             DC3WY::SubPlayer->UseDefualtAlign(true);
-             // 使用默认的水平坐标
-             DC3WY::SubPlayer->UseDefualtHorizontal();
-             // 播放字幕
-             DC3WY::SubPlayer->Play();
-         };
-     }
-    
-    if (DC3WY::FontManager.GUI() != nullptr)
+    DC3WY::IsOpMoviePlaying = { result >= 0 };
+    if (DC3WY::IsOpMoviePlaying)
     {
-        // 由于这个游戏播放视频会阻塞消息循环，所以我这里需要隐藏（如果显示的话）FontManager避免造成卡死的BUG
-        DC3WY::FontManager.GUI()->HideWindow();
+        if (DC3WY::SubPlayer != nullptr)
+        {
+            auto is_load{ DC3WY::SubPlayer->IsLoad() };
+            if (is_load)
+            {
+                DC3WY::SubPlayer->UseDefualtAlign(true);
+                DC3WY::SubPlayer->UseDefualtHorizontal();
+                DC3WY::SubPlayer->Play();
+            };
+        }
+
+        if (DC3WY::FontManager.GUI() != nullptr)
+        {
+            // 由于这个游戏播放视频会阻塞消息循环
+            // 所以我这里需要隐藏（如果显示的话）FontManager避免造成卡死的BUG
+            DC3WY::FontManager.GUI()->HideWindow();
+        }
     }
-    
+ 
     return { result };
 }
 ```
@@ -503,6 +507,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
         // 恢复不使用默认字幕位置
         DC3WY::SubPlayer->UnuseDefualtPoint();
     }
+    DC3WY::IsOpMoviePlaying = { false };
     auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
     return { result };
 }
@@ -648,5 +653,53 @@ auto __fastcall DC3WY::AudioStop_Hook(int32_t* m_this, int32_t, uint32_t index) 
 ```
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_34.png)当然，音乐鉴赏模式下也能使用<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_35.png)
+
+※补充，在播放OP视频时禁用字体选择
+
+```cpp
+static bool IsOpMoviePlaying{};
+
+auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
+  {
+      if (uMsg == WM_CREATE) 
+      {
+          /* 此处省略…… */
+      }
+      else if (uMsg == WM_SYSCOMMAND)
+      {
+          if (wParam == 0x114514)
+          {
+              if (DC3WY::FontManager.GUI() != nullptr)
+              {
+                  if (DC3WY::IsOpMoviePlaying)
+                  {
+                      // 前面也说了由于这个游戏播放视频会阻塞消息循环
+                      // 如果OP视频正在播放中就弹出这个弹窗
+                      ::MessageBoxW
+                      (
+                          { hWnd },
+                          { L"当前无法更改字体！" },
+                          { L"WARNING" },
+                          { MB_OK }
+                      );
+                      return FALSE;
+                  }
+                  DC3WY::FontManager.GUIChooseFont();
+              }
+              return TRUE;
+          }
+          else
+          {
+              /* 其他逻辑…… */
+          }
+      }
+      else
+      {
+          /* 其他逻辑…… */
+      }
+  }
+```
+
+
 
 # 在写了在写了……
