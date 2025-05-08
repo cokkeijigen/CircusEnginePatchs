@@ -30,7 +30,7 @@ namespace Utils {
 
 		inline WindowBase(): m_hwnd(nullptr), m_proc(nullptr){}
 		 
-		inline WindowBase(HWND hwnd) : m_hwnd(hwnd), m_proc(reinterpret_cast<decltype(m_proc)>(::GetWindowLongW(hwnd, GWLP_WNDPROC))){
+		inline WindowBase(HWND hwnd) : m_hwnd(hwnd), m_proc(reinterpret_cast<decltype(m_proc)>(::GetWindowLongPtr(hwnd, GWLP_WNDPROC))){
 			if constexpr (idc) WindowBase<T, idc>::m_this = reinterpret_cast<T*>(this);
 		}
 
@@ -92,7 +92,7 @@ namespace Utils {
         {
             auto&& result
             {
-                ::SetWindowLongW(this->m_hwnd, nIndex, LONG_PTR(nValue))
+                ::SetWindowLongPtrW(this->m_hwnd, nIndex, LONG_PTR(nValue))
             };
 			return *reinterpret_cast<T*>(&result);
 		}

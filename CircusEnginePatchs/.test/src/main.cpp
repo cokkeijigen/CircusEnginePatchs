@@ -2,6 +2,9 @@
 #include <iostream>
 #include <console.hpp>
 #include <windows.h>
+#include <FontManager.hpp>
+
+static std::unique_ptr<Utils::FontManagerGUI> gui{};
 
 static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
@@ -15,13 +18,21 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
     case WM_COMMAND: {
         if (LOWORD(wParam) == uint16_t(6666))
         {
+            gui->ChooseFont();
         }
         break;
     }
 
     case WM_CREATE:
     {
-       
+        gui = Utils::FontManagerGUI::CreatePtr(static_cast<HWND>(hwnd));
+        gui->Init(Utils::FontManager::DefaultSize, Utils::FontManagerGUI::NORMAL, L"黑体", 18, 30)
+            .Load(".\\font.dat").OnChanged(
+                [&](const Utils::FontManagerGUI* m_this) -> void
+                {
+                    console::writeline("更改了");
+                }
+            );
         break;
     }
     default: return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -29,7 +40,7 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
     return TRUE;
 }
 
-auto main2(int, char**)  -> int
+auto main(int, char**)  -> int
 {
 
 
@@ -74,9 +85,16 @@ auto main2(int, char**)  -> int
 #include <SubManner.hpp>
 #include <GDIWindow.hpp>
 
-auto main(int, char**) -> int
+
+
+auto main2(int, char**) -> int
 {
-    console::make();
+
+
+
+
+
+    /*console::make();*/
 
    /* console::make();
     constexpr auto filePath

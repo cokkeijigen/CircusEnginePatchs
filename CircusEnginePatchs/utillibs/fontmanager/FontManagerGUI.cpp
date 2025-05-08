@@ -43,6 +43,7 @@ namespace Utils {
 		case WM_CTLCOLORBTN:
 		case WM_CTLCOLORSTATIC:
         {
+            console::writeline("WM_CTLCOLORSTATIC or WM_CTLCOLORBTN");
 			::SetBkColor(reinterpret_cast<HDC>(wParam), m_this->DefaultBackgroundColor);
 			return reinterpret_cast<LRESULT>(m_this->DefaultSolidBrush);
 		}
@@ -650,7 +651,7 @@ namespace Utils {
     {
         int nScreenWidth { GetSystemMetrics(SM_CXSCREEN) };
         int nScreenHeight{ GetSystemMetrics(SM_CYSCREEN) };
-        LONG lStyle{ this->m_Parent.Get(GWL_STYLE) };
+        auto lStyle{ this->m_Parent.Get(GWL_STYLE) };
         RECT rect  { this->m_Parent.GetRect() };
         return bool
         {
