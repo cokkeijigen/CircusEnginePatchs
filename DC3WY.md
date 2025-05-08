@@ -457,11 +457,11 @@ auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
                     (name[5] == 'p' || name[5] == 'P') &&
                     (name[6] == 'g' || name[6] == 'G')
                 };
-                 if (is_gop_mpg) // gop.mpg
-                 {
-                     // 这个274是这个op视频对应的字幕文件，false表示只加载不播放
-                     DC3WY::LoadXSubAndPlayIfExist("274", false);
-                 }
+                if (is_gop_mpg) // gop.mpg
+                {
+                    // 这个274是这个op视频对应的字幕文件，false表示只加载不播放
+                    DC3WY::LoadXSubAndPlayIfExist("274", false);
+                }
             }
         }
     }
