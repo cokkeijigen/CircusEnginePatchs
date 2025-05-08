@@ -537,7 +537,7 @@ __declspec(naked) auto DC3WY::JmpAudioPlayHook(void) -> void
         sub esp, 0x04	                  // 需要使用栈来将文件名参数传递，所以这里esp+0x04
         mov eax, dword ptr ss:[esp+0x04]  // 这里交换call的返回地址
         mov dword ptr ss:[esp], eax
-        mov eax, dword ptr ss:[esp+0x130] // 因为上面esp+0x04了，所以文件名的地址变成了 0x12C+0x04 -> esp + 0x130
+        mov eax, dword ptr ss:[esp+0x130] // 因为上面esp+0x04了，所以文件名的地址变成了 0x12C+0x04 -> 0x130
         mov dword ptr ss:[esp+0x04], eax  // 根据传参顺序，最后一个入栈对应参数一
         jmp DC3WY::AudioPlay_Hook
     }
