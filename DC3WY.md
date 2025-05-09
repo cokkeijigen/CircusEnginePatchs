@@ -13,33 +13,30 @@
 ## 0x00 去除DVD和KEY验证
 ### 首先是DVD验证，这可以直接搜索字符`DVD`串或者断`MessageBoxA`就能找到位置。 <br>
 可以发现上面有个跳转是调到下面弹出验证消息的逻辑，直接`nop`掉跳转即可
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_00.png) <br>
-
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_00.png) 
+---
 ### 其次是Key验证弹窗，这个可以搜字符串`InstKey`找到，但是存在多个位置，不好判断具体是哪个调用了，所以直接上`x32dbg`，这里直接断`DialogBoxParamA`<br>
 此时找到`sub_40EA30`函数里调用了`DialogBoxParamA`：
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_01.png) <br>
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_01.png) 
 
 可以发现这个函数有多个引用<br>
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_02.png) <br>
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_02.png) 
 
 所以还需要继续下断点查找是哪里调用了
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_03.png) <br>
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_03.png) 
 
 最终来到`0x425F80`这个地址，可以发现这个是一个循环一直调用着`sub_40EA30`，不难猜出通过验证的逻辑肯定是走`jmp dc3wy.429434`
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_04.png) <br>
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_04.png) 
 
-修改方法就是直接把`call <dc3wy.40EA30>`改成`jmp dc3wy.429434`，~~其余的nop就行了(强迫症)~~ 即可
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_05.png) <br>
+修改方法就是直接把`call <dc3wy.40EA30>`改成`jmp dc3wy.429434`，~~其余的nop就行了(强迫症)~~ 即可<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_05.png) <br>
 
 ## 0x01 一些系统API的HOOK
 ### CreateFileA与FindFirstFileA
 为了实现与原版文件共存，因此需要Hook这两个函数，详细可以到官方文档查看：[FindFirstFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findfirstfilea)，[CreateFileA](https://learn.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-createfilea)
-
 ```cpp
 Patch::Hooker::Add<DC3WY::CreateFileA>(::CreateFileA);       // 添加Hook
 Patch::Hooker::Add<DC3WY::FindFirstFileA>(::FindFirstFileA); // 添加Hook
 ```
-
 这里声明一个辅助函数`ReplacePathA`用于查找并替换文件
 ```cpp
 auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
@@ -70,7 +67,7 @@ auto DC3WY::ReplacePathA(std::string_view path) -> std::string_view
       return Patch::Hooker::Call<DC3WY::FindFirstFileA>(new_path.empty() ? lpFileName : new_path.data(), lpFindFileData);
   }
 ```
-
+---
 ### GetGlyphOutlineA
 这个主要是用来更改游戏字体与文本编码
 ```cpp
@@ -83,13 +80,13 @@ static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRIC
     return Patch::Hooker::Call<DC3WY::GetGlyphOutlineA>(hdc, uChar, fuf, lpgm, cjbf, pvbf, lpmat);
 }
 ```
-
+---
 ### SendMessageA
 这是一个给窗口发送消息的函数，详细可以到官方文档查看：[SendMessageA](https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-sendmessagea) <br>那为什么要Hook它呢？那当然是为了更改这个对话框的文本内容。
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.png) <br>
 
 这个可以搜索字符串`データVer`定位到`sub_40DA40`这个函数
-![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) <br>
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_07.png) 
 
 通过`ida`反编译可以一目了然，这个`SendMessageA(DlgItem, 0xCu, 0x104u, lParam);`就是在更改对话框文本内容了。
 ```cpp
@@ -369,15 +366,11 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
     return { is_load };
 }
 ```
-
-
-
+---
 ### DC3WY::ComPlayVideo<0x444920>、DC3WY::ComStopVideo<0x444640> （这里函数名自己取的）
 
 这两个是控制OP视频的播放暂停的函数，当然Hook它们当然自不必说，因为需要一个字幕加载和播放的时机，而控制游戏的视频播放停止函数就是最好的选择。这个游戏使用COM接口来播放视频，直接查找`CoCreateInstance`（[详细](https://learn.microsoft.com/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)）的引用也能找到，但是太多了，直接上调试器，找到这两个函数有两种方法可以快速定位。
-
 首先是经典的土方法，直接断文件相关的API看看他是在哪读取的，我这里先试过了`CreateFileA`，不过它并没有使用这个，而是`CreateFileW`，但游戏exe并没有导入这个函数，所以需要从`kernel32.dll`中下断点。<br>
-
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_10.png)
 
 运行直到发现路径是OP视频的为止，然后直接取消断点，然后按下`Alt+F9`运行到用户代码，可以看到上面有个`CoCreateInstance`，这里就是我们要找的函数了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_11.png)
@@ -516,7 +509,7 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 ```
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_21.png)
-
+---
 ### DC3WY::AudioStop<0x432490>，DC3WY::AudioPlay<0x432490>（这里函数名自己取的）
 
 游戏的ED是使用了播放音频+滚动图片的方式呈现，要加字幕只能是去hook游戏播放音频相关的函数。它使用了`DirectSound`来播放音频，所以我们可以通过去给`DirectSound`的播放和停止接口函数下个断点，就能找到游戏的播放暂停函数了。<br>
@@ -807,7 +800,7 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_49.png)
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_50.png)
-
+---
 ### 文本注解修复
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_51.png)
