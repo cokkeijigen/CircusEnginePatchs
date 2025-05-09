@@ -718,6 +718,8 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 最终效果：<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_46.png)
 
+如果翻译后的字符串比原文长怎么办？那也有办法，那就是万能的Hook！我这里直接就从这个`else`这里开始Hook。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_47.png)
 
+对应地址为`0x404BFE`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_48.png)
 
 # 在写了在写了……
