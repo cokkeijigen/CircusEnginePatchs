@@ -794,7 +794,7 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
      std::string_view _name{ name };
      if (_name.size() != 0) 
      {
-         // 为了演示，我这里给其他角色名设置了默认图标
+         // 为了演示，我这里给其他名字设置了默认图标
          line = 3;
          row  = 4;
          return { static_cast<BOOL>(true) };
