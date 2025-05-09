@@ -704,6 +704,8 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 来到内存窗口，可以使用快捷键`Ctrl+R`来查找引用，我这里就查到了`0x4046B7`地址`push dc3wy.479668`引用了这个字符串<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_39.png)
 
+接着到`ida`里看看……。嗯，都是角色名没错，基本可以确定这里<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_40.png)
 
+通过观察游戏图片，不难看出这个`v28 `是头像所在的行，而`v12`则是列，这里的逻辑是判断角色名并设置其头像所在的行列<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_41.png)
 
 # 在写了在写了……
