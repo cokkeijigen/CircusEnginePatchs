@@ -808,6 +808,8 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_50.png)
 
+### 文本注解修复
 
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_51.png)
 
 # 在写了在写了……
