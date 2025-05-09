@@ -708,4 +708,8 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 通过观察游戏图片，不难看出这个`v28 `是头像所在的行，而`v12`则是列，这里的逻辑是判断角色名并设置其头像所在的行列<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_41.png)
 
+我们只要将这些名字都换成中文就好，回到`x32dbg`在内存窗口选中数据，按下`Ctrl + E`就能直接编辑了，一般日文角色名的翻译都不会超过原文，所以这里可以放心直接在原地更改，记得勾选`保持大小`，`x32dbg`会自动给填充`00`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_42.png)
+
+
+
 # 在写了在写了……
