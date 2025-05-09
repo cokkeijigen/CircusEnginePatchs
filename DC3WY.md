@@ -710,6 +710,12 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 我们只要将这些名字都换成中文就好，回到`x32dbg`在内存窗口选中数据，按下`Ctrl + E`就能直接编辑了，一般日文角色名的翻译都不会超过原文，所以这里可以放心直接在原地更改，记得勾选`保持大小`，`x32dbg`会自动给填充`00`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_42.png)
 
+因为更改后的字符串比原文小，所以还需要接着更改`strlen`对比的长度<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_43.png)
 
+值得注意的是，它这个`v12`是`edi`，有些地方直接使用了`eax`（也就是上面的`strlen`的结果）减去一个立即数得到最终结果，例如`シャルル`这个`strlen`的结果是`8`，然后减去`7`得到`1`，所以这里改成`夏露露`之后变成了长度`6`，为了保证改过后的结果也是`1`，把`lea edi, ds:[eax-0x07]`改成`lea edi, ds:[eax-0x05]`即可，其余的也一样，照猫画虎即可。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_44.png)
+
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_45.png)
+
+最终效果：<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_46.png)
 
 # 在写了在写了……
