@@ -763,7 +763,7 @@ __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
         lea eax, dword ptr ss:[esp+0x4C] 
         push eax                          // push &line
         
-        lea eax, dword ptr ss:[esp+0x4C]  // 前面esp-0x08 加上 push了&row和&line，所以`v38(角色名字)`的地址
+        lea eax, dword ptr ss:[esp+0x4C]  // 前面esp-0x08 加上 push &row和&line，所以`v38(角色名字)`的地址
         push eax                          // 变成了 esp + (0x3C + 8 * 2) = esp + 0x4C
     
         call DC3WY::SetNameIconEx         // auto result = DC3WY::SetNameIconEx(name, &line, &row)
