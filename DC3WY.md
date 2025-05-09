@@ -792,9 +792,9 @@ _succeed:
 static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
 {
      std::string_view _name{ name };
-     if (_name.size() != 0)
+     if (_name.size() != 0) 
      {
-         // 为了演示，我这里给原来就没有图标的角色名字都设置了一个默认图标
+         // 为了演示，我这里给其他角色名设置了默认图标
          line = 3;
          row  = 4;
          return { static_cast<BOOL>(true) };
