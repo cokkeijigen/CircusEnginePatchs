@@ -696,6 +696,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 ## 0x03 其他修改
 
 ### Backlog头像修复
+可以看到，在汉化之后Backlog的角色头像全部丢失<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_36.png)
 
 
 
