@@ -768,7 +768,8 @@ __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
         call DC3WY::SetNameIconEx         // auto result = DC3WY::SetNameIconEx(name, &line, &row)
         test eax, eax
         jnz _succeed                      // if(result) goto _succeed
-        
+
+        add esp, 0x08                     // 恢复堆栈
         mov dl, byte ptr ds:[0x004795BA]  // 搬运原地址的指令，长度为0x06
         mov eax, 0x00404C04               // 跳转回去原来的地址，0x404BFE + 0x06
         jmp eax
@@ -801,6 +802,9 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
     return { static_cast<BOOL>(false) };
 }
 ```
+
+![Image_text](http://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_49.png)
+
 
 
 # 在写了在写了……
