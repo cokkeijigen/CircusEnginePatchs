@@ -42,6 +42,9 @@ namespace DC3WY {
                     { 0x1919810 },
                     { L"Backlog显示全部图标" }
                 );
+
+                // 注册F1热键，在全屏时可用来打开字体选择器
+                ::RegisterHotKey(hWnd, 1, 0, VK_F1);
             }
             if (!DC3WY::FontManager.IsInit())
             {
@@ -63,6 +66,14 @@ namespace DC3WY {
                     }
                 );
             }
+        }
+        else if (uMsg == WM_HOTKEY)
+        {
+            if (wParam == 1)
+            {
+                ::SendMessageW(hWnd, WM_SYSCOMMAND, 0x114514, NULL);
+            }
+            return TRUE;
         }
         else if (uMsg == WM_SYSCOMMAND)
         {
