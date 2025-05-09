@@ -696,7 +696,13 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 ## 0x03 其他修改
 
 ### Backlog头像修复
-可以看到，在汉化之后Backlog的角色头像全部丢失<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_36.png)
+可以看到，在汉化之后Backlog的角色头像全部丢失，这是因为汉化后的文本和原来日文的对不上，所以无法设置对应的图标，这时候我们只需要把程序用来判断的角色名也给改成中文的就行了。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_36.png)
+
+来到内存布局这边，选中所有段，然后`Ctrl+B`打开`搜索匹配特征`窗口，在`代码页`选择`Shift_JIS`输入角色名，例如`リッカ`，<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_37.png)
+
+这里得到多个搜索结果，顺便点一个进去看看是不是我们想要的<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_38.png)
+
+来到内存窗口，可以使用快捷键`Ctrl+R`来查找引用，我这里就查到了`0x4046B7`地址`push dc3wy.479668`引用了这个字符串<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_39.png)
 
 
 
