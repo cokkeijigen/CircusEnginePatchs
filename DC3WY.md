@@ -387,7 +387,7 @@ static auto LoadXSubAndPlayIfExist(std::string_view file, bool play) -> bool
 
 这个`String1`应该就是文件路径了，`ida`点进去可以看到地址是`0x4E65F8`，通过计算尾部到头部的地址长度，可以得出它的大小为260，`也就是`MAX_PATH`。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_16.png)
 
-这里先简单对他进行一个Hook
+这里先简单对它进行一个Hook
 
 ```cpp
 Patch::Hooker::Add<DC3WY::ComPlayVideo_Hook>(reinterpret_cast<void*>(0x444920)); // 添加Hook
@@ -417,8 +417,6 @@ Patch::Hooker::Add<DC3WY::ComStopVideo_Hook>(reinterpret_cast<void*>(0x444640));
 ```
 
 ```cpp
-static bool IsOpMoviePlaying{}; // 记录是否正在播放OP
-
 auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 {
     auto result{ Patch::Hooker::Call<DC3WY::ComStopVideo_Hook>() };
@@ -429,6 +427,8 @@ auto DC3WY::ComStopVideo_Hook(void) -> int32_t
 这下视频的播放暂停函数都有了，接着来写加载外挂字幕并和视频一起播放
 
 ```cpp
+static bool IsOpMoviePlaying{}; // 记录是否正在播放OP
+
 auto DC3WY::ComPlayVideo_Hook(void) -> int32_t
 {
     std::string_view movie_file_path{ reinterpret_cast<const char*>(0x4E65F8) };
