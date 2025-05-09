@@ -1,3 +1,5 @@
+
+
 # DC3WY 中文本地化笔记
 
 | 工具 |说明 |
@@ -721,5 +723,84 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 如果翻译后的字符串比原文长怎么办？那也有办法，那就是万能的Hook！我这里直接就从这个`else`这里开始Hook。<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_47.png)
 
 对应地址为`0x404BFE`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_48.png)
+
+```cpp
+Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx);
+```
+
+```cpp
+__declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
+{
+    mov dl, byte ptr ds:[0x004795BA]  // 搬运原地址的指令，长度为0x06
+    mov eax, 0x00404C04               // 跳转回去原来的地址，0x404BFE + 0x06
+    jmp eax
+}
+```
+
+手写汇编不适合写一些复杂的逻辑，这里另外声明一个函数来实现
+
+```cpp
+static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
+{
+    return { static_cast<BOOL>(false) };
+}
+```
+
+已知`v12`是`edi`，`v28`是`esp+0x10`，`v38`是`esp+0x3C`，这些都是可以通过`ida`查看，鼠标光标点击变量名，按下`tab`就能转到对应的汇编指令处。
+
+```cpp
+__declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
+{
+    __asm {
+        sub esp, 0x08                     // 需要两个int分别存储line和row，所以esp-0x08
+        mov dword ptr ss:[esp], 0x00      // int row  = 0x00;
+        mov dword ptr ss:[esp+0x04], 0x00 // int line = 0x00;
+        
+        lea eax, dword ptr ss:[esp]       
+        push eax                          // push &row
+        
+        lea eax, dword ptr ss:[esp+0x4C] 
+        push eax                          // push &line
+        
+        lea eax, dword ptr ss:[esp+0x4C]  // 前面esp-0x08 加上 push了&row和&line，所以`v38(角色名字)`的地址
+        push eax                          // 变成了 esp + (0x3C + 8 * 2) = esp + 0x4C
+    
+        call DC3WY::SetNameIconEx         // auto result = DC3WY::SetNameIconEx(name, &line, &row)
+        test eax, eax
+        jnz _succeed                      // if(result) goto _succeed
+        
+        mov dl, byte ptr ds:[0x004795BA]  // 搬运原地址的指令，长度为0x06
+        mov eax, 0x00404C04               // 跳转回去原来的地址，0x404BFE + 0x06
+        jmp eax
+    }
+_succeed:
+    __asm
+    {
+        mov edi, dword ptr ss:[esp]       // 把row的结果放到`v12`
+        mov eax, dword ptr ss:[esp+4]     // 先将line的值放到eax
+        add esp, 0x08                     // 恢复堆栈
+        mov dword ptr ss:[esp+0x10], eax  // 把eax值放到`v28`
+        mov eax, 0x00404D2E               // 跳转回去原来的地址
+        jmp eax
+    }
+}
+```
+
+接着来到`DC3WY::SetNameIconEx`，现在，在这里面就能随便对比超长角色名并设置图标了
+```cpp
+static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
+{
+     std::string_view _name{ name };
+     if (_name.size() != 0)
+     {
+         // 为了演示，我这里给原来就没有图标的角色名字都设置了一个默认图标
+         line = 3;
+         row  = 4;
+         return { static_cast<BOOL>(true) };
+     }
+    return { static_cast<BOOL>(false) };
+}
+```
+
 
 # 在写了在写了……
