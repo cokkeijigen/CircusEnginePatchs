@@ -751,7 +751,8 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 ```cpp
 __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
 {
-    __asm {
+    __asm 
+    {
         sub esp, 0x08                     // 需要两个int分别存储line和row，所以esp-0x08
         mov dword ptr ss:[esp], 0x00      // int row  = 0x00;
         mov dword ptr ss:[esp+0x04], 0x00 // int line = 0x00;
