@@ -788,7 +788,7 @@ _succeed:
 }
 ```
 
-接着来到`DC3WY::SetNameIconEx`，现在，在这里面就能随便对比超长角色名并设置图标了
+接着来到`DC3WY::SetNameIconEx`，现在就能随便对比超长角色名并设置图标了
 ```cpp
 static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BOOL
 {
