@@ -746,7 +746,7 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 }
 ```
 
-已知`v12`是`edi`，`v28`是`esp+0x10`，`v38`是`esp+0x3C`，这些都是可以通过`ida`查看，鼠标光标点击变量名，按下`tab`就能转到对应的汇编指令处。
+已知`v12`是`edi`，`v28`是`esp+0x10`，`v38`是`esp+0x3C`。这些都是可以通过`ida`查看，鼠标光标点击变量名，按下`tab`就能转到对应的汇编指令处。
 
 ```cpp
 __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
