@@ -732,7 +732,7 @@ Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx); // 添加Hook
 __declspec(naked) auto DC3WY::JmpSetNameIconEx(void) -> void
 {
     mov dl, byte ptr ds:[0x004795BA]  // 搬运原地址的指令，长度为0x06
-    mov eax, 0x00404C04               // 跳转回去原来的地址，0x404BFE + 0x06
+    mov eax, 0x00404C04               // 跳转回去原来的地址，0x404BFE + 0x06 -> 0x00404C04
     jmp eax
 }
 ```
