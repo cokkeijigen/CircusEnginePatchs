@@ -725,7 +725,7 @@ auto CALLBACK DC3WY::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 对应地址为`0x404BFE`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_48.png)
 
 ```cpp
-Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx);
+Patch::Mem::JmpWrite(0x404BFE, DC3WY::JmpSetNameIconEx); // 添加Hook
 ```
 
 ```cpp
