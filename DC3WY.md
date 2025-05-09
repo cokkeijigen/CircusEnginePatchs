@@ -803,7 +803,9 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 }
 ```
 
-![Image_text](http://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_49.png)
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_49.png)
+
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_50.png)
 
 
 
