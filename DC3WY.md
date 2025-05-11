@@ -814,11 +814,33 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 
 ### 其他文本修改
 
-游戏内还是存在一些文本需要修改，其实完全可以使用`搜索匹配特征`来搜索定位。
+游戏内还是存在一些文本需要修改，其实完全可以使用`搜索匹配特征`来搜索定位，前面也有讲到了，相信看到这里，聪明的你们已经学会了如何照猫画虎。
 
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_56.png)![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_57.png)
 
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_58.png)如果有找不到的，可以尝试更换编码试试，例如`Unicode`、`UTF-8`等。像是这个窗口标题它就是`Unicode`字符串<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_59.png)
 
+要注意的是，这里的数据是有结构的，译文比原文短可以使用`空格（0x20 0x00）`来填充<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_60.png)
+但如果比原文长的话，也不是没有办法，通过Hook拿到窗口句柄，然后手动调用`SetWindowTextW`也能做到替换效果。
 
+---
 
+补充：游戏里有张表是存放存档标题名<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_61.png)
+这个直接在`x32dbg`里改有点麻烦了，最主要的是突然翻译有改动那就更麻烦了，所以我们直接把表复制出来，到自己代码中翻译好再写回去即可，后面改起来也方便。
 
-# 在写了在写了……
+```cpp
+static inline const char* ChapterTitles[][2]
+{
+    { "WY_9_0610_E1_COM", "新考验？" },
+    { "WY_9_0609_F25_AOI", "医生扮演" },
+    { "WY_9_0609_F24_SRA", "贫乳才是世界的真理" },
+    { "WY_9_0609_F23_SRR", "紧缚play" },
+    // 此处省略…………
+}
+```
+
+```cpp
+Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles));
+```
+
+遇到类似这种连续的字符串表，都能使用这种方法。
