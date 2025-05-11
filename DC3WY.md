@@ -119,7 +119,7 @@ static auto WINAPI SendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 ```
 
-至于这个`バージョン情報`的字符串如何更改，后面会讲到，接着往下看不用急。
+至于这个`バージョン情報`的字符串如何更改，可以看后面的“**其他文本修改**”中有讲到。
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_06.1.png)
 
@@ -802,6 +802,20 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 这是因为游戏判断使用的是`JIS`编码的`｛／｝`，而汉化后的文本是`GBK`导致对不上，要修复有两种方法。
 
 第一种简单粗暴，那就是强行使用`JIS`编码在`GKB`中的字符：`｛`->`乷`、`／`->`乛`、`｝`->`乸`，替换上去即可。
+
+![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_52.png)
+
+第二种，到`exe`中更改，那么要怎么找到具体位置呢？`｛`编码`0x81 0x6F`、`／`编码为`0x81 0x5E`、`｝`编码为`0x81 0x70`，然后直接使用`搜索匹配特征`<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_53.png)
+
+可能会有多个结果，这时候可以下个`硬件断点->读取`或者`Ctrl + R`查找引用，不太确定可以到`ida`看看反编译的代码<br>![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_54.png)![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_55.png)
+依次改成`GBK`编码即可，`｛`编码`0xA3 0xFB`、`／`编码为`0xA3 0xAF`、`｝`编码为`0xA3 0xFD`。（对了，这个引擎旧版是单独判字符每个字节，直接搜索常数过滤`cmp`就能找到)
+
+---
+
+### 其他文本修改
+
+游戏内还是存在一些文本需要修改，其实完全可以使用`搜索匹配特征`来搜索定位。
+
 
 
 
