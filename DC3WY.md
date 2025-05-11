@@ -799,4 +799,18 @@ static auto __stdcall SetNameIconEx(const char* name, int& line, int& row) -> BO
 
 ![Image_text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/img_dc3wy_note_51.png)
 
+这是因为游戏判断使用的是`JIS`编码的`｛／｝`，而汉化后的文本是`GBK`导致对不上，要修复有两种方法。
+
+第一种简单粗暴，那就是强行使用`JIS`编码在`GKB`中的字符：
+
+|JIS|GBK|
+|:--:|:--:|
+|｛ | 乷|
+|／| 乛|
+|｝ | 乸|
+
+
+
+
+
 # 在写了在写了……
