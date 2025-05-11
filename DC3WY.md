@@ -844,3 +844,5 @@ Patch::Mem::MemWrite(0x49DF58, DC3WY::ChapterTitles, sizeof(DC3WY::ChapterTitles
 ```
 
 遇到类似这种连续的字符串表，都能使用这种方法。
+
+总之笔记差不多就记到这里了，最后特别鸣谢：君の旅途、Sagilio，这两位佬的帮助。
