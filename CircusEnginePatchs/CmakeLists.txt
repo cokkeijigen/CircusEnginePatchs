@@ -21,7 +21,4 @@ add_definitions("-D_PROJECT_WORKSPACE=L\"${CMAKE_CURRENT_LIST_DIR}\"")
 include("VC-LTL helper for cmake.cmake")
 
 add_subdirectory("utillibs")
-add_subdirectory("dc3wy")
-add_subdirectory("dc3dd")
-add_subdirectory("fortissimo_exs")
-add_subdirectory(".test")
+add_subdirectory("nightshade")
