@@ -1,4 +1,4 @@
-project(nightshade)
+project(Nightshade_Patch)
 
 project_yy_thunks_for_win2k_release_only()
 
@@ -28,5 +28,5 @@ else()
 endif()
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:nightshade>" "I:\\Galgame\\Nightshade"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${PROJECT_NAME}>" "I:\\Galgame\\Nightshade"
 )
