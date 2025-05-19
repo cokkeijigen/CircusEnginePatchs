@@ -53,7 +53,6 @@ namespace Patch {
         {
             LPVOID(org_address) && LPVOID(tar_address);
         }
-
         inline static auto JmpWrite(org_t org_address, tar_t tar_address, uint8_t op = 0xE9) -> bool
         {
             return JmpWriteImpl(LPVOID(org_address), LPVOID(tar_address), op);
