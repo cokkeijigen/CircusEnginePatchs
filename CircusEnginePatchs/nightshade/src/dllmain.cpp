@@ -8,7 +8,7 @@ namespace NIGHTSHADE
 
     static auto ReplaceCharacter(UINT& uChar) -> bool
     {
-        switch (uChar)
+        switch (static_cast<uint16_t>(uChar))
         {
         case 0x8441: // Б 
             uChar = L'¿';
@@ -77,6 +77,7 @@ namespace NIGHTSHADE
 
     static auto WINAPI GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuf, LPGLYPHMETRICS lpgm, DWORD cjbf, LPVOID pvbf, MAT2* lpmat) -> DWORD
     {
+
         //DEBUG_ONLY(console::fmt::write("uChar{ 0x%X }\n", uChar));
         return DWORD
         {
@@ -86,11 +87,47 @@ namespace NIGHTSHADE
         };
     }
 
+    static auto __stdcall CheckHalfWidth(UINT uChar) -> BOOL
+    {
+        if (uChar & 0xFF00)
+        {
+            uChar = { ((uChar & 0xFF) << 8) | (uChar >> 8) & 0xFF };
+        }
+        else
+        {
+            return { static_cast<BOOL>(false) };
+        }
+        auto result { static_cast<BOOL>(NIGHTSHADE::ReplaceCharacter(uChar)) };
+        DEBUG_ONLY(console::fmt::write("uChar{ 0x%X } result{ %s }\n", uChar, result ? "true": "false"));
+        return { result };
+    }
+
+    static __declspec(naked) auto SetHalfWidth_Hook(void) -> void
+    {
+        __asm
+        {
+            pushad
+            push dword ptr ss:[ebp]
+            call NIGHTSHADE::CheckHalfWidth
+            test eax, eax
+            popad
+            jnz _is_half_width
+            sub edx, dword ptr ds:[0x4C87AC]
+            jmp _retrun
+        }
+    _is_half_width:
+        __asm sar edx, 0x01
+    _retrun:
+        __asm push 0x4022DF
+        __asm ret
+    }
+
     static auto INIT_ALL_PATCH(void) -> void
     {
         DEBUG_ONLY(console::make());
         Patch::Hooker::Begin();
         Patch::Hooker::Add<NIGHTSHADE::GetGlyphOutlineA>(::GetGlyphOutlineA);
+        Patch::Mem::JmpWrite(0x4022D9, NIGHTSHADE::SetHalfWidth_Hook);
         Patch::Hooker::Commit();
     }
 }
