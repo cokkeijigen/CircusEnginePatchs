@@ -113,11 +113,11 @@ namespace NIGHTSHADE
             popad
             jnz _is_half_width
             sub edx, dword ptr ds:[0x4C87AC]
-            jmp _retrun
+            jmp _return
         }
     _is_half_width:
         __asm sar edx, 0x01
-    _retrun:
+    _return:
         __asm push 0x4022DF
         __asm ret
     }
