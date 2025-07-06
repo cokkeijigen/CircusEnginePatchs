@@ -5,7 +5,7 @@ DC3WY汉化补丁，现在已发布
 请注意图中事项。本补丁发布于2025年立夏日。
 
 补丁地址：https://1drv.ms/f/c/86a42bf4ee7452b2/QrJSdO70K6QggIaZCgAAAAAAnxkohae8YsuGcw <br>
-密码：dc3wy <br>
+密码：dc3wy <br><br>
 随手笔记：https://github.com/cokkeijigen/circus_engine_patchs/blob/master/DC3WY.md
 
 【DC3WY汉化感言】
