@@ -1,6 +1,6 @@
 # Circus Engine Patchs
 
-DC3WY汉化补丁，现在已发布
+DC3WY汉化补丁，现在已发布。笔记：[DC3WY.md](https://github.com/cokkeijigen/CircusEnginePatchs/blob/master/DC3WY.md)
 ![Image text](https://raw.githubusercontent.com/cokkeijigen/circus_engine_patchs/master/Pictures/dc3wy_cn_patch_desc.png)<br>
 请注意图中事项。本补丁发布于2025年立夏日。
 
